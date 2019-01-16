@@ -1,0 +1,536 @@
+{
+  "definitions": {
+      "schemas": {
+        "fileStorage": {
+          "type": "object",
+          "properties": {
+            "oneOf": [
+              {
+                "file": {
+                  "type": "string\nrequired: false"
+                }
+              },
+              {
+                "ceph": {
+                  "type": "object\nrequired: false"
+                },
+                "properties": {
+                  "pool": {
+                    "type": "string\nrequired: true"
+                  },
+                  "objectId": {
+                    "type": "string\nrequired: true"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "baseStorage": {
+          "type": "object",
+          "properties": {
+            "baseId": {
+              "type": "string",
+              "required": true
+            }
+          }
+        },
+        "constraint": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "required": true
+            },
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "constraint-pgr-enum",
+                "constraint-pgr-number",
+                "constraint-pgr-string",
+                "constraint-pgr-isochrone"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "required": true
+            },
+            "key": {
+              "type": "string",
+              "required": true
+            },
+            "values": {
+              "type": "string",
+              "required": true
+            },
+            "propertiesColumn": {
+              "type": "string",
+              "required": true
+            },
+            "availableConstraintType": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "banned",
+                  "prefered",
+                  "unprefered"
+                ]
+              }
+            },
+            "availableOperators": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "=",
+                  "!=",
+                  "<",
+                  ">",
+                  "<=",
+                  ">=",
+                  "like"
+                ]
+              }
+            }
+          }
+        },
+        "constraintIsochrone": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "required": true
+            },
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "constraint-pgr-enum",
+                "constraint-pgr-number",
+                "constraint-pgr-string",
+                "constraint-pgr-isochrone"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "required": true
+            },
+            "key": {
+              "type": "string",
+              "required": true
+            },
+            "values": {
+              "type": "string",
+              "required": true
+            },
+            "propertiesColumn": {
+              "type": "string",
+              "required": true
+            },
+            "availableConstraintType": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "banned"
+                ]
+              }
+            },
+            "availableOperators": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "="
+                ]
+              }
+            }
+          }
+        },
+        "defaultParameters": {
+          "type": "array",
+          "required": false,
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "required": true
+              },
+              "default": {
+                "type": "string",
+                "required": true
+              }
+            }
+          }
+        },
+        "routeOperation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "route"
+              ]
+            },
+            "rate": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "maxIntermediatePoints": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "maxNumberOfConstraints": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "constraints": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "$ref": "#/components/schemas/constraint"
+              }
+            },
+            "defaultParameters": {
+              "$ref": "#/components/schemas/defaultParameters"
+            }
+          }
+        },
+        "nearestOperation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "nearest"
+              ]
+            },
+            "rate": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "maxNumber": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "defaultParameters": {
+              "$ref": "#/components/schemas/defaultParameters"
+            }
+          }
+        },
+        "isochroneOperation": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "required": true,
+              "enum": [
+                "isochrone"
+              ]
+            },
+            "rate": {
+              "type": "number",
+              "required": false,
+              "format": "integer"
+            },
+            "cost": {
+              "type": "array",
+              "required": true,
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "required": true,
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "unit": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "min": {
+                    "type": "number",
+                    "required": false
+                  },
+                  "max": {
+                    "type": "number",
+                    "required": false
+                  }
+                }
+              }
+            },
+            "constraints": {
+              "type": "array",
+              "required": false,
+              "minItems": 1,
+              "items": {
+                "$ref": "#/components/schemas/constraintIsochrone"
+              }
+            },
+            "defaultParameters": {
+              "$ref": "#/components/schemas/defaultParameters"
+            }
+          }
+        }
+      }
+    },
+
+  "required": [
+    "generation"
+  ],
+  "properties": {
+    "generation": {
+      "type": "object",
+      "required": [
+        "general",
+        "bases",
+        "workingSpace",
+        "resource"
+      ],
+      "properties": {
+        "general": {
+          "type": "object",
+          "required": [
+            "id",
+            "logs",
+            "operation"
+            ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "logs": {
+              "type": "object",
+              "required": ["configFile"],
+              "properties": {
+                "configFile": {
+                  "type": "string"
+                }
+              }
+            },
+            "parallelization": {
+              "type": "object",
+              "required": ["threads"],
+              "properties": {
+                "threads": {
+                  "type": "integer"
+                }
+              }
+            },
+            "overwrite": {
+              "type": "boolean"
+            },
+            "operation": {
+              "type": "string",
+              "enum": [
+                "creation",
+                "update"
+              ]
+            }
+          }
+        },
+        "bases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+                "id",
+                "type",
+                "configFile"
+              ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "bdd"
+                ]
+              },
+              "configFile": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "workingSpace": {
+          "type": "object",
+          "required":[
+              "directory",
+              "baseId"
+            ],
+          "properties": {
+            "directory": {
+              "type": "string"
+            },
+            "baseId": {
+              "type": "string"
+            }
+          }
+        },
+        "resource": {
+          "type": "object",
+          "properties": {
+            "ressourceId": {
+              "type": "string",
+              "required": true
+            },
+            "type": {
+              "type": "string",
+              "required": true
+            },
+            "description": {
+              "type": "string",
+              "required": true
+            },
+            "boundingBox": {
+              "type": "string",
+              "required": true
+            },
+            "defaultProjection": {
+              "type": "string",
+              "required": true
+            },
+            "availableProjection": {
+              "type": "array",
+              "required": false,
+              "items": {
+                "type": "string",
+                "required": true
+              }
+            },
+            "topology": {
+              "type": "object",
+              "required": true,
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "storage": {
+                  "$ref": "#/components/schemas/fileStorage",
+                  "required": true
+                },
+                "projection": {
+                  "type": "string",
+                  "required": true
+                },
+                "mapping": {
+                  "type": "object",
+                  "required": true,
+                  "properties": {
+                    "source": {
+                      "$ref": "#/components/schemas/baseStorage",
+                      "required": true
+                    },
+                    "storage": {
+                      "$ref": "#/components/schemas/fileStorage",
+                      "required": true
+                    }
+                  }
+                },
+                "defaultAttributs": {
+                  "type": "array",
+                  "required": false,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "costs": {
+              "type": "array",
+              "required": true,
+              "items": {
+                "type": "object",
+                "required": true,
+                "properties": {
+                  "profile": {
+                    "type": "string",
+                    "required": true,
+                    "optmization": {
+                      "type": "string",
+                      "required": true
+                    },
+                    "compute": {
+                      "type": "object",
+                      "required": true,
+                      "properties": {
+                        "storage": {
+                          "$ref": "#/components/schemas/fileStorage"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "operations": {
+              "type": "array",
+              "required": "false\nitems:\n  anyOf:\n    - $ref: \"#/components/schemas/routeOperation\"\n    - $ref: \"#/components/schemas/nearestOperation\"\n    - $ref: \"#/components/schemas/isochroneOperation\""
+            },
+            "outputs": {
+              "type": "object",
+              "required": true,
+              "properties": {
+                "configuration": {
+                  "type": "object",
+                  "required": true,
+                  "properties": {
+                    "storage": {
+                      "$ref": "#/components/schemas/fileStorage",
+                      "required": true
+                    }
+                  }
+                },
+                "graphs": {
+                  "type": "object",
+                  "required": true,
+                  "properties": {
+                    "storage": {
+                      "$ref": "#/components/schemas/baseStorage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

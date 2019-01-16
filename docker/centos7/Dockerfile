@@ -9,7 +9,8 @@ ENV HOME=/home
 RUN yum install -y \
   wget \
   gcc make \
-  zlib-dev openssl-devel bzip2-devel
+  zlib-dev openssl-devel bzip2-devel \
+  postgresql-devel git
 
 RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
   && tar xvf Python-${PYTHON_VERSION}.tgz \
@@ -20,6 +21,11 @@ RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VER
   && make altinstall -j${NPROC} \
   && cd / \
   && rm -rf Python-${PYTHON_VERSION}*
+
+RUN git clone --depth=1 --branch=2_7_6_1  https://github.com/psycopg/psycopg2.git \
+  && cd psycopg2 \
+  && python3.6 setup.py build \
+  && python3.6 setup.py install
 
 ENV PATH "/usr/local/bin:${PATH}"
 

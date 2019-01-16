@@ -1,0 +1,362 @@
+# Description d'un fichier de configuration de génération pour des ressources OSRM
+
+# Une génération est un objet qui contient toutes les informations utiles pour que les scripts de génération puissent créer une ressource.
+"generation":
+	type: object
+	required: true
+	properties:	
+		# Généralités sur la génération
+		"general":
+			type: object
+			required: true
+			properties:	
+				# Id de la génération
+				"id":
+					type: string
+					required: true
+				# Gestion des logs
+				"logs":
+					type: object
+					required: true
+					properties:
+						# Emplacement du fichier de configuration des logs
+						"configFile":
+							type: string
+							required: true
+				# Gestion de la parallélisation
+				"parallelization":
+					type: object
+					required: false
+					properties:
+						# Nombre de thread utilisable
+						"threads":
+							type: number
+							format: integer
+							required: true
+				# Gestion de la reprise sur erreur
+				"overwrite":
+					type: "boolean"
+					required: false
+		# Permet d'indiquer si la génération va partir de 0 ou s'il s'agit de mettre à jour une ressource déjà existante
+        "operation":
+          type: string
+          required: true
+          enum: {"creation","update"}
+		# Informations sur les bases de données qui seront utilisées pour la génération
+		"bases":
+			type: array
+			required: true
+			minItems: 1
+			items:
+				type: object
+				properties:
+					# Id de la base qui va être utile dans la suite de la configuration
+					"id":
+						type: string
+						required: true
+					# Type de base, pour le moment, il n'y aura que des bases de données
+					"type":
+						type: string
+						required: true
+						enum: ["bdd"]
+					# Fichier de configuration contenant toutes les informations pour se connecter à la base
+					"configFile":
+						type: string
+						required: true
+		# Information pour pouvoir se connecter, lire et écrire dans un cluster CEPH
+		"ceph":
+			type: object
+			required: false
+			properties:	
+				# Nom du cluster
+				"clusterName":
+					type: string
+					required: true
+				# Nom de l'utilisateur
+				"userName":
+					type: string
+					required: true
+				# Fichier de configuration 
+				"configFile":
+					type: string
+					required: true
+		# Espace de travail nécessaire à l'application pour travailler. Il faut un endroit sur disque où écrire et une base de données accessible en écriture. 
+		"workingSpace":
+			type: object
+			required: true
+			properties:	
+				"directory":
+					type: string
+					required: true
+				"baseId":
+					type: string
+					required: true
+		# Information sur la ressource générée. La plupart de ces informations permettront de générer le fichier de ressource utilisable par l'application de calcul d'itinéraire.
+		"ressource":
+			type: object
+			required: true
+			properties:	
+				# Id de la ressource
+				"ressourceId":
+					type: string
+					required: true
+				# Type de la ressource
+				"type":
+					type: string
+					required: true
+				# Description de la ressource
+				"description":
+					type: string
+					required: true
+				# Bbox des données diffusées
+				"boundingBox":
+					type: string
+					required: true
+				# Projection par défaut
+				"defaultProjection":
+					type: string
+					required: true
+				# Projections disponibles
+				"availableProjection":
+					type: array
+					required: false
+					items:
+						type: string
+						required: true
+				# Informations sur la topologie de la ressource
+				"topology":
+					type: object
+					required: true
+					properties:
+						# Description de la ressource
+						"description":
+							type: string
+							required: true
+						# Stockage de la ressource
+						"storage":
+							$ref: "#/components/schemas/storage"
+							required: true
+						# Projection des données sources
+						"projection":
+							type: string
+							required: true
+						# Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération. 
+						"mapping":
+							type: object
+							required: true
+							properties:
+								# Emplacement du script SQL 
+								"storage":
+									$ref: "#/components/schemas/storage"
+									required: true
+						# Liste des attributs qui seront des attributs par défaut pour la ressource
+			            "defaultAttributs":
+			              type: array
+			              required: false
+			              minItems: 1
+			              items:
+			                type: "string"
+				# Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs. 
+				"costs":
+					type: array
+					required: true
+					items:
+						type: object
+						required: true
+						properties:
+							# Chaque coût correspond à un profil
+							"profile":
+								type: string
+								required: true
+							# Chaque coût correspond à un profil
+						  	"optmization":
+						  		type: string
+						  		required: true
+						  	# Fichier permettant de calculer le coût
+						  	"compute":
+						  		type: object
+						  		required: true
+						  		properties:
+						  			# Stockage du fichier permettant de calculer le coût
+						  			"storage":
+						  				$ref: "#/components/schemas/storage"
+				# Informations sur les opérations autorisées sur la ressource qui va être générée. 
+				"operations":
+					type: array
+					required: false
+						items:
+							anyOf:
+								- $ref: "#/components/schemas/routeOperation"
+								- $ref: "#/components/schemas/nearestOperation"
+				# Informations sur les résultats de la génération. 
+				"outputs":
+					type: object
+					required: true
+					properties:
+						# La génération doit produire un fichier de ressource utilisable par l'application de calcul d'itinéraire. 
+						"configuration":
+							type: object
+							required: true
+							properties:
+								# Stockage du fichier de configuration.
+								"storage":
+									$ref: "#/components/schemas/storage"
+									required: true
+						# La génération doit produire des graphes utilisables par l'application de calcul d'itinéraire. 
+						"graphs":
+							type: object
+							required: true
+							properties:
+								# Stockage des graphes sur un disque ou dans un pool CEPH. (sans préciser l'id qui lui sera généré par les scripts de génération et apparaîtra dans le fichier de ressource).
+								"storage":
+									type: object
+									required: true
+									properties:
+										oneOf:
+											- "file":
+												type: string
+												required: true
+											- "ceph":
+												type: object
+												required: true
+												properties:
+													"pool":
+														type: string
+														required: true
+components:
+  schemas:
+    # storage d'un document: fichier ou ceph
+  	"storage":
+  		type: object
+  		properties:
+  			oneOf:
+          # Fichier 
+  				- "file":
+  						type: string
+              required: false
+          # storage objet ceph. Les informations de connexion sont dans la configuration principale de l'application. 
+  				- "ceph":
+  						type: object
+              required: false
+  						properties:
+                # Pool contenant l'objet.
+  							"pool":
+  								type: string
+                  required: true
+                # Id de l'objet.
+  							"objectId":
+  								type: string
+                  required: true
+    # Configuration des contraintes que l'on peut formuler dans les requêtes. 
+  	"constraint":
+  		type: object
+      properties: 
+        # Id de la contrainte
+      	"id":
+      		type: string
+          required: true
+        # type de la contrainte: parmi une liste prédéfinie. Le type va indiquer les opérations possibles. 
+      	"type":
+      		type: string
+          required: true
+      		enum: ["filter-osrm"]
+        # Description de la contrainte qui va apparaître dans le getcap.
+      	"description":
+      		type: string
+          required: true
+        # Mot clé permettant de formuler la contrainte. Indiqué dans le getcap. 
+        "key":
+          type: string
+          required: true
+        # Valeurs possibles pour la contrainte. Dans le cas d'OSRM, il n'y aura que des filtres précalculés lors de la génération des .osrm. Ce sont ces valeurs qui devront être indiquée ici. Elles seront alors visible dans le getcap. 
+        "values":
+        	type: array
+          required: true
+        	minItems: 1
+        	items:
+          	type: string
+        "availableConstraintType":
+          type: array
+          required: false
+          minItems: 1
+          items:
+            type: string
+            enum: {"banned"}
+        "availableOperators":
+          type: array
+          required: false
+          minItems: 1
+          items:
+            type: string
+            enum: {"="}
+    # Configuration des paramètres par défaut d'une opération
+    "defaultParameters":
+      type: array
+      required: false
+      minItems: 1
+      items:
+        type: object
+        properties:
+          # Id du paramètre concerné
+          "id":
+            type: string
+            required: true
+          # valeur par défaut du paramètre concerné
+          "default":
+            type: string
+            required: true
+    # Configuration nécessaire pour paramètrer l'opération route d'OSRM. 
+  	"routeOperation":
+  		type: object
+  		properties:
+        # Id de l'opération: route dans ce cas
+  			"type":
+  				type: string
+          required: true
+          enum: ["route"]
+        # Nombre de requête par seconde maximal
+  			"rate":
+  				type: number
+          required: false
+  				foramt: integer
+        # Nombre maximal de points intermédiaires par requête
+  			"maxIntermediatePoints":
+  				type: number
+          required: false
+  				foramt: integer
+        # Nombre maximal de contraintes formulables par requête
+  			"maxNumberOfConstraints":
+   				type: number
+          required: false
+  				foramt: integer
+        # Contraintes 
+  			"constraints":
+  				type: array
+          required: false
+  				minItems: 1
+  				items:
+  					$ref: "#/components/schemas/constraint"
+  		# Paramètres par défaut
+        "defaultParameters":
+          $ref: "#/components/schemas/defaultParameters"
+  	"nearestOperation":
+  		type: object
+  		properties:
+        # Id de l'opération: nearest dans ce cas
+  			"type":
+  				type: string
+          required: true
+          enum: ["nearest"]
+        # Nombre de requête par seconde maximal
+  			"rate":
+  				type: number
+          required: false
+  				foramt: integer
+        # Nombre maximal d'entités que l'opération peut renvoyé.
+  			"maxNumber":
+  				type: number
+          required: false
+  				foramt: integer
+  		# Paramètres par défaut
+        "defaultParameters":
+          $ref: "#/components/schemas/defaultParameters"
