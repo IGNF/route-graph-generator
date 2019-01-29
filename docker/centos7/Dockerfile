@@ -27,6 +27,8 @@ RUN git clone --depth=1 --branch=2_7_6_1  https://github.com/psycopg/psycopg2.gi
   && python3.6 setup.py build \
   && python3.6 setup.py install
 
+RUN yum install python-lxml
+
 ENV PATH "/usr/local/bin:${PATH}"
 
 WORKDIR /home

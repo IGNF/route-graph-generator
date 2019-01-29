@@ -81,10 +81,10 @@ def writeRes(res,i):
     return resEl
 
 def writeWayTags(wayEl, way):
-    for k,v in way.iteritems():
+    for k,v in way.items():
         if k == 'internodes' or k.endswith('_id') or k == 'geom' or k=='geometrie' :
             continue
         tag = etree.SubElement(wayEl, 'tag')
-        tag.set('k', '%s' %k.decode('utf8'))
-        tag.set('v', '%s' %str(v).decode('utf8'))
+        tag.set('k', '%s' %k)
+        tag.set('v', '%s' %str(v))
     return wayEl
