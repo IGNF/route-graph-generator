@@ -92,7 +92,7 @@ def execute():
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor()
         logger.info("Executing SQL conversion script")
-        instructions = sqlparse.split(sql_script.read().format(st=user))
+        instructions = sqlparse.split(sql_script.read().format(user=user))
 
         for instruction in instructions:
             if instruction == '':

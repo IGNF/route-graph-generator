@@ -31,7 +31,7 @@ RUN git clone --depth=1 --branch=0.2.4  https://github.com/andialbrecht/sqlparse
   && cd sqlparse \
   && python3.6 setup.py install
 
-RUN yum install python-lxml
+RUN yum install python-lxml -y
 
 ENV PATH "/usr/local/bin:${PATH}"
 

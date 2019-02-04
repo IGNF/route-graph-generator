@@ -7,11 +7,11 @@ CREATE SERVER bduni_server
         FOREIGN DATA WRAPPER postgres_fdw
         OPTIONS (host %(bdhost)s, port %(bdport)s, dbname %(dbname)s);
 
-CREATE USER MAPPING FOR {st}
+CREATE USER MAPPING FOR {user}
         SERVER bduni_server
         OPTIONS (user %(bduser)s, password %(bdpwd)s);
 
-GRANT USAGE ON FOREIGN SERVER bduni_server TO {st};
+GRANT USAGE ON FOREIGN SERVER bduni_server TO {user};
 
 
 DROP FOREIGN TABLE IF EXISTS troncon_de_route CASCADE;
