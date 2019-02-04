@@ -1,12 +1,15 @@
 # coding: utf8
 
-import psycopg2
-import psycopg2.extras
 import time
 import argparse
 import logging
+import subprocess
 
 from lxml import etree
+import psycopg2
+from psycopg2.extras import DictCursor, LoggingConnection
+# https://github.com/andialbrecht/sqlparse
+import sqlparse
 
 from _read_config import config_from_path
 from _osm_building import writeNode, writeWay, writeWayNds, writeRes, writeWayTags
@@ -44,11 +47,12 @@ def execute():
     }
 
     # Configuration du module logging
+    a = logging.FileHandler(logs_file)
     logging.basicConfig(
         format='%(asctime)s %(message)s',
         level=levels[ logs_config['level'].upper() ],
         handlers=[
-            logging.FileHandler(logs_file),
+            a,
             logging.StreamHandler()
         ])
 
@@ -61,28 +65,57 @@ def execute():
     # Configuration de la bdd source
     source_config = db_configs[ config['resource']['topology']['mapping']['source']['baseId'] ]
 
+    # Configuration de la bdd de travail
+    work_db_config = db_configs[ config['workingSpace']['baseId'] ]
+
     # Récupération des paramètres de la bdd
-    host = source_config.get('host')
-    dbname = source_config.get('dbname')
-    user = source_config.get('username')
-    password = source_config.get('password')
+    host = work_db_config.get('host')
+    dbname = work_db_config.get('dbname')
+    user = work_db_config.get('username')
+    password = work_db_config.get('password')
+    port = work_db_config.get('port')
     connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
 
     # Récupération de l'objet permettant de générer la ressource
     resource = config['resource']
 
-    logger.info("Connecting to source database")
+    logger.info("Connecting to work database")
     connection = psycopg2.connect(connect_args)
     connection.set_client_encoding('UTF8')
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='server_cursor') # Server side cursor
+
+    # subprocess.check_output("""PGPASSWORD={} PGUSER={} PGHOST={} PGPORT={} psql -d {} -v cuser={} -v bdpwd={} -v bdport={} -v bdhost={} -v bduser={} -v bdname={} -f {}
+    #     """.format(password, user, host, port, dbname,
+    #         user, source_config.get('password'), source_config.get('port'), source_config.get('host'), source_config.get('username'), source_config.get('dbname'),
+    #         resource['topology']['mapping']['storage']['file']
+    #     )
+    # )
+    with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
+        cur = connection.cursor()
+        logger.info("Executing SQL conversion script")
+        instructions = sqlparse.split(sql_script.read().format(st=user))
+
+        for instruction in instructions:
+            if instruction == '':
+                continue
+            logger.debug("SQL:\n {}\n".format(instruction) )
+            cur.execute(instruction,
+                {'bdpwd': source_config.get('password'), 'bdport': source_config.get('port'),
+                'bdhost': source_config.get('host'), 'bduser': source_config.get('username'), 'dbname': source_config.get('dbname')
+            })
+        connection.commit()
+
+    cursor = connection.cursor(cursor_factory=DictCursor)
+    cursor2 = connection.cursor(cursor_factory=DictCursor, name='server_cursor') # Server side cursor
 
     logger.info("SQL: select last_value from bduni_vertex_id_seq")
     cursor.execute("select last_value from bduni_vertex_id_seq")
     vertexSequence = cursor.fetchone()[0]
+    logger.info(vertexSequence)
+
     logger.info("SQL: select last_value from bduni_edge_id_seq")
     cursor.execute("select last_value from bduni_edge_id_seq")
     edgeSequence = cursor.fetchone()[0]
+    logger.info(edgeSequence)
 
     logger.info("Starting conversion")
     start_time = time.time()
@@ -93,18 +126,22 @@ def execute():
         with xf.element("osm", attribs):
 
             # Ecriture des nodes
-            cursor.execute(getQueryByTableAndBoundingBox('bduni_vertex', config['resource']['boundingBox'] ))
+            logger.info("SQL: {}".format(getQueryByTableAndBoundingBox('bduni_vertex', config['resource']['boundingBox'])))
+            cursor.execute(getQueryByTableAndBoundingBox('bduni_vertex', config['resource']['boundingBox']))
             row = cursor.fetchone()
             i = 1
             while row:
                 nodeEl = writeNode(row)
                 xf.write(nodeEl, pretty_print=True)
                 row = cursor.fetchone()
-                if i % 100000 == 0:
+                if (i % int(vertexSequence/10) == 0):
                     logger.info("%s / %s nodes ajoutés" %(i, vertexSequence))
                 i += 1
 
             # Ecriture des ways
+            logger.info("SQL: {}".format(getQueryByTableAndBoundingBox('bduni_edge',
+                config['resource']['boundingBox'], ['*', 'inter_nodes(geom) as internodes']))
+            )
             cursor2.execute(getQueryByTableAndBoundingBox('bduni_edge', config['resource']['boundingBox'], ['*', 'inter_nodes(geom) as internodes']))
             row = cursor2.fetchone()
             i = 1
@@ -119,7 +156,7 @@ def execute():
                 wayEl = writeWayTags(wayEl, row)
                 xf.write(wayEl, pretty_print=True)
                 row = cursor2.fetchone()
-                if (i % 100000 == 0):
+                if (i % int(edgeSequence/10) == 0):
                     logger.info("%s / %s ways ajoutés" %(i, edgeSequence))
                 i += 1
 
