@@ -33,6 +33,16 @@ RUN git clone --depth=1 --branch=0.2.4  https://github.com/andialbrecht/sqlparse
 
 RUN yum install python-lxml -y
 
+### Sera nécessaire si pour obtenir des données au format pgrouting, on choisira d'utiliser osm2pgrouting (mauvais solution à mon avis)
+# RUN yum install -y epel-release
+# RUN yum install -y expat expat-devel boost-devel boost-devel.x86_64 libpqxx-devel cmake gcc-c++
+# RUN git clone --depth=1 --branch=v2.3.6 https://github.com/pgRouting/osm2pgrouting.git \
+#   && cd osm2pgrouting \
+#   && cmake -H. -Bbuild \
+#   && cd build/ \
+#   && make -j${NPROC} \
+#   && make install -j${NPROC}
+
 ENV PATH "/usr/local/bin:${PATH}"
 
 WORKDIR /home
