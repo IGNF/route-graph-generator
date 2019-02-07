@@ -1,4 +1,3 @@
-import json
 import time
 
 from lxml import etree
@@ -30,8 +29,9 @@ def pivot_to_osm(resource, connection, logger):
         with xf.element("osm", attribs):
 
             # Ecriture des nodes
-            logger.info("SQL: {}".format(getQueryByTableAndBoundingBox('bduni_vertex', resource['boundingBox'])))
-            cursor.execute(getQueryByTableAndBoundingBox('bduni_vertex', resource['boundingBox']))
+            sql_query = getQueryByTableAndBoundingBox('bduni_vertex', resource['boundingBox'])
+            logger.info("SQL: {}".format(sql_query))
+            cursor.execute(sql_query)
             row = cursor.fetchone()
             i = 1
             while row:
@@ -43,10 +43,9 @@ def pivot_to_osm(resource, connection, logger):
                 i += 1
 
             # Ecriture des ways
-            logger.info("SQL: {}".format(getQueryByTableAndBoundingBox('bduni_edge',
-                resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes']))
-            )
-            cursor2.execute(getQueryByTableAndBoundingBox('bduni_edge', resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes']))
+            sql_query2 = getQueryByTableAndBoundingBox('bduni_edge', resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes'])
+            logger.info("SQL: {}".format(sql_query2))
+            cursor2.execute(sql_query2)
             row = cursor2.fetchone()
             i = 1
             while row:
@@ -65,7 +64,9 @@ def pivot_to_osm(resource, connection, logger):
                 i += 1
 
             # Ecriture des restrictions
-            cursor.execute("select * from bduni_non_com")
+            sql_query3 = "select * from bduni_non_com"
+            logger.info("SQL: {}".format(sql_query3))
+            cursor.execute(sql_query3)
             i = 1
             for row in cursor:
                 if row['common_vertex_id']==0:
@@ -78,6 +79,5 @@ def pivot_to_osm(resource, connection, logger):
                 i += 1
     cursor.close()
     cursor2.close()
-    connection.close()
     end_time = time.time()
     logger.info("Conversion ended. Elapsed time : %s seconds." %(end_time - start_time))

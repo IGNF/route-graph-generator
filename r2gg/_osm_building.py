@@ -20,7 +20,6 @@ def writeNode(node):
 def writeWay(way):
     wayEl = etree.Element("way", id="%s" %way['id'])
 
-
     wayEl.set('user', 'bduni')
     wayEl.set('uid', '1')
     wayEl.set('visible', 'true')
