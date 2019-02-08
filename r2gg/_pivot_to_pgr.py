@@ -1,3 +1,4 @@
+import math
 import time
 
 from psycopg2.extras import DictCursor
@@ -54,25 +55,28 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     cursor_in.execute(sql_query)
     rows = cursor_in.fetchall()
 
-    values_str = ""
-    for row in rows:
-        values_str += "(%s, %s, %s, %s),"
+    # Insertion petit à petit -> beaucoup plus performant
+    logger.debug("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    for i in range(math.ceil(len(rows)/100)):
+        tmp_rows = rows[i:i+100]
+        values_str = ""
+        for row in tmp_rows:
+            values_str += "(%s, %s, %s, %s),"
 
-    values_tuple = ()
-    for row in rows:
-        values_tuple += (row['id'], row['geom'], row['length'], row['length'])
+        values_tuple = ()
+        for row in tmp_rows:
+            values_tuple += (row['id'], row['geom'], row['length'], row['length'])
 
-    sql_insert = """
-        INSERT INTO ways (id, the_geom, length, cost)
-        VALUES {}
-        ON CONFLICT (id) DO UPDATE
-          SET the_geom = excluded.the_geom,
-            length = excluded.length,
-            cost = excluded.cost;
-        """.format(values_str[:-1])
-    logger.debug("SQL: Inserting {} values in out db".format(len(rows)))
-    cursor_out.execute(sql_insert, values_tuple)
-    connection_out.commit()
+        sql_insert = """
+            INSERT INTO ways (id, the_geom, length, cost)
+            VALUES {}
+            ON CONFLICT (id) DO UPDATE
+              SET the_geom = excluded.the_geom,
+                length = excluded.length,
+                cost = excluded.cost;
+            """.format(values_str[:-1])
+        cursor_out.execute(sql_insert, values_tuple)
+        connection_out.commit()
 
     # Ecriture des nodes et création de la topologie
     create_topology_sql = "SELECT pgr_createTopology('ways', 0.00001);"

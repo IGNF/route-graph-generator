@@ -26,7 +26,8 @@ def execute(config, resource, db_configs, connection, logger):
             logger.debug("SQL:\n {}\n".format(instruction) )
             cur.execute(instruction,
                 {'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'), 'dbname': source_db_config.get('dbname')
+                'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'),
+                'dbname': source_db_config.get('dbname')
             })
         connection.commit()
 

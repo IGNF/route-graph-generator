@@ -26,16 +26,15 @@ INTO public;
 -- DEFINITION DU GRAPHE : NOEUDS / ARCS
 -- ####################################
 
-DROP TABLE IF EXISTS bduni_vertex CASCADE ;
-CREATE TABLE bduni_vertex (
+CREATE TABLE IF NOT EXISTS bduni_vertex (
     id serial primary key,
     lon float,
     lat float,
     -- ajouter ce qui est utile pour OSRM...
     geom geometry(Point,4326)
 );
-CREATE INDEX bduni_vertex_geom_gist ON bduni_vertex USING GIST (geom);
-CREATE INDEX bduni_vertex_lon_lat_idx ON bduni_vertex(lon,lat);
+CREATE INDEX IF NOT EXISTS bduni_vertex_geom_gist ON bduni_vertex USING GIST (geom);
+CREATE INDEX IF NOT EXISTS bduni_vertex_lon_lat_idx ON bduni_vertex(lon,lat);
 
 
 -- ####################################
@@ -98,8 +97,7 @@ SELECT * FROM non_communication;
 -- REMPLISSAGE DE BDUNI_TRONCON
 -- ############################
 -- Ajout des tronçons de routes (jointure avec routes numérotées et nommées)
-DROP TABLE IF EXISTS bduni_troncon;
-CREATE TABLE bduni_troncon AS
+CREATE TABLE IF NOT EXISTS bduni_troncon AS
     SELECT DISTINCT ON (cleabs) * FROM (
       SELECT
         -- GCVS (système d'historique)
@@ -167,10 +165,8 @@ INSERT INTO bduni_vertex (lon,lat,geom)
 -- ############################
 -- REMPLISSAGE DE BDUNI_EDGE
 -- ############################
-DROP SEQUENCE IF EXISTS bduni_edge_id_seq;
-CREATE SEQUENCE bduni_edge_id_seq;
-DROP TABLE IF EXISTS bduni_edge;
-CREATE TABLE bduni_edge AS
+CREATE SEQUENCE IF NOT EXISTS bduni_edge_id_seq;
+CREATE TABLE IF NOT EXISTS bduni_edge AS
 SELECT
   nextval('bduni_edge_id_seq') AS id,
   bduni_vertex_id(ST_StartPoint(geom)) as source_id,
@@ -197,8 +193,7 @@ FROM bduni_troncon
 
 
 -- On ne conserve que les non communications sur la zone de calcul
-DROP TABLE IF EXISTS bduni_non_com;
-CREATE TABLE bduni_non_com AS
+CREATE TABLE IF NOT EXISTS bduni_non_com AS
 SELECT
   cleabs, lien_vers_troncon_entree, liens_vers_troncon_sortie
 FROM bduni_non_com_tmp
@@ -209,8 +204,8 @@ FROM bduni_non_com_tmp
 
 
 -- Remplissage des ids d'edge dans la table des non communications
-ALTER TABLE bduni_non_com ADD COLUMN id_from bigint;
-ALTER TABLE bduni_non_com ADD COLUMN id_to bigint;
+ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_from bigint;
+ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_to bigint;
 
 UPDATE bduni_non_com AS b SET id_from = e.id
 FROM bduni_edge as e
@@ -237,5 +232,5 @@ CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS in
   AND b.id = id_to;
 $$ LANGUAGE SQL ;
 
-ALTER TABLE bduni_non_com ADD COLUMN common_vertex_id integer;
+ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS common_vertex_id integer;
 UPDATE bduni_non_com SET common_vertex_id = common_point(bduni_non_com.id_from, bduni_non_com.id_to);
