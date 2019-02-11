@@ -25,7 +25,8 @@ INTO public;
 -- ####################################
 -- DEFINITION DU GRAPHE : NOEUDS / ARCS
 -- ####################################
-
+-- répétition du IF EXISTS pour ouvrir à l'éventualité de la mise à jour
+DROP TABLE IF EXISTS nodes CASCADE ;
 CREATE TABLE IF NOT EXISTS nodes (
   id bigserial primary key,
   lon float,
@@ -36,7 +37,10 @@ CREATE TABLE IF NOT EXISTS nodes (
 CREATE INDEX IF NOT EXISTS nodes_geom_gist ON nodes USING GIST (geom);
 CREATE INDEX IF NOT EXISTS nodes_lon_lat_idx ON nodes(lon,lat);
 
+-- répétition du IF EXISTS pour ouvrir à l'éventualité de la mise à jour
+DROP SEQUENCE IF EXISTS edges_id_seq;
 CREATE SEQUENCE IF NOT EXISTS edges_id_seq;
+DROP TABLE IF EXISTS edges;
 CREATE TABLE IF NOT EXISTS edges (
   id bigserial primary key,
   source_id bigserial,
