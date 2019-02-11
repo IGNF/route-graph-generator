@@ -29,7 +29,7 @@ def pivot_to_osm(resource, connection, logger):
         with xf.element("osm", attribs):
 
             # Ecriture des nodes
-            sql_query = getQueryByTableAndBoundingBox('bduni_vertex', resource['boundingBox'])
+            sql_query = getQueryByTableAndBoundingBox('nodes', resource['boundingBox'])
             logger.info("SQL: {}".format(sql_query))
             cursor.execute(sql_query)
             row = cursor.fetchone()
@@ -43,7 +43,7 @@ def pivot_to_osm(resource, connection, logger):
                 i += 1
 
             # Ecriture des ways
-            sql_query2 = getQueryByTableAndBoundingBox('bduni_edge', resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes'])
+            sql_query2 = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes'])
             logger.info("SQL: {}".format(sql_query2))
             cursor2.execute(sql_query2)
             row = cursor2.fetchone()

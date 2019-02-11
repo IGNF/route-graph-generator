@@ -32,14 +32,11 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
             y2 double precision,
             maxspeed_forward double precision,
             maxspeed_backward double precision,
-            priority double precision DEFAULT 1
+            priority double precision DEFAULT 1,
+            the_geom geometry(Linestring,4326)
         );"""
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
-
-    add_column = "ALTER TABLE ways ADD COLUMN IF NOT EXISTS the_geom geometry(Linestring,4326);"
-    logger.debug("SQL: {}".format(add_column))
-    cursor_out.execute(add_column)
 
     logger.info("SQL: select last_value from bduni_edge_id_seq")
     cursor_in.execute("select last_value from bduni_edge_id_seq")
@@ -50,7 +47,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     start_time = time.time()
 
     # Ecriture des ways
-    sql_query = getQueryByTableAndBoundingBox('bduni_edge', resource['boundingBox'], ['id', 'geom', 'ST_Length(geom) as length'])
+    sql_query = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], ['id', 'geom', 'ST_Length(geom) as length'])
     logger.info("SQL: {}".format(sql_query))
     cursor_in.execute(sql_query)
     rows = cursor_in.fetchall()

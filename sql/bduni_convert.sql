@@ -26,16 +26,27 @@ INTO public;
 -- DEFINITION DU GRAPHE : NOEUDS / ARCS
 -- ####################################
 
-CREATE TABLE IF NOT EXISTS bduni_vertex (
-    id serial primary key,
-    lon float,
-    lat float,
-    -- ajouter ce qui est utile pour OSRM...
-    geom geometry(Point,4326)
+CREATE TABLE IF NOT EXISTS nodes (
+  id bigserial primary key,
+  lon float,
+  lat float,
+  -- ajouter ce qui est utile pour OSRM...
+  geom geometry(Point,4326)
 );
-CREATE INDEX IF NOT EXISTS bduni_vertex_geom_gist ON bduni_vertex USING GIST (geom);
-CREATE INDEX IF NOT EXISTS bduni_vertex_lon_lat_idx ON bduni_vertex(lon,lat);
+CREATE INDEX IF NOT EXISTS nodes_geom_gist ON nodes USING GIST (geom);
+CREATE INDEX IF NOT EXISTS nodes_lon_lat_idx ON nodes(lon,lat);
 
+CREATE SEQUENCE IF NOT EXISTS edges_id_seq;
+CREATE TABLE IF NOT EXISTS edges (
+  id bigserial primary key,
+  source_id bigserial,
+  target_id bigserial,
+  direction integer,
+  geom geometry(Linestring,4326)
+  -- TODO: autres
+  -- for testing purposes only
+  , cleabs text
+);
 
 -- ####################################
 -- UTILITAIRES DE REMPLISSAGE DU GRAPHE
@@ -66,27 +77,12 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Récupération d'un identifiant de sommet en fonction d'un point (égalité stricte)
-CREATE OR REPLACE FUNCTION bduni_vertex_id( _geom geometry ) RETURNS integer AS $$
-    SELECT id FROM bduni_vertex WHERE lon = ST_X(_geom) AND lat = ST_Y(_geom);
+CREATE OR REPLACE FUNCTION nodes_id( _geom geometry ) RETURNS bigint AS $$
+    SELECT id FROM nodes WHERE lon = ST_X(_geom) AND lat = ST_Y(_geom);
 $$ LANGUAGE SQL ;
-
--- Renvoie les points intermédiaires d'une linestring en format json
-CREATE OR REPLACE FUNCTION inter_nodes(geom geometry(LineString, 4326)) RETURNS json[] AS $$
-    SELECT COALESCE(array_agg(row_to_json(subq)), '{{}}') FROM (
-      SELECT
-        ST_X((dp).geom) AS lon,
-        ST_Y((dp).geom) AS lat
-      FROM (
-        SELECT st_numpoints(geom) AS nump, ST_DumpPoints(geom) AS dp
-      ) AS foo
-      WHERE (dp).path[1] <@ int4range(2, nump)
-    ) subq ;
-$$ LANGUAGE SQL;
 
 
 -- populate.sql
-
-
 -- On doit copier au préalable troncon_de_route pour figer les tronçons car elle est mise à jour en continue
 
 CREATE TEMP TABLE bduni_non_com_tmp AS
@@ -97,7 +93,7 @@ SELECT * FROM non_communication;
 -- REMPLISSAGE DE BDUNI_TRONCON
 -- ############################
 -- Ajout des tronçons de routes (jointure avec routes numérotées et nommées)
-CREATE TABLE IF NOT EXISTS bduni_troncon AS
+CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     SELECT DISTINCT ON (cleabs) * FROM (
       SELECT
         -- GCVS (système d'historique)
@@ -149,36 +145,39 @@ CREATE TABLE IF NOT EXISTS bduni_troncon AS
   ;
 
   -- ############################
-  -- REMPLISSAGE DE BDUNI_VERTEX
+  -- REMPLISSAGE DE nodes
   -- ############################
--- Remplissage de bduni_vertex avec les sommets initiaux et finaux des tronçons
+-- Remplissage de nodes avec les sommets initiaux et finaux des tronçons
 -- (les points intermédiaires ne forment pas la topologie)
 WITH t AS (
   SELECT ST_Force2D(ST_StartPoint(geom)) as geom FROM bduni_troncon
     UNION
   SELECT ST_Force2D(ST_EndPoint(geom)) as geom FROM bduni_troncon
 )
-INSERT INTO bduni_vertex (lon,lat,geom)
-  SELECT ST_X(t.geom),ST_Y(t.geom),t.geom FROM t WHERE bduni_vertex_id(t.geom) IS NULL
+INSERT INTO nodes (lon,lat,geom)
+  SELECT ST_X(t.geom),ST_Y(t.geom),t.geom FROM t WHERE nodes_id(t.geom) IS NULL
 ;
 
 -- ############################
--- REMPLISSAGE DE BDUNI_EDGE
+-- REMPLISSAGE DE edges
 -- ############################
-CREATE SEQUENCE IF NOT EXISTS bduni_edge_id_seq;
-CREATE TABLE IF NOT EXISTS bduni_edge AS
-SELECT
-  nextval('bduni_edge_id_seq') AS id,
-  bduni_vertex_id(ST_StartPoint(geom)) as source_id,
-  bduni_vertex_id(ST_EndPoint(geom)) as target_id,
-  (CASE
-    WHEN sens_de_circulation='Sens direct' THEN 1
-    WHEN sens_de_circulation='Sens inverse' THEN -1
-    ELSE 0
-    END) as direction,
 
-  * -- TODO ne mettre que les attributs nécessaires
-FROM bduni_troncon
+INSERT INTO edges
+  SELECT
+  -- TODO CRITICAL rendre l'identifiant unique en fonction de cleabs
+    nextval('edges_id_seq') AS id,
+    nodes_id(ST_StartPoint(geom)) as source_id,
+    nodes_id(ST_EndPoint(geom)) as target_id,
+    (CASE
+      WHEN sens_de_circulation='Sens direct' THEN 1
+      WHEN sens_de_circulation='Sens inverse' THEN -1
+      ELSE 0
+      END) as direction,
+    geom as geom
+
+    -- TODO ne mettre que les attributs nécessaires
+    ,cleabs as cleabs
+  FROM bduni_troncon
 ;
 
 -- ############################
@@ -198,8 +197,8 @@ SELECT
   cleabs, lien_vers_troncon_entree, liens_vers_troncon_sortie
 FROM bduni_non_com_tmp
 -- WHERE geometrie && ST_Transform( ST_SetSRID( ST_MakeEnvelope(:bbox),4326 ),2154 )
- WHERE lien_vers_troncon_entree in (SELECT cleabs from bduni_edge)
- AND liens_vers_troncon_sortie in (SELECT cleabs from bduni_edge)
+ WHERE lien_vers_troncon_entree in (SELECT cleabs from edges)
+ AND liens_vers_troncon_sortie in (SELECT cleabs from edges)
 ;
 
 
@@ -208,17 +207,17 @@ ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_from bigint;
 ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_to bigint;
 
 UPDATE bduni_non_com AS b SET id_from = e.id
-FROM bduni_edge as e
+FROM edges as e
 WHERE e.cleabs = b.lien_vers_troncon_entree
 ;
 
 UPDATE bduni_non_com AS b SET id_to = e.id
-FROM bduni_edge as e
+FROM edges as e
 WHERE e.cleabs = b.liens_vers_troncon_sortie
 ;
 
 -- Récupération du point commun entre deux troncons
-CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS bigint AS $$
   SELECT
   CASE
      WHEN a.source_id=b.source_id THEN b.source_id
@@ -227,10 +226,10 @@ CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS in
      WHEN a.target_id=b.target_id THEN b.target_id
      ELSE 0
   END
-  FROM bduni_edge as a, bduni_edge as b
+  FROM edges as a, edges as b
   WHERE a.id = id_from
   AND b.id = id_to;
 $$ LANGUAGE SQL ;
 
-ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS common_vertex_id integer;
+ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS common_vertex_id bigint;
 UPDATE bduni_non_com SET common_vertex_id = common_point(bduni_non_com.id_from, bduni_non_com.id_to);
