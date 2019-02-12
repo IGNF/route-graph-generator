@@ -168,7 +168,6 @@ INSERT INTO nodes (lon,lat,geom)
 
 INSERT INTO edges
   SELECT
-  -- TODO CRITICAL rendre l'identifiant unique en fonction de cleabs
     nextval('edges_id_seq') AS id,
     nodes_id(ST_StartPoint(geom)) as source_id,
     nodes_id(ST_EndPoint(geom)) as target_id,
@@ -193,9 +192,12 @@ INSERT INTO edges
 --    yourTable.ID,
 --    regexp_split_to_table(yourTable.fruits, E'&') AS split_fruits
 --FROM yourTable
+--
+-- Après ce n'est utile que dans 3 cas sur 37747, soit 0.008% du temps...
 
 
 -- On ne conserve que les non communications sur la zone de calcul
+DROP TABLE IF EXISTS bduni_non_com;
 CREATE TABLE IF NOT EXISTS bduni_non_com AS
 SELECT
   cleabs, lien_vers_troncon_entree, liens_vers_troncon_sortie
