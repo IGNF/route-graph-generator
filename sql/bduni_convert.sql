@@ -176,10 +176,10 @@ INSERT INTO edges
       WHEN sens_de_circulation='Sens inverse' THEN -1
       ELSE 0
       END) as direction,
-    geom as geom
-
-    -- TODO ne mettre que les attributs nécessaires
-    ,cleabs as cleabs
+    geom as geom,
+    -- Attributs spécifiques à la bd uni
+    nature as nature,
+    cleabs as cleabs
   FROM bduni_troncon
 ;
 
