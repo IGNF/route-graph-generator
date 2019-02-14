@@ -6,7 +6,7 @@ import sqlparse
 from _pivot_to_osm import pivot_to_osm
 from _pivot_to_pgr import pivot_to_pgr
 
-def execute(config, resource, db_configs, connection, logger):
+def sql_convert(config, resource, db_configs, connection, logger):
     # Configuration de la bdd source
     source_db_config = db_configs[ resource['topology']['mapping']['source']['baseId'] ]
 
@@ -30,31 +30,31 @@ def execute(config, resource, db_configs, connection, logger):
                 'dbname': source_db_config.get('dbname')
                 })
         connection.commit()
+    connection.close()
 
-    # Si la sortie est de type pgrouting
-    if (resource['type'] == 'pgr'):
-        # Configuration et connection à la base de sortie
-        out_db_config = db_configs[ resource['topology']['storage']['baseId'] ]
-        host = out_db_config.get('host')
-        dbname = out_db_config.get('dbname')
-        user = out_db_config.get('username')
-        password = out_db_config.get('password')
-        port = out_db_config.get('port')
-        connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
-        logger.info("Connecting to output database")
-        connection_out = psycopg2.connect(connect_args)
+def pgr_convert(config, resource, db_configs, connection, logger):
+    if (resource['type'] != 'pgr'):
+        raise ValueError("Wrong resource type, should be 'pgr'")
 
-        pivot_to_pgr(resource, connection, connection_out, logger)
-        connection.close()
-        connection_out.close()
+    # Configuration et connection à la base de sortie
+    out_db_config = db_configs[ resource['topology']['storage']['baseId'] ]
+    host = out_db_config.get('host')
+    dbname = out_db_config.get('dbname')
+    user = out_db_config.get('username')
+    password = out_db_config.get('password')
+    port = out_db_config.get('port')
+    connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
+    logger.info("Connecting to output database")
+    connection_out = psycopg2.connect(connect_args)
 
-    elif (resource['type'] == 'osrm' or resource['type'] == 'osm'):
+    pivot_to_pgr(resource, connection, connection_out, logger)
+    connection.close()
+    connection_out.close()
 
-        pivot_to_osm(resource, connection, logger)
-        connection.close()
+def osrm_convert(config, resource, db_configs, connection, logger):
+    if (resource['type'] != 'osrm'):
+        raise ValueError("Wrong resource type, should be 'osrm'")
 
-        if (resource['type'] == 'osrm'):
-            # TODO: use lua scripts
-            pass
-    else:
-        raise ValueError("Wrong resource type, should be one of (pgr, osm, orsm)")
+    pivot_to_osm(resource, connection, logger)
+    connection.close()
+    # TODO: osm to osrm

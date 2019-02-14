@@ -1,11 +1,28 @@
 from _configure import configure
-from _main import execute
+from _main import sql_convert, pgr_convert, osrm_convert
 
 __version__ = "0.0.1"
 
-def main():
+def populate_pivot():
     config, resource, db_configs, connection, logger = configure()
-    execute(config, resource, db_configs, connection, logger)
+    sql_convert(config, resource, db_configs, connection, logger)
+
+def pivot2pgrouting():
+    config, resource, db_configs, connection, logger = configure()
+    pgr_convert(config, resource, db_configs, connection, logger)
+
+def pivot2osrm():
+    config, resource, db_configs, connection, logger = configure()
+    osrm_convert(config, resource, db_configs, connection, logger)
 
 if __name__ == '__main__':
-    main()
+    config, resource, db_configs, connection, logger = configure()
+    sql_convert(config, resource, db_configs, connection, logger)
+    if (resource['type'] == 'pgr'):
+        config, resource, db_configs, connection, logger = configure()
+        pgr_convert(config, resource, db_configs, connection, logger)
+    elif (resource['type'] == 'osrm'):
+        config, resource, db_configs, connection, logger = configure()
+        osrm_convert(config, resource, db_configs, connection, logger)
+    else:
+        raise ValueError("Wrong resource type, should be 'pgr' or osrm'")

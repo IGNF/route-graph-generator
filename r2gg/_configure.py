@@ -15,7 +15,6 @@ LEVELS = {
 }
 
 def configure():
-
     parser = argparse.ArgumentParser()
     parser.add_argument('config_file_path', type=str)
     config_path = parser.parse_args().config_file_path
