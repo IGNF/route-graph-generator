@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS edges (
   source_id bigserial,
   target_id bigserial,
   direction integer,
-  geom geometry(Linestring,4326)
-  -- TODO: autres
-  -- for testing purposes only
-  , cleabs text
+  geom geometry(Linestring,4326),
+  -- Attributs spécifiques à la bd uni
+  nature text,
+  cleabs text
 );
 
 -- ####################################
@@ -145,7 +145,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     ) s
         WHERE NOT detruit
   -- décommenter pour tester :
-  AND territoire='MTQ'
+  AND territoire='REU'
   ;
 
   -- ############################
@@ -193,7 +193,7 @@ INSERT INTO edges
 --    regexp_split_to_table(yourTable.fruits, E'&') AS split_fruits
 --FROM yourTable
 --
--- Après ce n'est utile que dans 3 cas sur 37747, soit 0.008% du temps...
+-- Après ce n'est utile que dans 3 cas sur 37747, soit 0.008 pourcent du temps...
 
 
 -- On ne conserve que les non communications sur la zone de calcul

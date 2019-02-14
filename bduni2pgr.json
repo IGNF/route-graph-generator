@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2osrm",
+      "id": "bduni2pgr",
       "logs": {
         "configFile": "sample_log_config.json"
       },
@@ -60,26 +60,14 @@
           "name"
         ]
       },
-      "costs": [
+      "costs":
         {
-          "profile": "car",
-          "optmization": "fastest",
           "compute": {
             "storage": {
-              "file": "lua/car-fastest.lua"
+              "file": "io/costs_calculation_sample.json"
             }
           }
         },
-        {
-          "profile": "car",
-          "optmization": "shortest",
-          "compute": {
-            "storage": {
-              "file": "lua/car-shortest.lua"
-            }
-          }
-        }
-      ],
       "operations": [
         {
           "type": "route",

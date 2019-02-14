@@ -28,7 +28,7 @@ def execute(config, resource, db_configs, connection, logger):
                 {'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
                 'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'),
                 'dbname': source_db_config.get('dbname')
-            })
+                })
         connection.commit()
 
     # Si la sortie est de type pgrouting

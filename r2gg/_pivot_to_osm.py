@@ -10,13 +10,13 @@ def pivot_to_osm(resource, connection, logger):
     cursor = connection.cursor(cursor_factory=DictCursor)
     cursor2 = connection.cursor(cursor_factory=DictCursor, name='server_cursor') # Server side cursor
 
-    logger.info("SQL: select last_value from bduni_vertex_id_seq")
-    cursor.execute("select last_value from bduni_vertex_id_seq")
+    logger.info("SQL: select last_value from nodes_id_seq")
+    cursor.execute("select last_value from nodes_id_seq")
     vertexSequence = cursor.fetchone()[0]
     logger.info(vertexSequence)
 
-    logger.info("SQL: select last_value from bduni_edge_id_seq")
-    cursor.execute("select last_value from bduni_edge_id_seq")
+    logger.info("SQL: select last_value from edges_id_seq")
+    cursor.execute("select last_value from edges_id_seq")
     edgeSequence = cursor.fetchone()[0]
     logger.info(edgeSequence)
 
