@@ -10,7 +10,8 @@ RUN yum install -y \
   wget \
   gcc make \
   zlib-dev openssl-devel bzip2-devel \
-  postgresql-devel git
+  postgresql-devel git \
+  yum-utils centos-release-scl epel-release
 
 RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
   && tar xvf Python-${PYTHON_VERSION}.tgz \
@@ -26,11 +27,9 @@ RUN yum install -y python36-setuptools && easy_install-3.6 pip
 
 RUN pip3 install 'psycopg2==2.7.6.1' 'sqlparse==0.2.4' 'lxml==4.3.1'
 
-RUN yum install python-lxml -y
-
 ### Pour la conversion osm vers osrm
 # Dépendances
-RUN yum install -y yum-utils centos-release-scl epel-release && yum-config-manager --enable rhel-server-rhscl-7-rpms
+RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
 RUN yum install -y devtoolset-6
 RUN scl enable devtoolset-6 bash && yum -y install cmake3
 
