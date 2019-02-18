@@ -3,6 +3,7 @@ import time
 
 from psycopg2.extras import DictCursor
 
+from _output_costs_from_costs_config import output_costs_from_costs_config
 from _read_config import config_from_path
 from _sql_building import getQueryByTableAndBoundingBox
 
@@ -10,6 +11,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
 
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
 
+    # Récupération des coûts à calculer
     costs = config_from_path(resource["costs"]["compute"]["storage"]["file"])
 
     cursor_out = connection_out.cursor()
@@ -38,6 +40,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
 
+    # Ajout des colonnes de coûts
     add_columns = "ALTER TABLE ways "
     for output in costs["outputs"]:
         add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format(output["name"])
@@ -45,14 +48,11 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     logger.debug("SQL: adding costs columns \n {}".format(add_columns))
     cursor_out.execute(add_columns)
 
-    logger.info("SQL: select last_value from edges_id_seq")
-    cursor_in.execute("select last_value from edges_id_seq")
-    edgeSequence = cursor_in.fetchone()[0]
-    logger.info(edgeSequence)
 
     logger.info("Starting conversion")
     start_time = time.time()
 
+    # Colonnes à lire dans la base source (champs calssiques + champs servant aux coûts)
     in_columns = [
             'id',
             'geom',
@@ -68,59 +68,24 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     cursor_in.execute(sql_query)
     rows = cursor_in.fetchall()
 
+    # Chaîne de n %s, pour l'insertion de données via psycopg
     single_value_str = "%s," * (4 + len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
-    # Insertion petit à petit -> beaucoup plus performant
+    # Insertion petit à petit -> plus performant
     logger.debug("SQL: Inserting or updating {} values in out db".format(len(rows)))
     for i in range(math.ceil(len(rows)/1000)):
         tmp_rows = rows[i*1000:(i+1)*1000]
+        # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in tmp_rows:
             values_str += "(" + single_value_str + "),"
         values_str = values_str[:-1]
 
+        # Tuple des valuers à insérer
         values_tuple = ()
         for row in tmp_rows:
-            values = {}
-            output_costs = ()
-
-            for variable in costs["variables"]:
-                if variable["mapping"] == "value":
-                    values[variable["name"]] = row[variable["alias"]]
-                else:
-                    values[variable["name"]] = variable["mapping"][str(row[variable["alias"]])]
-
-            for output in costs["outputs"]:
-                result = 0
-                for flag in output["negative_flags"]:
-                    if values[flag] == -1:
-                        result = -1
-                if result != -1:
-                    for operation in output["operations"]:
-                        if operation[0] == "add":
-                            if isinstance(operation[1], str):
-                                result += values[operation[1]]
-                            else:
-                                result += operation[1]
-                        elif operation[0] == "substract":
-                            if isinstance(operation[1], str):
-                                result -= values[operation[1]]
-                            else:
-                                result -= operation[1]
-                        elif operation[0] == "multiply":
-                            if isinstance(operation[1], str):
-                                result *= values[operation[1]]
-                            else:
-                                result *= operation[1]
-                        elif operation[0] == "divide":
-                            if isinstance(operation[1], str):
-                                result /= values[operation[1]]
-                            else:
-                                result /= operation[1]
-
-                output_costs += (result,)
-
+            output_costs = output_costs_from_costs_config(costs, row)
             values_tuple += (row['id'], row['geom'], row['length'], row['length_m']) + output_costs
 
         output_columns = "(id, the_geom, length, length_m"
@@ -144,7 +109,6 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     logger.info("SQL: {}".format(create_topology_sql))
     cursor_out.execute(create_topology_sql)
     connection_out.commit()
-
 
     # Check the routing topology
     analysegraph_sql = "SELECT pgr_analyzegraph('ways', 0.00001);"
