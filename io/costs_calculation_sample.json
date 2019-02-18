@@ -8,21 +8,10 @@
     },
     {
       "name": "vitesse_voiture",
-      "column_name": "nature",
-      "alias": "nature",
-      "mapping": {
-        "Rond-point": 25,
-        "Chemin": 10,
-        "Sentier": -1,
-        "Bretelle": 30,
-        "Route à 1 chaussée": 70,
-        "Route à 2 chaussées": 80,
-        "Type autoroutier": 100,
-        "Route empierrée": 20,
-        "Escalier": -1,
-        "Piste cyclable": -1,
-        "Bac ou liaison maritime": -1
-      }
+      "column_name": "vitesse_moyenne_vl",
+      "alias": "vitesse_moyenne_vl",
+      "mapping": "value",
+      "negative_if_zero": true
     },
     {
       "name": "sens_direct",
@@ -44,14 +33,14 @@
   "outputs": [
     {
       "name": "cost_m_car",
-      "negative_flags": ["sens_direct"],
+      "negative_flags": ["sens_direct", "vitesse_voiture"],
       "operations": [
         ["add", "length_m"]
       ]
     },
     {
       "name": "reverse_cost_m_car",
-      "negative_flags": ["sens_inverse"],
+      "negative_flags": ["sens_inverse", "vitesse_voiture"],
       "operations": [
         ["add", "length_m"]
       ]

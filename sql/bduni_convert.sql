@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS edges (
   direction integer,
   geom geometry(Linestring,4326),
   -- Attributs spécifiques à la bd uni
+  vitesse_moyenne_vl integer,
   nature text,
   cleabs text
 );
@@ -116,6 +117,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
         t.nombre_de_voies as nb_voies,
         t.sens_de_circulation as sens_de_circulation,
         t.itineraire_vert as it_vert,
+        t.vitesse_moyenne_vl as vitesse_moyenne_vl,
         -- NULLIF(t.nom_rue_gauche,'') as nom_voie_g,
         -- NULLIF(t.nom_rue_droite,'') as nom_voie_d,
         NULLIF(t.insee_commune_gauche,'') as inseecom_g,
@@ -178,6 +180,7 @@ INSERT INTO edges
       END) as direction,
     geom as geom,
     -- Attributs spécifiques à la bd uni
+    vitesse_moyenne_vl as vitesse_moyenne_vl,
     nature as nature,
     cleabs as cleabs
   FROM bduni_troncon

@@ -1,12 +1,18 @@
+from collections import defaultdict
+
 def output_costs_from_costs_config(costs_config, row):
     values = {}
     output_costs = ()
 
     for variable in costs_config["variables"]:
+        variable = defaultdict(bool, variable)
         if variable["mapping"] == "value":
             values[variable["name"]] = row[variable["alias"]]
         else:
             values[variable["name"]] = variable["mapping"][str(row[variable["alias"]])]
+        if variable["negative_if_zero"] and values[variable["name"]] == 0:
+            values[variable["name"]] = -1
+
 
     for output in costs_config["outputs"]:
         result = 0
