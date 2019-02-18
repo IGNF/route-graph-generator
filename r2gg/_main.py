@@ -1,4 +1,3 @@
-
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse

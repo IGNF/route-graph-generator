@@ -22,26 +22,25 @@ RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VER
   && cd / \
   && rm -rf Python-${PYTHON_VERSION}*
 
-RUN git clone --depth=1 --branch=2_7_6_1  https://github.com/psycopg/psycopg2.git \
-  && cd psycopg2 \
-  && python3.6 setup.py build \
-  && python3.6 setup.py install
+RUN yum install -y python36-setuptools && easy_install-3.6 pip
 
-RUN git clone --depth=1 --branch=0.2.4  https://github.com/andialbrecht/sqlparse.git \
-  && cd sqlparse \
-  && python3.6 setup.py install
+RUN pip3 install 'psycopg2==2.7.6.1' 'sqlparse==0.2.4' 'lxml==4.3.1'
 
 RUN yum install python-lxml -y
 
-### Sera nécessaire si pour obtenir des données au format pgrouting, on choisira d'utiliser osm2pgrouting (mauvais solution à mon avis)
-# RUN yum install -y epel-release
-# RUN yum install -y expat expat-devel boost-devel boost-devel.x86_64 libpqxx-devel cmake gcc-c++
-# RUN git clone --depth=1 --branch=v2.3.6 https://github.com/pgRouting/osm2pgrouting.git \
-#   && cd osm2pgrouting \
-#   && cmake -H. -Bbuild \
-#   && cd build/ \
-#   && make -j${NPROC} \
-#   && make install -j${NPROC}
+### Pour la conversion osm vers osrm
+# Dépendances
+RUN yum install -y yum-utils centos-release-scl epel-release && yum-config-manager --enable rhel-server-rhscl-7-rpms
+RUN yum install -y devtoolset-6
+RUN scl enable devtoolset-6 bash && yum -y install cmake3
+
+RUN git clone --depth=1 --branch=v5.20.0 https://github.com/Project-OSRM/osrm-backend.git \
+  && cd osrm-backend \
+  && mkdir -p build \
+  && cd build \
+  && scl enable devtoolset-6 bash && export CC=/opt/rh/devtoolset-6/root/usr/bin/gcc \
+  && cmake3 .. -DCMAKE_BUILD_TYPE=Release -DENABLE_MASON=ON -DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-6/root/usr/bin/g++ \
+  && make && make install
 
 ENV PATH "/usr/local/bin:${PATH}"
 
