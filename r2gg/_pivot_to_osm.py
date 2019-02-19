@@ -74,7 +74,7 @@ def pivot_to_osm(resource, connection, logger):
                     continue
                 ResEl = writeRes(row,i)
                 xf.write(ResEl, pretty_print=True)
-                if (i % 1000 == 0):
+                if (i % int(edgeSequence/10) == 0):
                     logger.info("%s / %s restrictions ajoutés" %(i, cursor.rowcount))
                 i += 1
     cursor.close()

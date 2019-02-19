@@ -40,7 +40,7 @@
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "bduni.osm"
+          "file": "outputs/bduni.osm"
         },
         "projection": "EPSG:4326",
         "mapping": {
@@ -58,7 +58,7 @@
       "costs": [
         {
           "profile": "car",
-          "optmization": "fastest",
+          "optimization": "fastest",
           "compute": {
             "storage": {
               "file": "lua/bduniv2_avec_sens_vitesse_fixe.lua"
@@ -67,7 +67,7 @@
         },
         {
           "profile": "car",
-          "optmization": "shortest",
+          "optimization": "shortest",
           "compute": {
             "storage": {
               "file": "lua/bduniv2_sans_sens_vitesse_fixe.lua"

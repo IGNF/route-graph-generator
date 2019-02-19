@@ -20,7 +20,6 @@ function process_way (profile, way, result)
 
     -- récupération des attributs utiles
     local cleabs  = way:get_value_by_key("cleabs")
-    local sens    = way:get_value_by_key("sens_de_circulation")
     local nature  = way:get_value_by_key("nature")
     local vitesse_moyenne = way:get_value_by_key("vitesse_moyenne_vl")
 

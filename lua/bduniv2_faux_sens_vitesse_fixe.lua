@@ -20,7 +20,7 @@ function process_way (profile, way, result)
 
     -- récupération des attributs utiles
     local cleabs  = way:get_value_by_key("cleabs")
-    local sens    = way:get_value_by_key("sens_de_circulation")
+    local direction    = tonumber(way:get_value_by_key("direction"))
     local nature  = way:get_value_by_key("nature")
     local vitesse_moyenne = way:get_value_by_key("vitesse_moyenne_vl")
 
@@ -34,16 +34,16 @@ function process_way (profile, way, result)
     result.backward_speed = vitesse_moyenne
 
     -- gestion du sens direct A L'ENVERS
-    if sens == "Sens direct" or sens == "Double sens" or sens == "Sans objet" then
+    if direction >= 0 then
         -- result.forward_mode  = mode.driving
-	result.backward_mode  = mode.driving
+	     result.backward_mode  = mode.driving
     else
        -- result.forward_mode  = mode.inaccessible
        result.backward_mode  = mode.inaccessible
     end
 
     -- gestion du sens inverse A L'ENVERS
-    if sens == "Sens inverse" or sens == "Double sens" or sens == "Sans objet" then
+    if direction <= 0 then
         -- result.backward_mode  = mode.driving
          result.forward_mode  = mode.driving
     else

@@ -1,11 +1,10 @@
-import subprocess
-
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse
 
 from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
+from r2gg._subprocess_exexution import subprocess_exexution
 
 def sql_convert(config, resource, db_configs, connection, logger):
     # Configuration de la bdd source
@@ -61,4 +60,20 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     # TODO: osm to osrm
     osm_file = resource['topology']['storage']['file']
     lua_file = resource["costs"][0]["compute"]["storage"]["file"]
-    subprocess.run(["osrm-extract", osm_file, "-p", lua_file])
+    # Gestion des points "." dans le chemin d'accès avec ".".join()
+    osrm_file = "{}_{}_{}.osrm".format(
+        ".".join(osm_file.split(".")[:-1]),
+        resource["costs"][0]["profile"],
+        resource["costs"][0]["optimization"],
+    )
+    new_osm_file = ".".join(osrm_file.split(".")[:-1]) + ".osm"
+
+    # Définition des commandes shell à exécuter
+    rename_args = ["mv", ".".join(osm_file.split(".")[:-1]) + ".osm", new_osm_file]
+    osrm_extract_args = ["osrm-extract", new_osm_file, "-p", lua_file]
+    osrm_contract_args = ["osrm-contract", osrm_file]
+    osrm_routed_args = ["osrm-routed", osrm_file]
+
+    subprocess_exexution(rename_args, logger)
+    subprocess_exexution(osrm_extract_args, logger)
+    subprocess_exexution(osrm_contract_args, logger)
