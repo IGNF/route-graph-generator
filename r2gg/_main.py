@@ -1,9 +1,11 @@
+import subprocess
+
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse
 
-from _pivot_to_osm import pivot_to_osm
-from _pivot_to_pgr import pivot_to_pgr
+from r2gg._pivot_to_osm import pivot_to_osm
+from r2gg._pivot_to_pgr import pivot_to_pgr
 
 def sql_convert(config, resource, db_configs, connection, logger):
     # Configuration de la bdd source
@@ -57,3 +59,6 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     pivot_to_osm(resource, connection, logger)
     connection.close()
     # TODO: osm to osrm
+    osm_file = resource['topology']['storage']['file']
+    lua_file = resource["costs"][0]["compute"]["storage"]["file"]
+    subprocess.run(["osrm-extract", osm_file, "-p", lua_file])

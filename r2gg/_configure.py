@@ -3,7 +3,7 @@ import logging
 
 import psycopg2
 
-from _read_config import config_from_path
+from r2gg._read_config import config_from_path
 
 # Définition des niveaux de log
 LEVELS = {

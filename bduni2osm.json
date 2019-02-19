@@ -61,7 +61,7 @@
           "optmization": "fastest",
           "compute": {
             "storage": {
-              "file": "lua/car-fastest.lua"
+              "file": "lua/bduniv2_avec_sens_vitesse_fixe.lua"
             }
           }
         },
@@ -70,7 +70,7 @@
           "optmization": "shortest",
           "compute": {
             "storage": {
-              "file": "lua/car-shortest.lua"
+              "file": "lua/bduniv2_sans_sens_vitesse_fixe.lua"
             }
           }
         }

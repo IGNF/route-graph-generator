@@ -3,8 +3,8 @@ import time
 from lxml import etree
 from psycopg2.extras import DictCursor
 
-from _osm_building import writeNode, writeWay, writeWayNds, writeRes, writeWayTags
-from _sql_building import getQueryByTableAndBoundingBox
+from r2gg._osm_building import writeNode, writeWay, writeWayNds, writeRes, writeWayTags
+from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_osm(resource, connection, logger):
     cursor = connection.cursor(cursor_factory=DictCursor)

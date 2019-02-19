@@ -1,5 +1,5 @@
-from _configure import configure
-from _main import sql_convert, pgr_convert, osrm_convert
+from r2gg._configure import configure
+from r2gg._main import sql_convert, pgr_convert, osrm_convert
 
 __version__ = "0.0.1"
 

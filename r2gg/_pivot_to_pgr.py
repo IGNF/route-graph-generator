@@ -3,9 +3,9 @@ import time
 
 from psycopg2.extras import DictCursor
 
-from _output_costs_from_costs_config import output_costs_from_costs_config
-from _read_config import config_from_path
-from _sql_building import getQueryByTableAndBoundingBox
+from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
+from r2gg._read_config import config_from_path
+from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_pgr(resource, connection_work, connection_out, logger):
 
