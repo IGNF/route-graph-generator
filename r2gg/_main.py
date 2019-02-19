@@ -57,23 +57,33 @@ def osrm_convert(config, resource, db_configs, connection, logger):
 
     pivot_to_osm(resource, connection, logger)
     connection.close()
-    # TODO: osm to osrm
+
+    # osm2osrm
     osm_file = resource['topology']['storage']['file']
-    lua_file = resource["costs"][0]["compute"]["storage"]["file"]
-    # Gestion des points "." dans le chemin d'accès avec ".".join()
-    osrm_file = "{}_{}_{}.osrm".format(
-        ".".join(osm_file.split(".")[:-1]),
-        resource["costs"][0]["profile"],
-        resource["costs"][0]["optimization"],
-    )
-    new_osm_file = ".".join(osrm_file.split(".")[:-1]) + ".osm"
+    logger.info("Generating graphs for each cost...")
+    for i in range(len(resource["costs"])):
+        logger.info("Cost {} of {}...".format(i+1, len(resource["costs"])))
+        lua_file = resource["costs"][i]["compute"]["storage"]["file"]
+        # Gestion des points "." dans le chemin d'accès avec ".".join()
+        cost_dir = "{}_{}_{}".format(
+            ".".join(osm_file.split(".")[:-1]),
+            resource["costs"][i]["profile"],
+            resource["costs"][i]["optimization"],
+        )
+        cost_name = cost_dir.split("/")[-1]
+        osrm_file = "{}/{}.osrm".format(cost_dir, cost_name)
+        tmp_osm_file = "{}/{}.osm".format(cost_dir, cost_name)
 
-    # Définition des commandes shell à exécuter
-    rename_args = ["mv", ".".join(osm_file.split(".")[:-1]) + ".osm", new_osm_file]
-    osrm_extract_args = ["osrm-extract", new_osm_file, "-p", lua_file]
-    osrm_contract_args = ["osrm-contract", osrm_file]
-    osrm_routed_args = ["osrm-routed", osrm_file]
+        # Définition des commandes shell à exécuter
+        mkdir_args = ["mkdir", "-p", cost_name]
+        copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
+        osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file]
+        osrm_contract_args = ["osrm-contract", osrm_file]
+        osrm_routed_args = ["osrm-routed", osrm_file]
+        rm_args = ["rm", tmp_osm_file]
 
-    subprocess_exexution(rename_args, logger)
-    subprocess_exexution(osrm_extract_args, logger)
-    subprocess_exexution(osrm_contract_args, logger)
+        subprocess_exexution(mkdir_args, logger)
+        subprocess_exexution(copy_args, logger)
+        subprocess_exexution(osrm_extract_args, logger)
+        subprocess_exexution(osrm_contract_args, logger)
+        subprocess_exexution(rm_args, logger)
