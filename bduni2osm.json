@@ -157,7 +157,7 @@
       "outputs": {
         "configuration": {
           "storage": {
-            "file": "ressource_example_osrm.yaml"
+            "file": "ressource_example_osrm.json"
           }
         },
         "graphs": {

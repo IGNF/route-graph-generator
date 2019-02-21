@@ -1,3 +1,5 @@
+import json
+
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse
@@ -50,6 +52,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     pivot_to_pgr(resource, connection, connection_out, logger)
     connection.close()
     connection_out.close()
+    with open(resource["outputs"]["configuration"]["storage"]["file"], "wb") as resource_file:
+        json.dump(resource, resource_file)
 
 def osrm_convert(config, resource, db_configs, connection, logger):
     if (resource['type'] != 'osrm'):
@@ -87,3 +91,6 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         subprocess_exexution(osrm_extract_args, logger)
         subprocess_exexution(osrm_contract_args, logger)
         subprocess_exexution(rm_args, logger)
+
+    with open(resource["outputs"]["configuration"]["storage"]["file"], "wb") as resource_file:
+        json.dump(resource, resource_file)
