@@ -7,23 +7,13 @@ ENV PYTHON_VERSION "3.6.5"
 ENV HOME=/home
 
 RUN yum install -y \
-  wget \
-  gcc make \
-  zlib-dev openssl-devel bzip2-devel \
+  make \
+  openssl-devel bzip2-devel \
   postgresql-devel git \
   yum-utils centos-release-scl epel-release
 
-RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
-  && tar xvf Python-${PYTHON_VERSION}.tgz \
-  && cd Python-${PYTHON_VERSION} \
-  && ./configure --prefix=/usr/local \
-  && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
-  && make -j${NPROC} \
-  && make altinstall -j${NPROC} \
-  && cd / \
-  && rm -rf Python-${PYTHON_VERSION}*
-
-RUN yum install -y python36-setuptools && easy_install-3.6 pip
+RUN yum install -y cmake3 \
+  && yum install -y python36 python36-setuptools && easy_install-3.6 pip
 
 RUN pip3 install 'psycopg2==2.7.6.1' 'sqlparse==0.2.4' 'lxml==4.3.1'
 
@@ -31,7 +21,7 @@ RUN pip3 install 'psycopg2==2.7.6.1' 'sqlparse==0.2.4' 'lxml==4.3.1'
 # Dépendances
 RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
 RUN yum install -y devtoolset-6
-RUN scl enable devtoolset-6 bash && yum -y install cmake3
+RUN scl enable devtoolset-6 bash
 
 RUN git clone --depth=1 --branch=v5.20.0 https://github.com/Project-OSRM/osrm-backend.git \
   && cd osrm-backend \
@@ -43,6 +33,12 @@ RUN git clone --depth=1 --branch=v5.20.0 https://github.com/Project-OSRM/osrm-ba
 
 ENV PATH "/usr/local/bin:${PATH}"
 
-WORKDIR /home
+RUN mkdir /usr/lib/python3.6/site-packages/r2gg
+RUN mkdir /usr/lib/python3.6/site-packages/r2gg/r2gg
 
-ENTRYPOINT ["python3.6"]
+COPY r2gg /usr/lib/python3.6/site-packages/r2gg/r2gg
+COPY setup.py /usr/lib/python3.6/site-packages/r2gg
+
+RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
+
+WORKDIR /home

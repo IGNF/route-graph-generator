@@ -52,8 +52,11 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     pivot_to_pgr(resource, connection, connection_out, logger)
     connection.close()
     connection_out.close()
-    with open(resource["outputs"]["configuration"]["storage"]["file"], "wb") as resource_file:
-        json.dump(resource, resource_file)
+    # Écriture du fichier resource TODO: n'écrire que le nécessaire
+    logger.info("Writing resource file")
+    with open(resource["outputs"]["configuration"]["storage"]["file"], "w") as resource_file:
+        json_string = json.dumps(resource, indent=2)
+        resource_file.write(json_string)
 
 def osrm_convert(config, resource, db_configs, connection, logger):
     if (resource['type'] != 'osrm'):
@@ -79,7 +82,7 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         tmp_osm_file = "{}/{}.osm".format(cost_dir, cost_name)
 
         # Définition des commandes shell à exécuter
-        mkdir_args = ["mkdir", "-p", cost_name]
+        mkdir_args = ["mkdir", "-p", cost_dir]
         copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
         osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file]
         osrm_contract_args = ["osrm-contract", osrm_file]
@@ -92,5 +95,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         subprocess_exexution(osrm_contract_args, logger)
         subprocess_exexution(rm_args, logger)
 
-    with open(resource["outputs"]["configuration"]["storage"]["file"], "wb") as resource_file:
-        json.dump(resource, resource_file)
+    # Écriture du fichier resource TODO: n'écrire que le nécessaire
+    logger.info("Writing resource file")
+    with open(resource["outputs"]["configuration"]["storage"]["file"], "w") as resource_file:
+        json_string = json.dumps(resource, indent=2)
+        resource_file.write(json_string)
