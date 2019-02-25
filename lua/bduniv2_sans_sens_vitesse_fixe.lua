@@ -1,5 +1,3 @@
-
-
 -- Premiere version d'un script LUA pour charger le routier de la BDUNIV2 dans OSRM
 
 api_version = 4

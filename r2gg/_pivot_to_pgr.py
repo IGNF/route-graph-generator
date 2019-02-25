@@ -60,7 +60,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
             'ST_length(geography(ST_Transform(geom, 4326))) as length_m'
         ]
     for variable in costs["variables"]:
-        in_columns += [variable["column_name"]]
+        in_columns += [variable["select_operation"]]
 
     # Ecriture des ways
     sql_query = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], in_columns)

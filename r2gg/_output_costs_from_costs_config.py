@@ -7,9 +7,9 @@ def output_costs_from_costs_config(costs_config, row):
     for variable in costs_config["variables"]:
         variable = defaultdict(bool, variable)
         if variable["mapping"] == "value":
-            values[variable["name"]] = row[variable["alias"]]
+            values[variable["name"]] = row[variable["value_name"]]
         else:
-            values[variable["name"]] = variable["mapping"][str(row[variable["alias"]])]
+            values[variable["name"]] = variable["mapping"][str(row[variable["value_name"]])]
         if variable["negative_if_zero"] and values[variable["name"]] == 0:
             values[variable["name"]] = -1
 

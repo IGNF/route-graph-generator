@@ -2,27 +2,27 @@
   "variables": [
     {
       "name": "length_m",
-      "column_name": "ST_length(geography(ST_Transform(geom, 4326))) as length_m",
-      "alias": "length_m",
+      "select_operation": "ST_length(geography(ST_Transform(geom, 4326))) as length_m",
+      "value_name": "length_m",
       "mapping": "value"
     },
     {
       "name": "vitesse_voiture",
-      "column_name": "vitesse_moyenne_vl",
-      "alias": "vitesse_moyenne_vl",
+      "select_operation": "vitesse_moyenne_vl",
+      "value_name": "vitesse_moyenne_vl",
       "mapping": "value",
       "negative_if_zero": true
     },
     {
       "name": "sens_direct",
-      "column_name": "direction",
-      "alias": "direction",
+      "select_operation": "direction",
+      "value_name": "direction",
       "mapping": "value"
     },
     {
       "name": "sens_inverse",
-      "column_name": "direction",
-      "alias": "direction",
+      "select_operation": "direction",
+      "value_name": "direction",
       "mapping": {
         "1": -1,
         "-1": 1,
