@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS nodes (
   id bigserial primary key,
   lon float,
   lat float,
-  -- ajouter ce qui est utile pour OSRM...
   geom geometry(Point,4326)
 );
 CREATE INDEX IF NOT EXISTS nodes_geom_gist ON nodes USING GIST (geom);

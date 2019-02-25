@@ -1,7 +1,7 @@
 # Fichiers de configuration de route-graph-generator
 
 ## Fichier principal
-
+Ce fichier de configuration est conséquent, pour le comprendre il est conseillé de lire ses spécifications et ses exemples.
 
 ### Exemple
 Plusieurs exemples sont présents dans le dossier io.
@@ -70,7 +70,7 @@ Valeur que doit prendre la varaible en fonction de la valeur retournée par le S
 ```
 Ce mapping permet de traduire une valeur en lettres en SLQ en une valeur chiffrée pour la varaible. Le mapping devra comporter toutes les valeurs pouvant être prise par le résultat de la requête SQL.
 
-#### Attribut "negative_if_zero" (facultatif)
+#### Attribut "negative_if_zero" (facultatif)
 Attribut booléen. Si `true`, rend le coût négatif si la valeur de la variable est nulle. En effet, les coûts nuls dans pgRouting correspondent à des imposibilité de passage. Cet attribut est notamment utile pour les vitesses : en effet, si la vitesse est nulle, on voudra avoit un coût négatif pour exclure le tronçon.
 
 ### Attribut "outputs"
@@ -81,12 +81,12 @@ Nom de la colonne de coûts résultante.
 #### Attribut "negative_flags"
 Liste de noms de variables (qui doivent donc correspondre aux attributs `name` des varaibles en question), qui sont potentiellement négatives. Cette liste permet d'obtenir des coûts négatifs et ainsi d'exclure des tronçons.
 
-#### Attribut "operations"
+#### Attribut "operations"
 Il s'agit d'une liste d'opérations à réaliser pour obtenir le coût. Les opérations sont réalisées dans l'odre de la liste, à partir du nombre 0 (la première opération est donc toujours une addition ou une soustraction).
 
 Les opérations sont des lites de 2 éléments. Le premier est une chaîne de caractères parmi `"add"` `"substract"` `"multiply"` et `"divide"`, et le scond est soit une chaîne de caractère, soint un nombre. Dans le premiers cas, la chaîne de caractères est le nom d'une variable. __Attention aux divisions par zéro.__
 
-##### Exemple d'"operations" - calcul du temps en fonction de la longueur et de la vitesse :
+##### Exemple d'operations - calcul du temps en fonction de la longueur et de la vitesse :
 ```json
 "operations": [
     ["add", "length_m"],
@@ -98,7 +98,7 @@ Les opérations sont des lites de 2 éléments. Le premier est une chaîne de ca
 ### Exemple
 Un exemple complet est présent dans le dossier [io](./costs_calculation_sample.json).
 
-## Configuration des profils (OSRM)
+## Configuration des profils (OSRM)
 La configuration des profils OSRM se fait _via_ des fonctions écrites en LUA. Se référer à la [documentation officielle](https://github.com/Project-OSRM/osrm-backend/blob/master/docs/profiles.md).
 
 #### Exemple
