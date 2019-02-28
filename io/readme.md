@@ -53,11 +53,8 @@ Chaque élément de la liste a plusieurs attributs :
 #### Attribut "name"
 Nom de la varaible, permettant de l'identifier dans le calcul des coûts.
 
-#### Attribut "select_operation"
-Opération SQL pour sélectionner la valeur dans la table en entrée. Il s'agit de ce qui suit le mot clef SQL `SELECT`. Lorsqu'il s'agit simplement de récupérer la valeur de la colonne, il s'agit du nom de la colonne. Il est conseillé pour les opérations plus complexes de donner un alias à la valeur, avec l'instruction `as value_name` à la fin de l'opération.
-
-#### Attribut "value_name"
-Nom de la valeur retournée par la sélection SQL. Losque la valeur de `select_operation` est le nom d'une colonne, `value_name` a la même valeur. Si la `select_operation` est plus complexe, `value_name` est l'alias donné à la valeur retournée.
+#### Attribut "column_name"
+Nom de la colonne dans la base en entrée correspondant à la valeur.
 
 #### Attribut "mapping"
 Valeur que doit prendre la varaible en fonction de la valeur retournée par le SQL. Il s'agit soit de la chaîne de caractère `"value"`, soit d'un objet JSON. Dans le premier cas, la valeur de la variable est la valeur retournée par l'instruction SQL. Dans le second cas, il est défini un mapping valeur SQL vers valeur de la variable. Par exemple :
@@ -69,9 +66,6 @@ Valeur que doit prendre la varaible en fonction de la valeur retournée par le S
  }
 ```
 Ce mapping permet de traduire une valeur en lettres en SLQ en une valeur chiffrée pour la varaible. Le mapping devra comporter toutes les valeurs pouvant être prise par le résultat de la requête SQL.
-
-#### Attribut "negative_if_zero" (facultatif)
-Attribut booléen. Si `true`, rend le coût négatif si la valeur de la variable est nulle. En effet, les coûts nuls dans pgRouting correspondent à des imposibilité de passage. Cet attribut est notamment utile pour les vitesses : en effet, si la vitesse est nulle, on voudra avoit un coût négatif pour exclure le tronçon.
 
 ### Attribut "outputs"
 Il s'agit d'une liste d'"outputs", c'est-à-dire des colonnes dans la table de sortie qui correspondront à des coûts. Chaque élément de la lite a plusieurs attributs.
@@ -90,6 +84,9 @@ L'attribut `direct_condition` correspond au sens direct de parcours du graphe, l
 "direct_condition": "sens>=0;vitesse>0",
 "reverse_condition": "sens<=0;vitesse>0"
 ```
+
+#### Attribut "turn_restrictions"
+Booléen, indique s'il faut prendre en compte les restrictions de virage (non_communication dans la bd uni) pour le calcul d'itinéraire
 
 #### Attribut "operations"
 Il s'agit d'une liste d'opérations à réaliser pour obtenir le coût. Les opérations sont réalisées dans l'odre de la liste, à partir du nombre 0 (la première opération est donc toujours une addition ou une soustraction).
