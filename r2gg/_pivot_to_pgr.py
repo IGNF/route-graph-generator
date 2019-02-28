@@ -8,7 +8,6 @@ from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_pgr(resource, connection_work, connection_out, logger):
-
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
 
     # Récupération des coûts à calculer

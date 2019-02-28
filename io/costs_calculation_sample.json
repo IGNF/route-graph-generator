@@ -1,6 +1,16 @@
 {
   "variables": [
     {
+      "name": "cleabs",
+      "column_name": "cleabs",
+      "mapping": "value"
+    },
+    {
+      "name": "nature",
+      "column_name": "nature",
+      "mapping": "value"
+    },
+    {
       "name": "length_m",
       "column_name": "length_m",
       "mapping": "value"
@@ -28,8 +38,8 @@
     },
     {
       "name": "cost_s_car",
-      "direct_conditions" : "sens==1;vitesse_voiture>0",
-      "reverse_conditions" : "sens==-1;vitesse_voiture>0",
+      "direct_conditions" : "sens>=0;vitesse_voiture>0",
+      "reverse_conditions" : "sens<=0;vitesse_voiture>0",
       "turn_restrictions": true,
       "operations": [
         ["add", "length_m"],
@@ -39,6 +49,8 @@
     },
     {
       "name": "cost_m_pedestrian",
+      "direct_conditions" : "nature!='Type autoroutier';nature!='Bretelle'",
+      "reverse_conditions" : "nature!='Type autoroutier';nature!='Bretelle'",
       "turn_restrictions": false,
       "operations": [
         ["add", "length_m"]
@@ -46,6 +58,8 @@
     },
     {
       "name": "cost_s_pedestrian",
+      "direct_conditions" : "nature!='Type autoroutier';nature!='Bretelle'",
+      "reverse_conditions" : "nature!='Type autoroutier';nature!='Bretelle'",
       "turn_restrictions": false,
       "operations": [
         ["add", "length_m"],
