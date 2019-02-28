@@ -44,6 +44,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     add_columns = "ALTER TABLE ways "
     for output in costs["outputs"]:
         add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format(output["name"])
+        add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format("reverse_" + output["name"])
     add_columns = add_columns[:-1]
     logger.debug("SQL: adding costs columns \n {}".format(add_columns))
     cursor_out.execute(add_columns)
@@ -57,10 +58,10 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
             'id',
             'geom',
             'ST_Length(geom) as length',
-            'ST_length(geography(ST_Transform(geom, 4326))) as length_m'
+            'length_m as length_m'
         ]
     for variable in costs["variables"]:
-        in_columns += [variable["select_operation"]]
+        in_columns += [variable["column_name"]]
 
     # Ecriture des ways
     sql_query = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], in_columns)
@@ -69,7 +70,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (4 + len(costs["outputs"]))
+    single_value_str = "%s," * (4 + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -91,8 +92,9 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
         output_columns = "(id, the_geom, length, length_m"
         set_on_conflict = "the_geom = excluded.the_geom,length = excluded.length,length_m = excluded.length_m"
         for output in costs["outputs"]:
-            output_columns += ", " + output["name"]
+            output_columns += ", " + output["name"] + ", reverse_" + output["name"]
             set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
+            set_on_conflict += ",{0} = excluded.{0}".format("reverse_" + output["name"])
 
         output_columns += ")"
         sql_insert = """

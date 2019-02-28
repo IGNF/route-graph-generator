@@ -78,8 +78,18 @@ Il s'agit d'une liste d'"outputs", c'est-à-dire des colonnes dans la table de s
 #### Attribut "name"
 Nom de la colonne de coûts résultante.
 
-#### Attribut "negative_flags"
-Liste de noms de variables (qui doivent donc correspondre aux attributs `name` des varaibles en question), qui sont potentiellement négatives. Cette liste permet d'obtenir des coûts négatifs et ainsi d'exclure des tronçons.
+#### Attributs "direct_conditions" et "reverse_conditions"
+Chaînes de caractères définissant des conditions pour la circulabilité des tronçons, séparés par des points-virgules `;`.
+Si les conditions ne sont pas vérifiées, le tronçon n'est pas praticable.
+Si aucune condition n'est spécifiée, le tronçon est praticable.
+
+L'attribut `direct_condition` correspond au sens direct de parcours du graphe, l'attribut `reverse_condition` correspond au sens inverse de parcours du graphe.
+
+##### Exemple
+```json
+"direct_condition": "sens>=0;vitesse>0",
+"reverse_condition": "sens<=0;vitesse>0"
+```
 
 #### Attribut "operations"
 Il s'agit d'une liste d'opérations à réaliser pour obtenir le coût. Les opérations sont réalisées dans l'odre de la liste, à partir du nombre 0 (la première opération est donc toujours une addition ou une soustraction).

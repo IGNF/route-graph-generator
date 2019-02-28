@@ -29,8 +29,8 @@ INTO public;
 DROP TABLE IF EXISTS nodes CASCADE ;
 CREATE TABLE IF NOT EXISTS nodes (
   id bigserial primary key,
-  lon float,
-  lat float,
+  lon double precision,
+  lat double precision,
   geom geometry(Point,4326)
 );
 CREATE INDEX IF NOT EXISTS nodes_geom_gist ON nodes USING GIST (geom);
@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS edges (
   id bigserial primary key,
   source_id bigserial,
   target_id bigserial,
+  length_m double precision,
   direction integer,
   geom geometry(Linestring,4326),
   -- Attributs spécifiques à la bd uni
@@ -172,6 +173,7 @@ INSERT INTO edges
     nextval('edges_id_seq') AS id,
     nodes_id(ST_StartPoint(geom)) as source_id,
     nodes_id(ST_EndPoint(geom)) as target_id,
+    ST_length(geography(ST_Transform(geom, 4326))) as length_m,
     (CASE
       WHEN sens_de_circulation='Sens direct' THEN 1
       WHEN sens_de_circulation='Sens inverse' THEN -1

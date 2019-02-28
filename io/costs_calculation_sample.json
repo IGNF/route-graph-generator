@@ -2,52 +2,33 @@
   "variables": [
     {
       "name": "length_m",
-      "select_operation": "ST_length(geography(ST_Transform(geom, 4326))) as length_m",
-      "value_name": "length_m",
+      "column_name": "length_m",
       "mapping": "value"
     },
     {
       "name": "vitesse_voiture",
-      "select_operation": "vitesse_moyenne_vl",
-      "value_name": "vitesse_moyenne_vl",
-      "mapping": "value",
-      "negative_if_zero": true
-    },
-    {
-      "name": "sens_direct",
-      "select_operation": "direction",
-      "value_name": "direction",
+      "column_name": "vitesse_moyenne_vl",
       "mapping": "value"
     },
     {
-      "name": "sens_inverse",
-      "select_operation": "direction",
-      "value_name": "direction",
-      "mapping": {
-        "1": -1,
-        "-1": 1,
-        "0": 1
-      }
+      "name": "sens",
+      "column_name": "direction",
+      "mapping": "value"
     }
   ],
   "outputs": [
     {
       "name": "cost_m_car",
-      "negative_flags": ["sens_direct", "vitesse_voiture"],
-      "operations": [
-        ["add", "length_m"]
-      ]
-    },
-    {
-      "name": "reverse_cost_m_car",
-      "negative_flags": ["sens_inverse", "vitesse_voiture"],
+      "direct_conditions" : "sens>=0;vitesse_voiture>0",
+      "reverse_conditions" : "sens<=0;vitesse_voiture>0",
       "operations": [
         ["add", "length_m"]
       ]
     },
     {
       "name": "cost_s_car",
-      "negative_flags": ["sens_direct", "vitesse_voiture"],
+      "direct_conditions" : "sens==1;vitesse_voiture>0",
+      "reverse_conditions" : "sens==-1;vitesse_voiture>0",
       "operations": [
         ["add", "length_m"],
         ["divide", "vitesse_voiture"],
@@ -55,12 +36,16 @@
       ]
     },
     {
-      "name": "reverse_cost_s_car",
-      "negative_flags": ["sens_inverse", "vitesse_voiture"],
+      "name": "cost_m_pedestrian",
+      "operations": [
+        ["add", "length_m"]
+      ]
+    },
+    {
+      "name": "cost_s_pedestrian",
       "operations": [
         ["add", "length_m"],
-        ["divide", "vitesse_voiture"],
-        ["multiply", 3.6]
+        ["multiply", 0.72]
       ]
     }
   ]
