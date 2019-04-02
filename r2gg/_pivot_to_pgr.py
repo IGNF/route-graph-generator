@@ -7,7 +7,7 @@ from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_pgr(resource, connection_work, connection_out, logger):
+def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restrictions=True):
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
 
     # Récupération des coûts à calculer
@@ -48,11 +48,51 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     logger.debug("SQL: adding costs columns \n {}".format(add_columns))
     cursor_out.execute(add_columns)
 
+    if turn_restrictions:
+        
+        create_non_comm = """
+            DROP TABLE IF EXISTS turn_restrictions;
+            CREATE TABLE turn_restrictions(
+                id text unique,
+                id_from bigint,
+                id_to bigint
+        );"""
+        logger.debug("SQL: {}".format(create_non_comm))
+        cursor_out.execute(create_non_comm)
+        
+        logger.info("Populating turn restrictions")
+        tr_query = "SELECT id_from, id_to FROM non_comm;"
+
+        logger.debug("SQL: {}".format(tr_query))
+        cursor_in.execute(tr_query)
+        rows = cursor_in.fetchall()
+        # Insertion petit à petit -> plus performant
+        logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+        index = 0
+        for i in range(math.ceil(len(rows)/1000)):
+            tmp_rows = rows[i*1000:(i+1)*1000]
+            values_str = ""
+            for row in tmp_rows:
+                values_str += "(%s, %s, %s),"
+            values_str = values_str[:-1]
+            
+            # Tuple des valuers à insérer
+            values_tuple = ()
+            for row in tmp_rows:
+                values_tuple += (index, row['id_from'], row['id_to'])
+                index += 1
+
+            sql_insert = """
+                INSERT INTO turn_restrictions (id, id_from, id_to)
+                VALUES {}
+            """.format(values_str)
+            cursor_out.execute(sql_insert, values_tuple)
+            connection_out.commit()
 
     logger.info("Starting conversion")
     start_time = time.time()
 
-    # Colonnes à lire dans la base source (champs calssiques + champs servant aux coûts)
+    # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
     in_columns = [
             'id',
             'geom',
@@ -73,7 +113,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger):
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
-    logger.debug("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
     for i in range(math.ceil(len(rows)/1000)):
         tmp_rows = rows[i*1000:(i+1)*1000]
         # Chaîne permettant l'insertion de valeurs via psycopg

@@ -147,7 +147,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     ) s
         WHERE NOT detruit
   -- décommenter pour tester :
-  AND territoire='REU'
+  -- AND territoire='REU'
   ;
 
   -- ############################
@@ -191,37 +191,30 @@ INSERT INTO edges
 -- REMPLISSAGE DE bduni_non_com
 -- ############################
 
--- TODO : Si on veut être complet il faudrait renormaliser la table des non_comm en splittant le champ liens_vers_troncon_sortie
---SELECT
---    yourTable.ID,
---    regexp_split_to_table(yourTable.fruits, E'&') AS split_fruits
---FROM yourTable
---
--- Après ce n'est utile que dans 3 cas sur 37747, soit 0.008 pourcent du temps...
-
-
 -- On ne conserve que les non communications sur la zone de calcul
-DROP TABLE IF EXISTS bduni_non_com;
-CREATE TABLE IF NOT EXISTS bduni_non_com AS
+DROP TABLE IF EXISTS non_comm;
+CREATE TABLE IF NOT EXISTS non_comm AS
 SELECT
-  cleabs, lien_vers_troncon_entree, liens_vers_troncon_sortie
+  cleabs,
+  lien_vers_troncon_entree,
+  -- liens_vers_troncon_sortie
+  regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS liens_vers_troncon_sortie
 FROM bduni_non_com_tmp
 -- WHERE geometrie && ST_Transform( ST_SetSRID( ST_MakeEnvelope(:bbox),4326 ),2154 )
  WHERE lien_vers_troncon_entree in (SELECT cleabs from edges)
- AND liens_vers_troncon_sortie in (SELECT cleabs from edges)
 ;
 
 
 -- Remplissage des ids d'edge dans la table des non communications
-ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_from bigint;
-ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS id_to bigint;
+ALTER TABLE non_comm ADD COLUMN IF NOT EXISTS id_from bigint;
+ALTER TABLE non_comm ADD COLUMN IF NOT EXISTS id_to bigint;
 
-UPDATE bduni_non_com AS b SET id_from = e.id
+UPDATE non_comm AS b SET id_from = e.id
 FROM edges as e
 WHERE e.cleabs = b.lien_vers_troncon_entree
 ;
 
-UPDATE bduni_non_com AS b SET id_to = e.id
+UPDATE non_comm AS b SET id_to = e.id
 FROM edges as e
 WHERE e.cleabs = b.liens_vers_troncon_sortie
 ;
@@ -241,5 +234,5 @@ CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS bi
   AND b.id = id_to;
 $$ LANGUAGE SQL ;
 
-ALTER TABLE bduni_non_com ADD COLUMN IF NOT EXISTS common_vertex_id bigint;
-UPDATE bduni_non_com SET common_vertex_id = common_point(bduni_non_com.id_from, bduni_non_com.id_to);
+ALTER TABLE non_comm ADD COLUMN IF NOT EXISTS common_vertex_id bigint;
+UPDATE non_comm SET common_vertex_id = common_point(non_comm.id_from, non_comm.id_to);

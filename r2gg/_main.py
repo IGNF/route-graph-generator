@@ -45,7 +45,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     user = out_db_config.get('username')
     password = out_db_config.get('password')
     port = out_db_config.get('port')
-    connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
+    connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
     logger.info("Connecting to output database")
     connection_out = psycopg2.connect(connect_args)
 
@@ -86,7 +86,6 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
         osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file]
         osrm_contract_args = ["osrm-contract", osrm_file]
-        osrm_routed_args = ["osrm-routed", osrm_file]
         rm_args = ["rm", tmp_osm_file]
 
         subprocess_exexution(mkdir_args, logger)
