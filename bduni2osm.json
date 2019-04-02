@@ -40,7 +40,7 @@
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "outputs/bduni.osm"
+          "file": "/mnt/data/r2gg_outputs/bduni.osm"
         },
         "projection": "EPSG:4326",
         "mapping": {

@@ -1,3 +1,4 @@
+import os
 import time
 
 from lxml import etree
@@ -23,7 +24,10 @@ def pivot_to_osm(resource, connection, logger):
     logger.info("Starting conversion")
     start_time = time.time()
 
-    with open(resource['topology']['storage']['file'], "wb") as f, etree.xmlfile(f, encoding='utf-8') as xf:
+    filename = resource['topology']['storage']['file']
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    with open(filename, "wb") as f, etree.xmlfile(f, encoding='utf-8') as xf:
         xf.write_declaration()
         attribs = {"version": "0.6", "generator": "r2gg 0.0.1"}
         with xf.element("osm", attribs):
@@ -47,6 +51,7 @@ def pivot_to_osm(resource, connection, logger):
             logger.info("SQL: {}".format(sql_query2))
             cursor2.execute(sql_query2)
             row = cursor2.fetchone()
+
             i = 1
             while row:
                 wayEl = writeWay(row)

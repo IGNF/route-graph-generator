@@ -103,29 +103,29 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       SELECT
         -- GCVS (système d'historique)
         t.cleabs as cleabs,
-        t.gcms_numrec as numrec,
+        -- t.gcms_numrec as numrec,
         t.gcms_detruit AS detruit,
         t.gcms_territoire as territoire,
 
         -- BD TOPO
-        NULLIF(t.etat_de_l_objet,'') as etat,
-        n.type_de_route as cl_admin,
+        -- NULLIF(t.etat_de_l_objet,'') as etat,
+        -- n.type_de_route as cl_admin,
         t.nature as nature,
         t.importance as importance,
-        t.fictif as fictif,
-        t.position_par_rapport_au_sol as pos_sol,
-        t.nombre_de_voies as nb_voies,
+        -- t.fictif as fictif,
+        -- t.position_par_rapport_au_sol as pos_sol,
+        -- t.nombre_de_voies as nb_voies,
         t.sens_de_circulation as sens_de_circulation,
-        t.itineraire_vert as it_vert,
+        -- t.itineraire_vert as it_vert,
         t.vitesse_moyenne_vl as vitesse_moyenne_vl,
         -- NULLIF(t.nom_rue_gauche,'') as nom_voie_g,
         -- NULLIF(t.nom_rue_droite,'') as nom_voie_d,
-        NULLIF(t.insee_commune_gauche,'') as inseecom_g,
-        NULLIF(t.insee_commune_droite,'') as inseecom_d,
-        t.largeur_de_chaussee as largeur,
+        -- NULLIF(t.insee_commune_gauche,'') as inseecom_g,
+        -- NULLIF(t.insee_commune_droite,'') as inseecom_d,
+        -- t.largeur_de_chaussee as largeur,
 
-        n.gestionnaire as gestion,
-        n.numero as numero,
+        -- n.gestionnaire as gestion,
+        -- n.numero as numero,
 
         -- NON BDTOPO
         NULLIF(n.cleabs,'') as rn_cleabs,
