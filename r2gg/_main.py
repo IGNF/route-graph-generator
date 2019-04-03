@@ -1,4 +1,5 @@
 import json
+import multiprocessing
 import os
 
 import psycopg2
@@ -69,6 +70,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     # osm2osrm
     osm_file = resource['topology']['storage']['file']
     logger.info("Generating graphs for each cost...")
+    cpu_count = multiprocessing.cpu_count()
+
     for i in range(len(resource["costs"])):
         logger.info("Cost {} of {}...".format(i+1, len(resource["costs"])))
         lua_file = resource["costs"][i]["compute"]["storage"]["file"]
@@ -85,8 +88,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
         copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
-        osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file]
-        osrm_contract_args = ["osrm-contract", osrm_file]
+        osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
+        osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
         rm_args = ["rm", tmp_osm_file]
 
         subprocess_exexution(mkdir_args, logger)
