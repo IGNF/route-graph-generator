@@ -56,7 +56,10 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     connection_out.close()
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")
-    with open(resource["outputs"]["configuration"]["storage"]["file"], "w") as resource_file:
+    filename = resource["outputs"]["configuration"]["storage"]["file"]
+
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    with open(filename, "w") as resource_file:
         json_string = json.dumps(resource, indent=2)
         resource_file.write(json_string)
 
@@ -101,7 +104,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")
     filename = resource["outputs"]["configuration"]["storage"]["file"]
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
     with open(filename, "w") as resource_file:
         json_string = json.dumps(resource, indent=2)
         resource_file.write(json_string)

@@ -25,7 +25,7 @@ def pivot_to_osm(resource, connection, logger):
     start_time = time.time()
 
     filename = resource['topology']['storage']['file']
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
 
     with open(filename, "wb") as f, etree.xmlfile(f, encoding='utf-8') as xf:
         xf.write_declaration()
