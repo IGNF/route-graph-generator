@@ -49,7 +49,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restric
     cursor_out.execute(add_columns)
 
     if turn_restrictions:
-        
+        logger.info("Writing turn restrinctions...")
         create_non_comm = """
             DROP TABLE IF EXISTS turn_restrictions;
             CREATE TABLE turn_restrictions(
@@ -88,6 +88,8 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restric
             """.format(values_str)
             cursor_out.execute(sql_insert, values_tuple)
             connection_out.commit()
+        
+        logger.info("Writing turn restrinctions Done")
 
     logger.info("Starting conversion")
     start_time = time.time()
