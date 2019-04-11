@@ -41,4 +41,7 @@ COPY setup.py /usr/lib/python3.6/site-packages/r2gg
 
 RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
+# Montage du volume pour partager les données 
+VOLUME ["/home/data-volume"]
+
 WORKDIR /home
