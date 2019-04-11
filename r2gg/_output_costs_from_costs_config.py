@@ -52,7 +52,7 @@ def output_costs_from_costs_config(costs_config, row):
             if result_direct != -1:
                 result_direct = result
 
-            if result_direct != -1:
+            if result_reverse != -1:
                 result_reverse = result
 
         output_costs += (result_direct, result_reverse)
