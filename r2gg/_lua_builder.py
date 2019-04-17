@@ -5,7 +5,7 @@
 
 
 def build_lua(costs_config):
-    return lua_string
+    return costs_config
 
 def _build_setup(turn_res):
     setup_string = "function setup()\n"

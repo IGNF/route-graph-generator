@@ -1,4 +1,6 @@
 import json
+import multiprocessing
+import os
 
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
@@ -45,7 +47,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     user = out_db_config.get('username')
     password = out_db_config.get('password')
     port = out_db_config.get('port')
-    connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
+    connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
     logger.info("Connecting to output database")
     connection_out = psycopg2.connect(connect_args)
 
@@ -54,7 +56,10 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     connection_out.close()
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")
-    with open(resource["outputs"]["configuration"]["storage"]["file"], "w") as resource_file:
+    filename = resource["outputs"]["configuration"]["storage"]["file"]
+
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    with open(filename, "w") as resource_file:
         json_string = json.dumps(resource, indent=2)
         resource_file.write(json_string)
 
@@ -68,6 +73,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     # osm2osrm
     osm_file = resource['topology']['storage']['file']
     logger.info("Generating graphs for each cost...")
+    cpu_count = multiprocessing.cpu_count()
+
     for i in range(len(resource["costs"])):
         logger.info("Cost {} of {}...".format(i+1, len(resource["costs"])))
         lua_file = resource["costs"][i]["compute"]["storage"]["file"]
@@ -84,9 +91,8 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
         copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
-        osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file]
-        osrm_contract_args = ["osrm-contract", osrm_file]
-        osrm_routed_args = ["osrm-routed", osrm_file]
+        osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
+        osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
         rm_args = ["rm", tmp_osm_file]
 
         subprocess_exexution(mkdir_args, logger)
@@ -97,6 +103,9 @@ def osrm_convert(config, resource, db_configs, connection, logger):
 
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")
-    with open(resource["outputs"]["configuration"]["storage"]["file"], "w") as resource_file:
+    filename = resource["outputs"]["configuration"]["storage"]["file"]
+
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    with open(filename, "w") as resource_file:
         json_string = json.dumps(resource, indent=2)
         resource_file.write(json_string)
