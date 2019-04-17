@@ -1,0 +1,6 @@
+{
+        "host": "road2-centos",
+        "dbname": "pivot",
+        "username": "postgres",
+        "password": "postgres"
+}

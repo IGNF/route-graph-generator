@@ -1,6 +1,6 @@
 FROM centos:7.5.1804
 
-ARG proxy="http://proxy.ign.fr:3128/"
+ARG proxy=""
 
 ENV http_proxy=$proxy https_proxy=$proxy HTTP_PROXY=$proxy HTTPS_PROXY=$proxy
 ENV PYTHON_VERSION "3.6.5"
@@ -21,7 +21,8 @@ RUN pip3 install 'psycopg2==2.7.6.1' 'sqlparse==0.2.4' 'lxml==4.3.1'
 # Dépendances
 RUN yum-config-manager --enable rhel-server-rhscl-7-rpms
 RUN yum install -y devtoolset-6
-RUN scl enable devtoolset-6 bash
+
+WORKDIR /home/docker
 
 RUN git clone --depth=1 --branch=v5.20.0 https://github.com/Project-OSRM/osrm-backend.git \
   && cd osrm-backend \
@@ -41,7 +42,13 @@ COPY setup.py /usr/lib/python3.6/site-packages/r2gg
 
 RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
-# Montage du volume pour partager les données 
-VOLUME ["/home/data-volume"]
+# Commandes pour lancer une génération
+RUN mkdir /home/docker/data/
+COPY docker/centos7/config/* ./
+#RUN r2gg:populate_pivot bduni2osrm.json
+#RUN r2gg:pivot2osrm bduni2osrm.json
 
-WORKDIR /home
+# Montage du volume pour partager les données
+VOLUME ["/home/docker/data"]
+
+CMD sleep 3000
