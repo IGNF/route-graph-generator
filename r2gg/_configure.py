@@ -17,7 +17,7 @@ LEVELS = {
 def configure():
     parser = argparse.ArgumentParser()
     parser.add_argument('config_file_path', type=str)
-    config_path = parser.parse_args().config_file_path
+    config_path = parser.parse_known_args()[0].config_file_path
 
     # Récupération de l'objet 'génération' qui contient toute la config
     config = config_from_path(config_path)['generation']

@@ -1,5 +1,5 @@
 {
-        "host": "road2-centos",
+        "host": "pgrouting-procedures-centos",
         "dbname": "pivot",
         "username": "postgres",
         "password": "postgres"

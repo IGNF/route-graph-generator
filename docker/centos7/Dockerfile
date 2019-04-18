@@ -45,10 +45,12 @@ RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 # Commandes pour lancer une génération
 RUN mkdir /home/docker/data/
 COPY docker/centos7/config/* ./
-#RUN r2gg:populate_pivot bduni2osrm.json
-#RUN r2gg:pivot2osrm bduni2osrm.json
+
+ENV LANG en_US.utf8
+
+RUN ["chmod", "+x", "./populatepivot2osrm.sh"]
 
 # Montage du volume pour partager les données
 VOLUME ["/home/docker/data"]
 
-CMD sleep 3000
+

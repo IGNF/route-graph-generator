@@ -40,7 +40,7 @@
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/home/data/bduni-reu.osm"
+          "file": "/home/docker/data/bduni-reu.osm"
         },
         "projection": "EPSG:4326",
         "mapping": {
@@ -148,7 +148,7 @@
       "outputs": {
         "configuration": {
           "storage": {
-            "file": "ressource_example_osrm.json"
+            "file": "/home/docker/app/src/config/resources/bduni_reu_osrm.json"
           }
         },
         "graphs": {

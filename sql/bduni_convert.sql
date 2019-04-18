@@ -86,6 +86,18 @@ CREATE OR REPLACE FUNCTION nodes_id( _geom geometry ) RETURNS bigint AS $$
     SELECT id FROM nodes WHERE lon = ST_X(_geom) AND lat = ST_Y(_geom);
 $$ LANGUAGE SQL ;
 
+-- Renvoie les points intermédiaires d'une linestring en format json
+CREATE OR REPLACE FUNCTION inter_nodes(geom geometry(LineString, 4326)) RETURNS json[] AS $$
+    SELECT COALESCE(array_agg(row_to_json(subq)), '{{}}') FROM (
+      SELECT
+        ST_X((dp).geom) AS lon,
+        ST_Y((dp).geom) AS lat
+      FROM (
+        SELECT st_numpoints(geom) AS nump, ST_DumpPoints(geom) AS dp
+      ) AS foo
+      WHERE (dp).path[1] <@ int4range(2, nump)
+    ) subq ;
+$$ LANGUAGE SQL;
 
 -- populate.sql
 -- On doit copier au préalable troncon_de_route pour figer les tronçons car elle est mise à jour en continue
@@ -147,7 +159,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     ) s
         WHERE NOT detruit
   -- décommenter pour tester :
-  -- AND territoire='REU'
+  AND territoire='REU'
   ;
 
   -- ############################
