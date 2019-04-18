@@ -2,7 +2,7 @@ import subprocess
 
 def subprocess_exexution(args, logger):
     try:
-        logger.info('Subprocess: \"' + " ".join(args) + '\"')
+        logger.info('Subprocess: \"' + " ".join(str(arg) for arg in args) + '\"')
         process = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,

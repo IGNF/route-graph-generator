@@ -69,7 +69,7 @@ def pivot_to_osm(resource, connection, logger):
                 i += 1
 
             # Ecriture des restrictions
-            sql_query3 = "select * from bduni_non_com"
+            sql_query3 = "select * from non_comm"
             logger.info("SQL: {}".format(sql_query3))
             cursor.execute(sql_query3)
             i = 1
