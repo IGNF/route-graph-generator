@@ -28,12 +28,13 @@
       "baseId": "base_pivot"
     },
     "resource": {
-      "ressourceId": "bduni",
+      "id": "bduni-reu-osrm",
       "type": "osrm",
+      "defaultSourceId": "bduni-reu-car-fastest",
       "description": "Données BDUNI v2.",
       "boundingBox": "-90,-180,90,180",
       "defaultProjection": "EPSG:4326",
-      "availableProjection": [
+      "availableProjections": [
         "EPSG:4326",
         "EPSG:2154"
       ],
@@ -51,24 +52,31 @@
             "file": "bduni_convert.sql"
           }
         },
-        "defaultAttributs": [
+        "defaultAttributes": [
           "name"
         ]
       },
-      "costs": [
+      "sources": [
         {
-          "profile": "car",
-          "optimization": "fastest",
-          "compute": {
-            "storage": {
-              "file": "bduniv2_avec_sens_vitesse_fixe.lua"
+          "id": "bduni-reu-car-fastest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bduni-reu-car-fastest/bduni-reu-car-fastest.osrm"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
+              }
             }
           }
         }
       ],
-      "operations": [
+      "availableOperations": [
         {
-          "type": "route",
+          "id": "route",
           "rate": 10,
           "maxIntermediatePoints": 10,
           "maxNumberOfConstraints": 2,
@@ -92,7 +100,7 @@
           ],
           "defaultParameters": [
             {
-              "id": "algorythme",
+              "id": "algorithm",
               "default": "contraction-hierarchies"
             },
             {
@@ -122,7 +130,7 @@
           ]
         },
         {
-          "type": "nearest",
+          "id": "nearest",
           "rate": 20,
           "maxNumber": 100,
           "defaultParameters": [
@@ -144,19 +152,12 @@
             }
           ]
         }
-      ],
-      "outputs": {
-        "configuration": {
-          "storage": {
-            "file": "/home/docker/app/src/config/resources/bduni_reu_osrm.json"
-          }
-        },
-        "graphs": {
-          "storage": {
-            "ceph": {
-              "pool": "itineraire"
-            }
-          }
+      ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "/home/docker/app/src/config/resources/bduni_reu_osrm.resource"
         }
       }
     }

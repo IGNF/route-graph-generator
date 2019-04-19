@@ -75,17 +75,13 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
 
-    for i in range(len(resource["costs"])):
-        logger.info("Cost {} of {}...".format(i+1, len(resource["costs"])))
-        lua_file = resource["costs"][i]["compute"]["storage"]["file"]
+    for i in range(len(resource["sources"])):
+        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+        lua_file = resource["sources"][i]["cost"]["compute"]["storage"]["file"]
         # Gestion des points "." dans le chemin d'accès avec ".".join()
-        cost_dir = "{}_{}_{}".format(
-            ".".join(osm_file.split(".")[:-1]),
-            resource["costs"][i]["profile"],
-            resource["costs"][i]["optimization"],
-        )
+        osrm_file = resource["sources"][i]["storage"]["file"]
+        cost_dir = os.path.dirname(osrm_file)
         cost_name = cost_dir.split("/")[-1]
-        osrm_file = "{}/{}.osrm".format(cost_dir, cost_name)
         tmp_osm_file = "{}/{}.osm".format(cost_dir, cost_name)
 
         # Définition des commandes shell à exécuter
@@ -103,9 +99,10 @@ def osrm_convert(config, resource, db_configs, connection, logger):
 
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")
-    filename = resource["outputs"]["configuration"]["storage"]["file"]
+    filename = config["outputs"]["configuration"]["storage"]["file"]
 
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:
-        json_string = json.dumps(resource, indent=2)
+        json_string = json.dumps(final_resource, indent=2)
         resource_file.write(json_string)

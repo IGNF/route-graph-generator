@@ -60,17 +60,41 @@
           "name"
         ]
       },
-      "costs":
+      "sources": [
         {
-          "compute": {
-            "storage": {
-              "file": "io/costs_calculation_sample.json"
+          "id": "pgrouting-test-reu-time",
+          "type": "pgr",
+          "storage": {
+            "costColumn": "cost_s_car",
+            "rcostColumn": "reverse_cost_s_car"
+          },
+          "cost": {
+            "compute": {
+              "storage": {
+                "file": "io/costs_calculation_sample.json"
+              }
             }
           }
         },
+        {
+          "id": "pgrouting-test-reu-length",
+          "type": "pgr",
+          "storage": {
+            "costColumn": "cost_m_car",
+            "rcostColumn": "reverse_cost_m_car"
+          },
+          "cost": {
+            "compute": {
+              "storage": {
+                "file": "io/costs_calculation_sample.json"
+              }
+            }
+          }
+        }
+      ],
       "operations": [
         {
-          "type": "route",
+          "id": "route",
           "rate": 10,
           "maxIntermediatePoints": 10,
           "maxNumberOfConstraints": 2,
@@ -94,7 +118,7 @@
           ],
           "defaultParameters": [
             {
-              "id": "algorythme",
+              "id": "algorithm",
               "default": "contraction-hierarchies"
             },
             {
@@ -124,7 +148,7 @@
           ]
         },
         {
-          "type": "nearest",
+          "id": "nearest",
           "rate": 20,
           "maxNumber": 100,
           "defaultParameters": [
@@ -146,19 +170,12 @@
             }
           ]
         }
-      ],
-      "outputs": {
-        "configuration": {
-          "storage": {
-            "file": "ressource_example_pgr.json"
-          }
-        },
-        "graphs": {
-          "storage": {
-            "ceph": {
-              "pool": "itineraire"
-            }
-          }
+      ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "ressource_example_pgr.resource"
         }
       }
     }

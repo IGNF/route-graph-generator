@@ -42,12 +42,13 @@ COPY setup.py /usr/lib/python3.6/site-packages/r2gg
 
 RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
-# Commandes pour lancer une génération
 RUN mkdir /home/docker/data/
 COPY docker/centos7/config/* ./
+COPY docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua /home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua
 
 ENV LANG en_US.utf8
 
+# Commandes pour lancer une génération
 RUN ["chmod", "+x", "./populatepivot2osrm.sh"]
 
 # Montage du volume pour partager les données

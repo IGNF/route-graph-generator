@@ -58,7 +58,7 @@ def configure():
     user = work_db_config.get('username')
     password = work_db_config.get('password')
     port = work_db_config.get('port')
-    connect_args = 'host=%s dbname=%s user=%s password=%s' %(host, dbname, user, password)
+    connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
 
     logger.info("Connecting to work database")
     connection = psycopg2.connect(connect_args)
