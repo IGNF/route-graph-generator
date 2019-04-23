@@ -1,7 +1,7 @@
 {
-        "host": "pgrouting-procedures-centos",
-        "dbname": "pivot",
-        "username": "postgres",
-        "password": "postgres",
-        "port": "5432"
+  "host": "pgrouting-procedures-centos",
+  "dbname": "pivot",
+  "username": "postgres",
+  "password": "postgres",
+  "port": "5432"
 }

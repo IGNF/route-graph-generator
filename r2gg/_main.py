@@ -51,7 +51,11 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     logger.info("Connecting to output database")
     connection_out = psycopg2.connect(connect_args)
 
-    pivot_to_pgr(resource, connection, connection_out, logger)
+    cost_calculation_files_paths = {source["compute"]["storage"]["file"] for source in resource["sources"]}
+
+    for cost_calculation_file_path in cost_calculation_files_paths:
+        pivot_to_pgr(resource, cost_calculation_file_path, connection, connection_out, logger)
+
     connection.close()
     connection_out.close()
     # Écriture du fichier resource TODO: n'écrire que le nécessaire

@@ -7,11 +7,11 @@ from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restrictions=True):
+def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connection_out, logger, turn_restrictions=True):
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
 
     # Récupération des coûts à calculer
-    costs = config_from_path(resource["costs"]["compute"]["storage"]["file"])
+    costs = config_from_path(cost_calculation_file_path)
 
     cursor_out = connection_out.cursor()
     # Création de la edge_table pgrouting
@@ -59,7 +59,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restric
         );"""
         logger.debug("SQL: {}".format(create_non_comm))
         cursor_out.execute(create_non_comm)
-        
+
         logger.info("Populating turn restrictions")
         tr_query = "SELECT id_from, id_to FROM non_comm;"
 
@@ -75,7 +75,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restric
             for row in tmp_rows:
                 values_str += "(%s, %s, %s),"
             values_str = values_str[:-1]
-            
+
             # Tuple des valuers à insérer
             values_tuple = ()
             for row in tmp_rows:
@@ -88,7 +88,7 @@ def pivot_to_pgr(resource, connection_work, connection_out, logger, turn_restric
             """.format(values_str)
             cursor_out.execute(sql_insert, values_tuple)
             connection_out.commit()
-        
+
         logger.info("Writing turn restrinctions Done")
 
     logger.info("Starting conversion")

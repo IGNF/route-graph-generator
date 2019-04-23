@@ -15,7 +15,7 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "db_docker_config.json"
+        "configFile": "db_config_pivot.json"
       },
       {
         "id": "base_bduni",
@@ -25,7 +25,7 @@
       {
         "id": "base_pgr",
         "type": "bdd",
-        "configFile": "routing_docker.json"
+        "configFile": "output_base.json"
       }
     ],
     "workingSpace": {
@@ -53,7 +53,7 @@
             "baseId": "base_bduni"
           },
           "storage": {
-            "file": "sql/bduni_convert.sql"
+            "file": "bduni_convert.sql"
           }
         },
         "defaultAttributs": [
@@ -72,7 +72,7 @@
           "cost": {
             "compute": {
               "storage": {
-                "file": "io/costs_calculation_sample.json"
+                "file": "/home/docker/data/costs_calculation_sample.json"
               }
             }
           }
@@ -88,7 +88,7 @@
           "cost": {
             "compute": {
               "storage": {
-                "file": "io/costs_calculation_sample.json"
+                "file": "/home/docker/data/costs_calculation_sample.json"
               }
             }
           }

@@ -1,0 +1,7 @@
+{
+	"host": "pgrouting-procedures-centos",
+	"dbname": "pgrouting",
+	"username": "postgres",
+	"password": "postgres",
+	"port": "5432"
+}
