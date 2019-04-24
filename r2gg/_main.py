@@ -17,6 +17,14 @@ def sql_convert(config, resource, db_configs, connection, logger):
     # Configuration de la bdd de travail
     work_db_config = db_configs[ config['workingSpace']['baseId'] ]
 
+    # Récupération de la bbox
+    bbox = [int(coord) for coord in resource["boundingBox"].split(",")]
+    assert len(bbox) == 4, "bondingBox invalide"
+    xmin = bbox[0]
+    ymin = bbox[1]
+    xmax = bbox[2]
+    ymax = bbox[3]
+
     # Lancement du script SQL de conversion source --> pivot
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor()
@@ -29,10 +37,13 @@ def sql_convert(config, resource, db_configs, connection, logger):
                 continue
             logger.debug("SQL:\n {}\n".format(instruction) )
             cur.execute(instruction,
-                {'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'),
-                'dbname': source_db_config.get('dbname')
-                })
+                {
+                  'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
+                  'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'),
+                  'dbname': source_db_config.get('dbname'),
+                  'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                }
+            )
         connection.commit()
     connection.close()
 

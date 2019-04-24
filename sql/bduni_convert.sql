@@ -158,6 +158,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
             ON t.lien_vers_route_nommee = n.cleabs
     ) s
         WHERE NOT detruit
+        AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
   -- décommenter pour tester :
   AND territoire='REU'
   ;
@@ -212,8 +213,7 @@ SELECT
   -- liens_vers_troncon_sortie
   regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS liens_vers_troncon_sortie
 FROM bduni_non_com_tmp
--- WHERE geometrie && ST_Transform( ST_SetSRID( ST_MakeEnvelope(:bbox),4326 ),2154 )
- WHERE lien_vers_troncon_entree in (SELECT cleabs from edges)
+WHERE lien_vers_troncon_entree in (SELECT cleabs from edges)
 ;
 
 
