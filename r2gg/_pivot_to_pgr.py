@@ -116,8 +116,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
     # Insertion petit à petit -> plus performant
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
-    for i in range(math.ceil(len(rows)/1000)):
-        tmp_rows = rows[i*1000:(i+1)*1000]
+    for i in range(math.ceil(len(rows)/10000)):
+        tmp_rows = rows[i*10000:(i+1)*10000]
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in tmp_rows:

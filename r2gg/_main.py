@@ -18,7 +18,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     work_db_config = db_configs[ config['workingSpace']['baseId'] ]
 
     # Récupération de la bbox
-    bbox = [int(coord) for coord in resource["boundingBox"].split(",")]
+    bbox = [float(coord) for coord in resource["boundingBox"].split(",")]
     assert len(bbox) == 4, "bondingBox invalide"
     xmin = bbox[0]
     ymin = bbox[1]

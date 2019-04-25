@@ -9,7 +9,6 @@ from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_osm(resource, connection, logger):
     cursor = connection.cursor(cursor_factory=DictCursor)
-    cursor2 = connection.cursor(cursor_factory=DictCursor, name='server_cursor') # Server side cursor
 
     logger.info("SQL: select last_value from nodes_id_seq")
     cursor.execute("select last_value from nodes_id_seq")
@@ -49,8 +48,8 @@ def pivot_to_osm(resource, connection, logger):
             # Ecriture des ways
             sql_query2 = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], ['*', 'inter_nodes(geom) as internodes'])
             logger.info("SQL: {}".format(sql_query2))
-            cursor2.execute(sql_query2)
-            row = cursor2.fetchone()
+            cursor.execute(sql_query2)
+            row = cursor.fetchone()
 
             i = 1
             while row:
@@ -63,7 +62,7 @@ def pivot_to_osm(resource, connection, logger):
                 wayEl = writeWayNds(wayEl, row, row['internodes'])
                 wayEl = writeWayTags(wayEl, row)
                 xf.write(wayEl, pretty_print=True)
-                row = cursor2.fetchone()
+                row = cursor.fetchone()
                 if (i % int(edgeSequence/10) == 0):
                     logger.info("%s / %s ways ajoutés" %(i, edgeSequence))
                 i += 1
@@ -72,17 +71,18 @@ def pivot_to_osm(resource, connection, logger):
             sql_query3 = "select * from non_comm"
             logger.info("SQL: {}".format(sql_query3))
             cursor.execute(sql_query3)
+            row = cursor.fetchone()
             i = 1
-            for row in cursor:
-                if row['common_vertex_id']==0:
+            while row:
+                if row['common_vertex_id'] == -1:
                     i += 1
                     continue
                 ResEl = writeRes(row,i)
                 xf.write(ResEl, pretty_print=True)
-                if (i % int(edgeSequence/10) == 0):
+                row = cursor.fetchone()
+                if (i % int(cursor.rowcount/10) == 0):
                     logger.info("%s / %s restrictions ajoutés" %(i, cursor.rowcount))
                 i += 1
     cursor.close()
-    cursor2.close()
     end_time = time.time()
     logger.info("Conversion ended. Elapsed time : %s seconds." %(end_time - start_time))
