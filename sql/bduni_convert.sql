@@ -160,7 +160,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
         WHERE NOT detruit
         AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
   -- décommenter pour tester :
-  AND territoire='REU'
+  -- AND territoire='REU'
   ;
 
   -- ############################
@@ -207,15 +207,16 @@ INSERT INTO edges
 -- On ne conserve que les non communications sur la zone de calcul
 DROP TABLE IF EXISTS non_comm;
 CREATE TABLE IF NOT EXISTS non_comm AS
-SELECT
-  cleabs,
-  lien_vers_troncon_entree,
-  -- liens_vers_troncon_sortie
-  regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS liens_vers_troncon_sortie
-FROM bduni_non_com_tmp
-WHERE lien_vers_troncon_entree in (SELECT cleabs from edges)
-;
-
+SELECT * FROM (
+  SELECT
+    cleabs,
+    lien_vers_troncon_entree,
+    -- liens_vers_troncon_sortie
+    regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS lien_vers_troncon_sortie
+  FROM bduni_non_com_tmp
+  WHERE lien_vers_troncon_entree IN (SELECT cleabs from edges)
+) AS non_comm_split
+WHERE non_comm_split.lien_vers_troncon_sortie IN (SELECT cleabs from edges);
 
 -- Remplissage des ids d'edge dans la table des non communications
 ALTER TABLE non_comm ADD COLUMN IF NOT EXISTS id_from bigint;
@@ -228,7 +229,7 @@ WHERE e.cleabs = b.lien_vers_troncon_entree
 
 UPDATE non_comm AS b SET id_to = e.id
 FROM edges as e
-WHERE e.cleabs = b.liens_vers_troncon_sortie
+WHERE e.cleabs = b.lien_vers_troncon_sortie
 ;
 
 -- Récupération du point commun entre deux troncons
@@ -239,7 +240,7 @@ CREATE OR REPLACE FUNCTION common_point(id_from bigint, id_to bigint) RETURNS bi
      WHEN a.source_id=b.target_id THEN b.target_id
      WHEN a.target_id=b.source_id THEN b.source_id
      WHEN a.target_id=b.target_id THEN b.target_id
-     ELSE 0
+     ELSE -1
   END
   FROM edges as a, edges as b
   WHERE a.id = id_from
