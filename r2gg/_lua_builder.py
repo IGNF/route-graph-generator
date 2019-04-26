@@ -30,6 +30,13 @@ def _build_process_node():
 
 def _build_process_way(costs_config, output_cost_name):
 
+    output_cost = None
+    for output in costs_config["outputs"]:
+        if output["name"] == output_cost_name:
+            output_cost = output
+
+    assert output_cost != None, "output cost name not in configuration outputs"
+
     process_way_string = (
         "function process_way (profile, way, result)\n"
         "\n"
@@ -37,27 +44,16 @@ def _build_process_way(costs_config, output_cost_name):
     )
 
     get_variables_strings = []
-    speed_var_name = '0'
     for variable in costs_config["variables"]:
         var_str = "    local {} =  way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"])
         get_variables_strings.append(var_str)
-        if variable["isSpeed"]:
-            speed_var_name = variable["name"]
 
     for string in get_variables_strings:
         process_way_string += string
 
-    output_cost = None
-
-    for output in costs_config["outputs"]:
-        if output["name"] == output_cost_name:
-            output_cost = output
-
-    assert output_cost != None, "output cost name not in configuration outputs"
-
     process_way_string += "\n-- vitesse\n"
-    process_way_string += "    result.forward_speed  = {}\n".format(speed_var_name)
-    process_way_string += "    result.backward_speed = {}\n".format(speed_var_name)
+    process_way_string += "    result.forward_speed  = {}\n".format(output_cost["speedValue"])
+    process_way_string += "    result.backward_speed = {}\n".format(output_cost["speedValue"])
 
     process_way_string += (
         "\n"
