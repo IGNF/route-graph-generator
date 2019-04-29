@@ -1,6 +1,22 @@
 from collections import defaultdict
 
 def output_costs_from_costs_config(costs_config, row):
+    """
+    Fonction pour calculer les coûts associés à une arrête par rapport à la configuration des coûts
+
+    Parameters
+    ----------
+    costs_config: dict
+        défintion des coûts. objet correspondant au schéma JSON de configuration des coûts.
+    row: dict
+        ligne de la base de données correspondant à l'arrête sur laquelle calculer des coûts
+
+    Returns
+    -------
+    tuple
+        tuple des valeurs des coûts calculés pour row
+    """
+
     values = {}
     output_costs = ()
 
@@ -62,8 +78,21 @@ def output_costs_from_costs_config(costs_config, row):
 def _conditions_to_bool(conditions_str, values):
     """
     Fonction pour parser une chaîne de caractères correspondant à des conditions vers un booléen
-    Se comporte comme un AND sue l'ensemble des conditions
+    Se comporte comme un AND sur l'ensemble des conditions -> vrai si TOUT est vrai, false sinon
+
+    Parameters
+    ----------
+    conditions_str: str
+        chaine de caractère correspondant à toutes les conditions
+    values: dict
+        Dictionnaire des valeurs de la configuration des coûts
+
+    Returns
+    -------
+    bool
+        true si TOUTES les conditions sont vérifiée, false sinon
     """
+
     conditions = conditions_str.split(";")
     for condition in conditions:
         if not _condition_to_bool(condition, values):
@@ -75,28 +104,45 @@ def _conditions_to_bool(conditions_str, values):
 def _condition_to_bool(condition, values):
     """
     Fonction pour parser une condition vers un booléen
+
+    Parameters
+    ----------
+    condition: str
+        chaine de caractère correspondant à 1 condition
+    values: dict
+        Dictionnaire des valeurs de la configuration des coûts
+
+    Returns
+    -------
+    bool
+        true si la condition est vérifiée, false sinon
     """
 
     # On teste 1 à 1 les différents tests possibles, en faisant bien attention à
     # tester ">=" avant ">" car le second est compris dans le premier (idem pour "<=")
     #
     # La conversion en float ne se fait qu'ici (dans les opérateurs > < >= <=) car on pourrait comparer des strings
-    # avec = et !=
+    # avec == et !=
     test = condition.split("==")
     if len(test) == 2:
         return values[test[0]] == test[1]
-    test = condition.split(">=")
-    if len(test) == 2:
-        return values[test[0]] >= float(test[1])
-    test = condition.split("<=")
-    if len(test) == 2:
-        return values[test[0]] <= float(test[1])
+
     test = condition.split("!=")
     if len(test) == 2:
         return values[test[0]] != test[1]
+
+    test = condition.split(">=")
+    if len(test) == 2:
+        return values[test[0]] >= float(test[1])
+
+    test = condition.split("<=")
+    if len(test) == 2:
+        return values[test[0]] <= float(test[1])
+
     test = condition.split(">")
     if len(test) == 2:
         return values[test[0]] > float(test[1])
+
     test = condition.split("<")
     if len(test) == 2:
         return values[test[0]] < float(test[1])

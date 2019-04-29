@@ -11,6 +11,22 @@ from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._subprocess_exexution import subprocess_exexution
 
 def sql_convert(config, resource, db_configs, connection, logger):
+    """
+    Fonction de conversion depuis la bdd source vers la bdd pivot
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
+
     # Configuration de la bdd source
     source_db_config = db_configs[ resource['topology']['mapping']['source']['baseId'] ]
 
@@ -48,6 +64,22 @@ def sql_convert(config, resource, db_configs, connection, logger):
     connection.close()
 
 def pgr_convert(config, resource, db_configs, connection, logger):
+    """
+    Fonction de conversion depuis la bdd pivot vers la bdd pgrouting
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
+
     if (resource['type'] != 'pgr'):
         raise ValueError("Wrong resource type, should be 'pgr'")
 
@@ -79,6 +111,22 @@ def pgr_convert(config, resource, db_configs, connection, logger):
         resource_file.write(json_string)
 
 def osrm_convert(config, resource, db_configs, connection, logger):
+    """
+    Fonction de conversion depuis la bdd pivot vers les fichiers osm et osrm
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
+
     if (resource['type'] != 'osrm'):
         raise ValueError("Wrong resource type, should be 'osrm'")
 

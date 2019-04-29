@@ -1,6 +1,17 @@
 import subprocess
 
 def subprocess_exexution(args, logger):
+    """
+    Exécute un sous-processus (commande système)
+
+    Parameters
+    ----------
+    args: [str]
+        arguments pour l'exécution d'un sous-processus, avec en premier argument
+        le nom de la commande
+
+    logger: logging.Logger
+    """
     try:
         str_args = [str(arg) for arg in args]
         logger.info('Subprocess: \"' + " ".join(str_args) + '\"')

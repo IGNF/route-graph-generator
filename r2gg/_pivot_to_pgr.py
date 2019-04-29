@@ -7,7 +7,22 @@ from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connection_out, logger, turn_restrictions=True):
+def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connection_out, logger):
+    """
+    Fonction de conversion depuis la bdd pivot vers le fichier osm
+
+    Parameters
+    ----------
+    resource: dict
+    cost_calculation_file_path: str
+        chemin vers le fichier json de configuration des coûts
+    connection_work: psycopg2.connection
+        connection à la bdd de travail
+    connection_out: psycopg2.connection
+        connection à la bdd pgrouting de sortie
+    logger: logging.Logger
+    """
+
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
 
     # Récupération des coûts à calculer
@@ -48,51 +63,51 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.debug("SQL: adding costs columns \n {}".format(add_columns))
     cursor_out.execute(add_columns)
 
-    if turn_restrictions:
-        logger.info("Writing turn restrinctions...")
-        create_non_comm = """
-            DROP TABLE IF EXISTS turn_restrictions;
-            CREATE TABLE turn_restrictions(
-                id text unique,
-                id_from bigint,
-                id_to bigint
-        );"""
-        logger.debug("SQL: {}".format(create_non_comm))
-        cursor_out.execute(create_non_comm)
-
-        logger.info("Populating turn restrictions")
-        tr_query = "SELECT cleabs, id_from, id_to FROM non_comm;"
-
-        logger.debug("SQL: {}".format(tr_query))
-        cursor_in.execute(tr_query)
-        rows = cursor_in.fetchall()
-        # Insertion petit à petit -> plus performant
-        logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
-        index = 0
-        for i in range(math.ceil(len(rows)/1000)):
-            tmp_rows = rows[i*1000:(i+1)*1000]
-            values_str = ""
-            for row in tmp_rows:
-                values_str += "(%s, %s, %s),"
-            values_str = values_str[:-1]
-
-            # Tuple des valuers à insérer
-            values_tuple = ()
-            for row in tmp_rows:
-                values_tuple += (row['cleabs'], row['id_from'], row['id_to'])
-                index += 1
-
-            sql_insert = """
-                INSERT INTO turn_restrictions (id, id_from, id_to)
-                VALUES {}
-            """.format(values_str)
-            cursor_out.execute(sql_insert, values_tuple)
-            connection_out.commit()
-
-        logger.info("Writing turn restrinctions Done")
-
     logger.info("Starting conversion")
     start_time = time.time()
+
+    # Non communications
+    logger.info("Writing turn restrinctions...")
+    create_non_comm = """
+        DROP TABLE IF EXISTS turn_restrictions;
+        CREATE TABLE turn_restrictions(
+            id text unique,
+            id_from bigint,
+            id_to bigint
+    );"""
+    logger.debug("SQL: {}".format(create_non_comm))
+    cursor_out.execute(create_non_comm)
+
+    logger.info("Populating turn restrictions")
+    tr_query = "SELECT cleabs, id_from, id_to FROM non_comm;"
+
+    logger.debug("SQL: {}".format(tr_query))
+    cursor_in.execute(tr_query)
+    rows = cursor_in.fetchall()
+    # Insertion petit à petit -> plus performant
+    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    index = 0
+    for i in range(math.ceil(len(rows)/10000)):
+        tmp_rows = rows[i*10000:(i+1)*10000]
+        values_str = ""
+        for row in tmp_rows:
+            values_str += "(%s, %s, %s),"
+        values_str = values_str[:-1]
+
+        # Tuple des valuers à insérer
+        values_tuple = ()
+        for row in tmp_rows:
+            values_tuple += (row['cleabs'], row['id_from'], row['id_to'])
+            index += 1
+
+        sql_insert = """
+            INSERT INTO turn_restrictions (id, id_from, id_to)
+            VALUES {}
+        """.format(values_str)
+        cursor_out.execute(sql_insert, values_tuple)
+        connection_out.commit()
+
+    logger.info("Writing turn restrinctions Done")
 
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
     in_columns = [
@@ -153,12 +168,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_out.execute(create_topology_sql)
     connection_out.commit()
 
-    # Check the routing topology
-    analysegraph_sql = "SELECT pgr_analyzegraph('ways', 0.00001);"
-    logger.info("SQL: {}".format(analysegraph_sql))
-    cursor_out.execute(analysegraph_sql)
-    connection_out.commit()
-
+    # Check the routing topology TODO: remove? takes too much time
+    # analysegraph_sql = "SELECT pgr_analyzegraph('ways', 0.00001);"
+    # logger.info("SQL: {}".format(analysegraph_sql))
+    # cursor_out.execute(analysegraph_sql)
+    # connection_out.commit()
 
     # analyzeOneway_sql = "SELECT pgr_analyzeoneway('ways', 0.00001)"
     # logger.info("SQL: {}".format(analyzeOneway_sql))

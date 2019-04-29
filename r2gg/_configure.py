@@ -15,6 +15,21 @@ LEVELS = {
 }
 
 def configure():
+    """
+    Fonction de lecture du fichier de configuration passé en argument
+
+    Returns
+    -------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('config_file_path', type=str)
     config_path = parser.parse_known_args()[0].config_file_path

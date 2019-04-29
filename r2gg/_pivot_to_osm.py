@@ -8,6 +8,17 @@ from r2gg._osm_building import writeNode, writeWay, writeWayNds, writeRes, write
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_osm(resource, connection, logger):
+    """
+    Fonction de conversion depuis la bdd pivot vers le fichier osm
+
+    Parameters
+    ----------
+    resource: dict
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
+
     cursor = connection.cursor(cursor_factory=DictCursor)
 
     logger.info("SQL: select last_value from nodes_id_seq")
@@ -85,6 +96,7 @@ def pivot_to_osm(resource, connection, logger):
                 if (i % int(cursor.rowcount/10) == 0):
                     logger.info("%s / %s restrictions ajoutés" %(i, cursor.rowcount))
                 i += 1
+
     cursor.close()
     end_time = time.time()
     logger.info("Conversion ended. Elapsed time : %s seconds." %(end_time - start_time))

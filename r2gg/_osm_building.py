@@ -2,6 +2,21 @@ from lxml import etree
 from xml.dom import minidom
 
 def writeNode(node):
+    """
+    Fonction qui écrit un noeud en xml à partir d'un dict (potentiellement une ligne de bdd)
+
+    Parameters
+    ----------
+    node: dict
+        Dictionnaire des attributs du noeud.
+        pour l'instant ne contient que la clé "id"
+
+    Returns
+    -------
+    lxml.etree.Element
+        element xml correspondant au noeud
+    """
+
     nodeEl = etree.Element("node", id="%s" %node['id'])
 
     nodeEl.set('lon', '%s' % node['lon'])
@@ -18,6 +33,21 @@ def writeNode(node):
     return nodeEl
 
 def writeWay(way):
+    """
+    Fonction qui écrit une arrête vierge en xml à partir d'un dict
+    (potentiellement une ligne de bdd)
+
+    Parameters
+    ----------
+    way: dict
+        Dictionnaire des attributs de l'arrête.
+
+    Returns
+    -------
+    lxml.etree.Element
+        element xml correspondant à l'arrête vierge
+    """
+
     wayEl = etree.Element("way", id="%s" %way['id'])
 
     wayEl.set('user', 'bduni')
@@ -30,6 +60,24 @@ def writeWay(way):
     return wayEl
 
 def writeWayNds(wayEl, way, internodes):
+    """
+    Fonction qui écrit dans un arrête en xml les noeuds intermédiaires
+
+    Parameters
+    ----------
+    wayEl: lxml.etree.Element
+        objet xml corrrespondant à l'arrête
+    way: dict
+        Dictionnaire des attributs de l'arrête.
+    internodes: [dict]
+        Liste de dict, réponse de la fonction inter_nodes(geom) définie en SQL
+
+    Returns
+    -------
+    lxml.etree.Element
+        element xml correspondant à l'arrête avec ses noeuds
+    """
+
     nd = etree.SubElement(wayEl, 'nd')
     nd.set('ref', '%s' %way['source_id'])
 
@@ -43,7 +91,22 @@ def writeWayNds(wayEl, way, internodes):
     return wayEl
 
 # Ecriture des restrictions
-def writeRes(res,i):
+def writeRes(res, i):
+    """
+    Fonction qui écrit une restriction (non communication) en xml à partir d'un dict
+
+    Parameters
+    ----------
+    res: dict
+        Dictionnaire des attributs de la restriction.
+    i: int
+        identifiant de la retriction
+
+    Returns
+    -------
+    lxml.etree.Element
+        element xml correspondant à la restriction
+    """
 
     resEl = etree.Element("relation", id="%s" %i)
     resEl.set('visible', 'true')
@@ -80,6 +143,22 @@ def writeRes(res,i):
     return resEl
 
 def writeWayTags(wayEl, way):
+    """
+    Fonction qui ajoute des attributs (tags) à un élement xml d'arrête
+
+    Parameters
+    ----------
+    wayEl: lxml.etree.Element
+        objet xml corrrespondant à l'arrête
+    way: int
+        Dictionnaire des attributs de l'arrête.
+
+    Returns
+    -------
+    lxml.etree.Element
+        element xml correspondant à l'arrête avec ses attributs
+    """
+
     for k,v in way.items():
         if k == 'internodes' or k.endswith('_id') or k == 'geom' or k=='geometrie' :
             continue
