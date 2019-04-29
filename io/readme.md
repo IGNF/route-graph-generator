@@ -72,9 +72,12 @@ Il s'agit d'une liste d'"outputs", c'est-à-dire des colonnes dans la table de s
 #### Attribut "name"
 Nom de la colonne de coûts résultante.
 
+#### Attribut "speed_value"
+Nom de la varaible correspondant à la vitesse de ce coût OU valeur numérique
+
 #### Attributs "direct_conditions" et "reverse_conditions"
-Chaînes de caractères définissant des conditions pour la circulabilité des tronçons, séparés par des points-virgules `;`.
-Si les conditions ne sont pas vérifiées, le tronçon n'est pas praticable.
+Chaînes de caractères définissant des conditions toutes nécessaires pour la circulabilité des tronçons, séparés par des points-virgules `;`.
+Si toutes les conditions ne sont pas vérifiées, le tronçon n'est pas praticable.
 Si aucune condition n'est spécifiée, le tronçon est praticable.
 
 L'attribut `direct_condition` correspond au sens direct de parcours du graphe, l'attribut `reverse_condition` correspond au sens inverse de parcours du graphe.
@@ -87,6 +90,9 @@ L'attribut `direct_condition` correspond au sens direct de parcours du graphe, l
 
 #### Attribut "turn_restrictions"
 Booléen, indique s'il faut prendre en compte les restrictions de virage (non_communication dans la bd uni) pour le calcul d'itinéraire
+
+#### Attribut "cost_type"
+Type du coût (OSRM). Pour l'instant, parmi {'distance', 'duration'}
 
 #### Attribut "operations"
 Il s'agit d'une liste d'opérations à réaliser pour obtenir le coût. Les opérations sont réalisées dans l'odre de la liste, à partir du nombre 0 (la première opération est donc toujours une addition ou une soustraction).
