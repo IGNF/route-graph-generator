@@ -61,7 +61,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         cursor_out.execute(create_non_comm)
 
         logger.info("Populating turn restrictions")
-        tr_query = "SELECT id_from, id_to FROM non_comm;"
+        tr_query = "SELECT cleabs, id_from, id_to FROM non_comm;"
 
         logger.debug("SQL: {}".format(tr_query))
         cursor_in.execute(tr_query)
@@ -79,7 +79,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             # Tuple des valuers à insérer
             values_tuple = ()
             for row in tmp_rows:
-                values_tuple += (index, row['id_from'], row['id_to'])
+                values_tuple += (row['cleabs'], row['id_from'], row['id_to'])
                 index += 1
 
             sql_insert = """
