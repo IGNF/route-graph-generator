@@ -112,7 +112,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
         json_string = json.dumps(resource, indent=2)
         resource_file.write(json_string)
 
-def osrm_convert(config, resource, db_configs, connection, logger):
+def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = False):
     """
     Fonction de conversion depuis la bdd pivot vers les fichiers osm et osrm
 
@@ -144,15 +144,17 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     for source in resource["sources"]:
         logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
         lua_file = source["cost"]["compute"]["storage"]["file"]
-        config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
-        costs_config = config_from_path(config_file)
-        cost_name = source["cost"]["name"]
 
-        if cost_name not in [ output["name"] for output in costs_config["outputs"] ]:
-            raise ValueError("cost_name must be in cost configuration")
+        if build_lua_from_cost_config:
+            config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
+            costs_config = config_from_path(config_file)
+            cost_name = source["cost"]["name"]
 
-        with open(lua_file, "w") as lua_f:
-            lua_f.write(build_lua(costs_config, cost_name))
+            if cost_name not in [ output["name"] for output in costs_config["outputs"] ]:
+                raise ValueError("cost_name must be in cost configuration")
+
+            with open(lua_file, "w") as lua_f:
+                lua_f.write(build_lua(costs_config, cost_name))
 
         # Gestion des points "." dans le chemin d'accès avec ".".join()
         osrm_file = source["storage"]["file"]
