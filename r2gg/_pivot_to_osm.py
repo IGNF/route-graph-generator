@@ -52,8 +52,8 @@ def pivot_to_osm(resource, connection, logger):
                 nodeEl = writeNode(row)
                 xf.write(nodeEl, pretty_print=True)
                 row = cursor.fetchone()
-                if (i % int(vertexSequence/10) == 0):
-                    logger.info("%s / %s nodes ajoutés" %(i, vertexSequence))
+                if (i % int(cursor.rowcount/10) == 0):
+                    logger.info("%s / %s nodes ajoutés" %(i, cursor.rowcount))
                 i += 1
 
             # Ecriture des ways
@@ -61,7 +61,6 @@ def pivot_to_osm(resource, connection, logger):
             logger.info("SQL: {}".format(sql_query2))
             cursor.execute(sql_query2)
             row = cursor.fetchone()
-
             i = 1
             while row:
                 wayEl = writeWay(row)
@@ -74,8 +73,8 @@ def pivot_to_osm(resource, connection, logger):
                 wayEl = writeWayTags(wayEl, row)
                 xf.write(wayEl, pretty_print=True)
                 row = cursor.fetchone()
-                if (i % int(edgeSequence/10) == 0):
-                    logger.info("%s / %s ways ajoutés" %(i, edgeSequence))
+                if (i % int(cursor.rowcount/10) == 0):
+                    logger.info("%s / %s ways ajoutés" %(i, cursor.rowcount))
                 i += 1
 
             # Ecriture des restrictions
@@ -85,7 +84,6 @@ def pivot_to_osm(resource, connection, logger):
             row = cursor.fetchone()
             i = 1
             while row:
-                print(i)
                 if row['common_vertex_id'] == -1:
                     row = cursor.fetchone()
                     i += 1

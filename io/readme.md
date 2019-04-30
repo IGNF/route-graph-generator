@@ -44,8 +44,8 @@ Mot de passe
 }
 ```
 
-## Configuration des coûts (pgRouting)
-Afin de configurer les coûts pour pgRouting, il a été défini un format statique basé sur du JSON permettant de réaliser le calcul de ces coûts
+## Configuration des coûts
+Afin de configurer les coûts pour pgRouting, et désormais également pour OSRM, il a été défini un format statique basé sur du JSON permettant de réaliser le calcul de ces coûts
 ### Attribut "variables"
 Il s'agit d'une liste de "variables", c'est-à-dire de valeurs qui sont utilisées pour le calcul des coûts, définies à partir de colonnes de la table en entrée.
 Chaque élément de la liste a plusieurs attributs :

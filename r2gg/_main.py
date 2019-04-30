@@ -6,8 +6,10 @@ import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse
 
+from r2gg._lua_builder import build_lua
 from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
+from r2gg._read_config import config_from_path
 from r2gg._subprocess_exexution import subprocess_exexution
 
 def sql_convert(config, resource, db_configs, connection, logger):
@@ -138,14 +140,25 @@ def osrm_convert(config, resource, db_configs, connection, logger):
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
 
-    for i in range(len(resource["sources"])):
+    i = 0
+    for source in resource["sources"]:
         logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
-        lua_file = resource["sources"][i]["cost"]["compute"]["storage"]["file"]
+        lua_file = source["cost"]["compute"]["storage"]["file"]
+        config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
+        costs_config = config_from_path(config_file)
+        cost_name = source["cost"]["name"]
+
+        if cost_name not in [ output["name"] for output in costs_config["outputs"] ]:
+            raise ValueError("cost_name must be in cost configuration")
+
+        with open(lua_file, "w") as lua_f:
+            lua_f.write(build_lua(costs_config, cost_name))
+
         # Gestion des points "." dans le chemin d'accès avec ".".join()
-        osrm_file = resource["sources"][i]["storage"]["file"]
+        osrm_file = source["storage"]["file"]
         cost_dir = os.path.dirname(osrm_file)
-        cost_name = cost_dir.split("/")[-1]
-        tmp_osm_file = "{}/{}.osm".format(cost_dir, cost_name)
+        profile_name = osrm_file.split("/")[-1].split(".")[0]
+        tmp_osm_file = "{}/{}.osm".format(cost_dir, profile_name)
 
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
@@ -159,6 +172,7 @@ def osrm_convert(config, resource, db_configs, connection, logger):
         subprocess_exexution(osrm_extract_args, logger)
         subprocess_exexution(osrm_contract_args, logger)
         subprocess_exexution(rm_args, logger)
+        i += 1
 
     # Écriture du fichier resource TODO: n'écrire que le nécessaire
     logger.info("Writing resource file")

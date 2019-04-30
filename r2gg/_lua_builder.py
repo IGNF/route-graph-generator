@@ -21,7 +21,7 @@ def build_lua(costs_config, output_cost_name):
         le coût spécifié
     """
 
-    result = ""
+    result = "api_version = 4\n"
 
     output_cost = None
     for output in costs_config["outputs"]:
@@ -36,9 +36,9 @@ def build_lua(costs_config, output_cost_name):
     else:
         result += _build_setup(bool(output_cost["turn_restrictions"]))
 
-    result += _build_process_node
-    result += _build_process_way
-    result += _build_return
+    result += _build_process_node()
+    result += _build_process_way(costs_config, output_cost)
+    result += _build_return()
     return result
 
 
@@ -118,14 +118,14 @@ def _build_process_way(costs_config, output_cost):
     # récupération des attributs utiles
     get_variables_strings = []
     for variable in costs_config["variables"]:
-        var_str = "    local {} =  way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"])
+        var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\"))\n".format(variable["name"], variable["column_name"])
         get_variables_strings.append(var_str)
 
     for string in get_variables_strings:
         process_way_string += string
 
     # vitesse
-    process_way_string += "\n-- vitesse\n"
+    process_way_string += "\n    -- vitesse\n"
     process_way_string += "    result.forward_speed  = {}\n".format(output_cost["speed_value"])
     process_way_string += "    result.backward_speed = {}\n".format(output_cost["speed_value"])
     process_way_string += "\n"
@@ -135,7 +135,7 @@ def _build_process_way(costs_config, output_cost):
 
     direct_conditions_str = "true"
     if output_cost["direct_conditions"]:
-        direct_conditions_array = output_cost["direct_conditions"].split(",")
+        direct_conditions_array = output_cost["direct_conditions"].split(";")
         direct_conditions_str = " and ".join(direct_conditions_array)
 
     process_way_string += "    if {} then\n".format(direct_conditions_str)
@@ -153,14 +153,14 @@ def _build_process_way(costs_config, output_cost):
 
     reverse_conditions_str = "true"
     if output_cost["reverse_conditions"]:
-        reverse_conditions_array = output_cost["reverse_conditions"].split(",")
+        reverse_conditions_array = output_cost["reverse_conditions"].split(";")
         reverse_conditions_str = " and ".join(reverse_conditions_array)
 
     process_way_string += "    if {} then\n".format(reverse_conditions_str)
     process_way_string += "        result.backward_mode  = mode.driving\n"
     # si le coût est de type distance, il faut rajouter l'attribut rate
     if output_cost["cost_type"] == 'distance':
-        process_way_string += "        result.backward_rateforward_rate  = 1\n"
+        process_way_string += "        result.backward_rate  = 1\n"
     process_way_string += "    else\n"
     process_way_string += "        result.backward_mode  = mode.inaccessible\n"
     process_way_string += "    end\n"
