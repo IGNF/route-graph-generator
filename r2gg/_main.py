@@ -53,7 +53,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
         for instruction in instructions:
             if instruction == '':
                 continue
-            logger.debug("SQL:\n {}\n".format(instruction) )
+            logger.debug("SQL:\n{}\n".format(instruction) )
             cur.execute(instruction,
                 {
                   'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
