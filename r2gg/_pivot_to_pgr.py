@@ -113,6 +113,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     in_columns = [
             'id',
             'geom',
+            'source_id',
+            'target_id',
             'ST_Length(geom) as length',
             'length_m as length_m'
         ]
@@ -126,7 +128,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (4 + 2 * len(costs["outputs"]))
+    single_value_str = "%s," * (6 + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -143,10 +145,10 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         values_tuple = ()
         for row in tmp_rows:
             output_costs = output_costs_from_costs_config(costs, row)
-            values_tuple += (row['id'], row['geom'], row['length'], row['length_m']) + output_costs
+            values_tuple += (row['id'], row['geom'], row['source_id'], row['target_id'], row['length'], row['length_m']) + output_costs
 
-        output_columns = "(id, the_geom, length, length_m"
-        set_on_conflict = "the_geom = excluded.the_geom,length = excluded.length,length_m = excluded.length_m"
+        output_columns = "(id, the_geom, source, target, length, length_m"
+        set_on_conflict = "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,length = excluded.length,length_m = excluded.length_m"
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]
             set_on_conflict += ",{0} = excluded.{0}".format(output["name"])

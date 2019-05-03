@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2pgr",
+      "id": "bduni2osrm",
       "logs": {
         "configFile": "sample_log_config.json"
       },
@@ -23,7 +23,7 @@
         "configFile": "bduni_config.json"
       },
       {
-        "id": "base_pgr",
+        "id": "base_pgrouting",
         "type": "bdd",
         "configFile": "routing_docker.json"
       }
@@ -33,19 +33,20 @@
       "baseId": "base_pivot"
     },
     "resource": {
-      "ressourceId": "bduni",
+      "id": "bduni-idf-osrm",
       "type": "pgr",
+      "defaultSourceId": "bduni-idf-car-fastest",
       "description": "Données BDUNI v2.",
-      "boundingBox": "-90,-180,90,180",
+      "boundingBox": "2.103,48.881,2.155,48.909",
       "defaultProjection": "EPSG:4326",
-      "availableProjection": [
+      "availableProjections": [
         "EPSG:4326",
         "EPSG:2154"
       ],
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "baseId": "base_pgr"
+          "file": "./bduni-idf-test.osm"
         },
         "projection": "EPSG:4326",
         "mapping": {
@@ -56,45 +57,61 @@
             "file": "sql/bduni_convert.sql"
           }
         },
-        "defaultAttributs": [
+        "defaultAttributes": [
           "name"
         ]
       },
       "sources": [
         {
-          "id": "pgrouting-test-reu-time",
+          "id": "bduni-idf-car-fastest",
           "type": "pgr",
           "storage": {
-            "dbConfig": "/home/docker/app/src/config/dbs/db_config_test.json",
+            "dbConfig": "routing_docker.json",
             "costColumn": "cost_s_car",
             "rcostColumn": "reverse_cost_s_car"
           },
           "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "name": "cost_s_car",
             "compute": {
               "storage": {
-                "file": "io/costs_calculation_sample.json"
+                "file": "./io/costs_calculation_sample.json"
+              },
+              "configuration": {
+                "storage": {
+                  "file": "./io/costs_calculation_sample.json"
+                }
               }
             }
           }
         },
         {
-          "id": "pgrouting-test-reu-length",
+          "id": "bduni-idf-car-shortest",
           "type": "pgr",
           "storage": {
-            "dbConfig": "/home/docker/app/src/config/dbs/db_config_test.json",
+            "dbConfig": "routing_docker.json",
             "costColumn": "cost_m_car",
             "rcostColumn": "reverse_cost_m_car"
           },
           "cost": {
+            "profile": "car",
+            "optimization": "shortest",
+            "name": "cost_m_car",
             "compute": {
               "storage": {
-                "file": "io/costs_calculation_sample.json"
+                "file": "./io/costs_calculation_sample.json"
+              },
+              "configuration": {
+                "storage": {
+                  "file": "./io/costs_calculation_sample.json"
+                }
               }
             }
           }
         }
       ],
-      "operations": [
+      "availableOperations": [
         {
           "id": "route",
           "rate": 10,
@@ -177,7 +194,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "ressource_example_pgr.resource"
+          "file": "./bduni_idf_pgr.resource"
         }
       }
     }

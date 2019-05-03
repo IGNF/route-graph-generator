@@ -160,7 +160,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
         ON t.lien_vers_route_nommee = n.cleabs
   ) s
     WHERE NOT detruit
-    AND geom && ST_MakeEnvelope(-180,-90,180,90, 4326 )
+    AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
     -- décommenter pour tester :
     AND territoire='REU'
 ;
