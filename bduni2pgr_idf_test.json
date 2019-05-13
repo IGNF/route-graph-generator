@@ -73,12 +73,12 @@
           "cost": {
             "profile": "car",
             "optimization": "fastest",
-            "name": "cost_s_car",
             "compute": {
               "storage": {
                 "file": "./io/costs_calculation_sample.json"
               },
               "configuration": {
+                "name": "cost_s_car",
                 "storage": {
                   "file": "./io/costs_calculation_sample.json"
                 }
@@ -97,12 +97,12 @@
           "cost": {
             "profile": "car",
             "optimization": "shortest",
-            "name": "cost_m_car",
             "compute": {
               "storage": {
                 "file": "./io/costs_calculation_sample.json"
               },
               "configuration": {
+                "name": "cost_m_car",
                 "storage": {
                   "file": "./io/costs_calculation_sample.json"
                 }

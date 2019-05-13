@@ -162,7 +162,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     WHERE NOT detruit
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
     -- décommenter pour tester :
-    AND territoire='REU'
+    -- AND territoire='REU'
 ;
 
   -- ############################

@@ -148,7 +148,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
         if build_lua_from_cost_config:
             config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
             costs_config = config_from_path(config_file)
-            cost_name = source["cost"]["name"]
+            cost_name = source["cost"]["configuration"]["name"]
 
             if cost_name not in [ output["name"] for output in costs_config["outputs"] ]:
                 raise ValueError("cost_name must be in cost configuration")
