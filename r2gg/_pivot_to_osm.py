@@ -1,3 +1,4 @@
+from math import ceil
 import os
 import time
 
@@ -52,7 +53,7 @@ def pivot_to_osm(resource, connection, logger):
                 nodeEl = writeNode(row)
                 xf.write(nodeEl, pretty_print=True)
                 row = cursor.fetchone()
-                if (i % int(cursor.rowcount/10) == 0):
+                if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s nodes ajoutés" %(i, cursor.rowcount))
                 i += 1
 
@@ -73,7 +74,7 @@ def pivot_to_osm(resource, connection, logger):
                 wayEl = writeWayTags(wayEl, row)
                 xf.write(wayEl, pretty_print=True)
                 row = cursor.fetchone()
-                if (i % int(cursor.rowcount/10) == 0):
+                if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s ways ajoutés" %(i, cursor.rowcount))
                 i += 1
 
@@ -91,7 +92,7 @@ def pivot_to_osm(resource, connection, logger):
                 ResEl = writeRes(row,i)
                 xf.write(ResEl, pretty_print=True)
                 row = cursor.fetchone()
-                if (i % int(cursor.rowcount/10) == 0):
+                if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s restrictions ajoutés" %(i, cursor.rowcount))
                 i += 1
 
