@@ -45,6 +45,7 @@ RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 RUN mkdir /home/docker/data/
 COPY docker/centos7/config/* ./
 COPY docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua /home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua
+COPY docker/centos7/config/bduniv2_distance.lua /home/docker/data/bduniv2_distance.lua
 COPY docker/centos7/config/costs_calculation_sample.json /home/docker/data/costs_calculation_sample.json
 
 ENV LANG en_US.utf8
@@ -55,5 +56,3 @@ RUN ["chmod", "+x", "./populatepivot2pgr.sh"]
 
 # Montage du volume pour partager les données
 VOLUME ["/home/docker/data"]
-
-

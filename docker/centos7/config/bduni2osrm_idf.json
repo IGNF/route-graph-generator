@@ -20,7 +20,7 @@
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "bduni_config.json"
+        "configFile": "/run/secrets/db_config"
       }
     ],
     "workingSpace": {
@@ -32,7 +32,7 @@
       "type": "osrm",
       "defaultSourceId": "bduni-idf-car-fastest",
       "description": "Données BDUNI v2.",
-      "boundingBox": "-90,-180,90,180",
+      "boundingBox": "1.7,48.4,3.3,49.1",
       "defaultProjection": "EPSG:4326",
       "availableProjections": [
         "EPSG:4326",
