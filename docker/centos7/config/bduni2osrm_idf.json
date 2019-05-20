@@ -173,7 +173,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/app/src/config/resources/bduni_idf_osrm.resource"
+          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
         }
       }
     }
