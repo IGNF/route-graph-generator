@@ -146,6 +146,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
         lua_file = source["cost"]["compute"]["storage"]["file"]
 
         if build_lua_from_cost_config:
+            logger.info("Building lua profile")
             config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
             costs_config = config_from_path(config_file)
             cost_name = source["cost"]["compute"]["configuration"]["name"]
@@ -155,6 +156,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
 
             with open(lua_file, "w") as lua_f:
                 lua_f.write(build_lua(costs_config, cost_name))
+            logger.info("Finished lua building")
 
         # Gestion des points "." dans le chemin d'accès avec ".".join()
         osrm_file = source["storage"]["file"]

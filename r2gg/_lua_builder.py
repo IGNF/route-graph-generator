@@ -124,6 +124,16 @@ def _build_process_way(costs_config, output_cost):
     for string in get_variables_strings:
         process_way_string += string
 
+    # pour le nom
+    process_way_string += "    local way_names = way:get_value_by_key(way_names)\n"
+
+    process_way_string += (
+        "    -- clé absolue du troncon\n"
+        "    if way_names and way_names ~= '' then\n"
+        "        result.name = way_names\n"
+        "    end\n"
+    )
+
     # vitesse
     process_way_string += "\n    -- vitesse\n"
     process_way_string += "    result.forward_speed  = {}\n".format(output_cost["speed_value"])

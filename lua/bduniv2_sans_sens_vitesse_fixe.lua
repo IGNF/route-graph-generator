@@ -17,13 +17,13 @@ end
 function process_way (profile, way, result)
 
     -- récupération des attributs utiles
-    local cleabs  = way:get_value_by_key("cleabs")
+    local way_names  = way:get_value_by_key("way_names")
     local nature  = way:get_value_by_key("nature")
     local vitesse_moyenne = way:get_value_by_key("vitesse_moyenne_vl")
 
     -- clé absolue du troncon
-    if cleabs and cleabs ~= "" then
-        result.name = cleabs
+    if way_names and way_names ~= "" then
+        result.name = way_names
     end
 
     -- vitesse
