@@ -47,7 +47,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor()
         logger.info("Executing SQL conversion script")
-        instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('username')))
+        instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
 
         # Exécution instruction par instruction
         for instruction in instructions:
@@ -57,8 +57,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
             cur.execute(instruction,
                 {
                   'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                  'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('username'),
-                  'dbname': source_db_config.get('dbname'),
+                  'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
+                  'dbname': source_db_config.get('database'),
                   'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
                 }
             )

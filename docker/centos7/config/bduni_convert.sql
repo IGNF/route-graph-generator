@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS edges (
   -- Attributs spécifiques à la bd uni
   vitesse_moyenne_vl integer,
   nature text,
-  cleabs text
+  cleabs text,
+  way_names text
 );
 
 
@@ -132,8 +133,13 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.sens_de_circulation as sens_de_circulation,
       -- t.itineraire_vert as it_vert,
       t.vitesse_moyenne_vl as vitesse_moyenne_vl,
-      -- NULLIF(t.nom_rue_gauche,'') as nom_voie_g,
-      -- NULLIF(t.nom_rue_droite,'') as nom_voie_d,
+
+      -- Pour l'attribut name
+      t.nom_1_gauche as nom_g,
+      t.nom_1_droite as nom_d,
+      t.cpx_numero as cpx_numero,
+      t.cpx_toponyme_route_nommee as cpx_toponyme,
+
       -- NULLIF(t.insee_commune_gauche,'') as inseecom_g,
       -- NULLIF(t.insee_commune_droite,'') as inseecom_d,
       -- t.largeur_de_chaussee as largeur,
@@ -198,7 +204,9 @@ INSERT INTO edges
     -- Attributs spécifiques à la bd uni
     vitesse_moyenne_vl as vitesse_moyenne_vl,
     nature as nature,
-    cleabs as cleabs
+    cleabs as cleabs,
+    CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names
+
   FROM bduni_troncon
 ;
 
