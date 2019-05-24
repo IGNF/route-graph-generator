@@ -1,6 +1,7 @@
 {
 	"host": "host",
-	"dbname": "roads",
-	"username": "user",
-	"password": "pass"
+	"database": "roads",
+	"user,": "user",
+  "password": "pass",
+  "port": 5432
 }

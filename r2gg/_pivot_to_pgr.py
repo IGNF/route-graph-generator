@@ -49,7 +49,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             maxspeed_forward double precision,
             maxspeed_backward double precision,
             priority double precision DEFAULT 1,
-            the_geom geometry(Linestring,4326)
+            the_geom geometry(Linestring,4326),
+            way_names text
         );"""
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -116,7 +117,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'source_id',
             'target_id',
             'ST_Length(geom) as length',
-            'length_m as length_m'
+            'length_m as length_m',
+            'way_names as way_names'
         ]
     for variable in costs["variables"]:
         in_columns += [variable["column_name"]]
@@ -128,7 +130,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (6 + 2 * len(costs["outputs"]))
+    single_value_str = "%s," * (7 + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -145,10 +147,13 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         values_tuple = ()
         for row in tmp_rows:
             output_costs = output_costs_from_costs_config(costs, row)
-            values_tuple += (row['id'], row['geom'], row['source_id'], row['target_id'], row['length'], row['length_m']) + output_costs
+            values_tuple += (row['id'], row['geom'], row['source_id'], row['target_id'], row['length'], row['length_m'], row['way_names'].encode('utf-8')) + output_costs
 
-        output_columns = "(id, the_geom, source, target, length, length_m"
-        set_on_conflict = "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,length = excluded.length,length_m = excluded.length_m"
+        output_columns = "(id, the_geom, source, target, length, length_m, way_names"
+        set_on_conflict = (
+            "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,"
+            "length = excluded.length,length_m = excluded.length_m,way_names = excluded.way_names"
+        )
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]
             set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
@@ -161,7 +166,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             ON CONFLICT (id) DO UPDATE
               SET {};
             """.format(output_columns, values_str, set_on_conflict)
-        cursor_out.execute(sql_insert, values_tuple)
+        cursor_out.execute(sql_insert.encode('utf-8'), values_tuple)
         connection_out.commit()
 
     # Ecriture des nodes et création de la topologie

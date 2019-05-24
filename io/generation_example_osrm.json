@@ -59,6 +59,12 @@
           "compute": {
             "storage": {
               "file": "lua/car-fastest.lua"
+            },
+            "configuration": {
+              "name": "cost_s_car",
+              "storage": {
+                "file": "costs_calculation_sample.json"
+              }
             }
           }
         },
@@ -68,6 +74,12 @@
           "compute": {
             "storage": {
               "file": "lua/car-shortest.lua"
+            },
+            "configuration": {
+              "name": "cost_m_car",
+              "storage": {
+                "file": "costs_calculation_sample.json"
+              }
             }
           }
         }

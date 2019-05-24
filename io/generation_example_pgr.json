@@ -34,7 +34,8 @@
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "baseId": "base_bduni"
+          "baseId": "base_bduni",
+          "dbConfig": "sample_db_config.json"
         },
         "projection": "EPSG:2154",
         "mapping": {

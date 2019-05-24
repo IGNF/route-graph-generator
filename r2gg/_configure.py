@@ -69,8 +69,8 @@ def configure():
 
     # Récupération des paramètres de la bdd
     host = work_db_config.get('host')
-    dbname = work_db_config.get('dbname')
-    user = work_db_config.get('username')
+    dbname = work_db_config.get('database')
+    user = work_db_config.get('user')
     password = work_db_config.get('password')
     port = work_db_config.get('port')
     connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)

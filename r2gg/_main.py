@@ -88,8 +88,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     # Configuration et connection à la base de sortie
     out_db_config = db_configs[ resource['topology']['storage']['baseId'] ]
     host = out_db_config.get('host')
-    dbname = out_db_config.get('dbname')
-    user = out_db_config.get('username')
+    dbname = out_db_config.get('database')
+    user = out_db_config.get('user')
     password = out_db_config.get('password')
     port = out_db_config.get('port')
     connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
@@ -108,8 +108,9 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     filename = config["outputs"]["configuration"]["storage"]["file"]
 
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:
-        json_string = json.dumps(resource, indent=2)
+        json_string = json.dumps(final_resource, indent=2)
         resource_file.write(json_string)
 
 def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = False):

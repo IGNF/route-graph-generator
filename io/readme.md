@@ -25,10 +25,13 @@ Fichier où enregistrer les logs. Chemin absolu conseillé.
 #### Attribut "host"
 Adresse du serveur de base de données.
 
-#### Attribut "dbname"
+#### Attribut "port"
+Port du serveur de base de données.
+
+#### Attribut "database"
 Nom de la base de données concernée.
 
-#### Attribut "username"
+#### Attribut "user"
 Nom d'utilisateur.
 
 #### Attribut "password"
@@ -38,9 +41,10 @@ Mot de passe
 ```json
 {
 	"host": "host",
-	"dbname": "roads",
-	"username": "user",
-	"password": "pass"
+	"database": "roads",
+	"user": "user",
+  "password": "pass",
+  "port": 5432
 }
 ```
 
