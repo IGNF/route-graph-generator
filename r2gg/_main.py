@@ -103,15 +103,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     connection.close()
     connection_out.close()
-    # Écriture du fichier resource TODO: n'écrire que le nécessaire
-    logger.info("Writing resource file")
-    filename = config["outputs"]["configuration"]["storage"]["file"]
+    _write_resource_file(config, resource, logger)
 
-    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
-    final_resource = {"resource": resource}
-    with open(filename, "w") as resource_file:
-        json_string = json.dumps(final_resource, indent=2)
-        resource_file.write(json_string)
 
 def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = False):
     """
@@ -179,6 +172,21 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
         subprocess_exexution(rm_args, logger)
         i += 1
 
+    _write_resource_file(config, resource, logger)
+
+
+def _write_resource_file(config, resource, logger):
+    """
+    Fonction pour l'écriture du fhcier de ressource
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    logger: logging.Logger
+    """
     filename = config["outputs"]["configuration"]["storage"]["file"]
     logger.info("Writing resource file: " + filename)
 
