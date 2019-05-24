@@ -179,9 +179,8 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
         subprocess_exexution(rm_args, logger)
         i += 1
 
-    # Écriture du fichier resource TODO: n'écrire que le nécessaire
-    logger.info("Writing resource file")
     filename = config["outputs"]["configuration"]["storage"]["file"]
+    logger.info("Writing resource file: " + filename)
 
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
     final_resource = {"resource": resource}
