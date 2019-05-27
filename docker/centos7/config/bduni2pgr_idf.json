@@ -25,7 +25,7 @@
       {
         "id": "base_sortie",
         "type": "bdd",
-        "configFile": "output_base.json"
+        "configFile": "/home/docker/data/output_base.json"
       }
     ],
     "workingSpace": {
@@ -47,7 +47,7 @@
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
           "baseId": "base_sortie",
-          "dbConfig": "output_base.json"
+          "dbConfig": "/home/docker/data/output_base.json"
         },
         "projection": "EPSG:4326",
         "mapping": {

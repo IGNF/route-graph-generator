@@ -175,6 +175,18 @@
               "pool": "itineraire"
             }
           }
+        },
+        "dirs": {
+          "dataDir": "",
+          "sqlDir": "",
+          "profileDir": "",
+          "resourceDir": ""
+        },
+        "sshConfig":{
+          "host": "127.0.0.1",
+          "port": 22,
+          "username": "toto",
+          "password": "mdp1"
         }
       }
     }
