@@ -1,0 +1,205 @@
+{
+  "generation": {
+    "general": {
+      "id": "bduni2osrm",
+      "logs": {
+        "configFile": "sample_log_config.json"
+      },
+      "parallelization": {
+        "threads": 4
+      },
+      "overwrite": true,
+      "operation": "creation"
+    },
+    "bases": [
+      {
+        "id": "base_pivot",
+        "type": "bdd",
+        "configFile": "db_config_pivot.json"
+      },
+      {
+        "id": "base_bduni",
+        "type": "bdd",
+        "configFile": "bduni_config.json"
+      }
+    ],
+    "workingSpace": {
+      "directory": "/var/tmp/",
+      "baseId": "base_pivot"
+    },
+    "resource": {
+      "id": "bduni-idf-osrm",
+      "type": "osrm",
+      "defaultSourceId": "bduni-idf-car-fastest",
+      "description": "Données BDUNI v2.",
+      "boundingBox": "1.7,48.4,3.3,49.1",
+      "defaultProjection": "EPSG:4326",
+      "availableProjections": [
+        "EPSG:4326",
+        "EPSG:2154"
+      ],
+      "topology": {
+        "description": "Données issues de la BDUNI de l'IGN.",
+        "storage": {
+          "file": "/mnt/data/bduni-idf.osm"
+        },
+        "projection": "EPSG:4326",
+        "mapping": {
+          "source": {
+            "baseId": "base_bduni"
+          },
+          "storage": {
+            "file": "sql/bduni_convert.sql"
+          }
+        },
+        "defaultAttributes": [
+          "name"
+        ]
+      },
+      "sources": [
+        {
+          "id": "bduni-idf-car-fastest",
+          "type": "osrm",
+          "storage": {
+            "file": "/mnt/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "./docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua"
+              },
+              "configuration": {
+                "name": "cost_s_car",
+                "storage": {
+                  "file": "./io/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bduni-idf-car-shortest",
+          "type": "osrm",
+          "storage": {
+            "file": "/mnt/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "./docker/centos7/config/bduniv2_distance.lua"
+              },
+              "configuration": {
+                "name": "cost_s_car",
+                "storage": {
+                  "file": "./io/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "availableOperations": [
+        {
+          "id": "route",
+          "rate": 10,
+          "maxIntermediatePoints": 10,
+          "maxNumberOfConstraints": 2,
+          "constraints": [
+            {
+              "id": "filter-unique",
+              "type": "filter-osrm",
+              "description": "Type d'arc.",
+              "key": "road_type",
+              "values": [
+                "autoroute",
+                "tunnel"
+              ],
+              "availableConstraints": [
+                "banned"
+              ],
+              "availableOperators": [
+                "="
+              ]
+            }
+          ],
+          "defaultParameters": [
+            {
+              "id": "algorithm",
+              "default": "contraction-hierarchies"
+            },
+            {
+              "id": "format",
+              "default": "application/json"
+            },
+            {
+              "id": "getGeometry",
+              "default": true
+            },
+            {
+              "id": "getBbox",
+              "default": true
+            },
+            {
+              "id": "getInstructions",
+              "default": false
+            },
+            {
+              "id": "distanceUnit",
+              "default": "kilometer"
+            },
+            {
+              "id": "timeUnit",
+              "default": "h-m-s"
+            }
+          ]
+        },
+        {
+          "id": "nearest",
+          "rate": 20,
+          "maxNumber": 100,
+          "defaultParameters": [
+            {
+              "id": "format",
+              "default": "application/json"
+            },
+            {
+              "id": "getId",
+              "default": false
+            },
+            {
+              "id": "number",
+              "default": 1
+            },
+            {
+              "id": "type",
+              "default": "all"
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "./bduni_idf_osrm.resource"
+        }
+      },
+      "dirs": {
+        "dbConfigDir": "",
+        "sqlDir": "",
+        "profileDir": "",
+        "resourceDir": ""
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
+      }
+    }
+  }
+}
