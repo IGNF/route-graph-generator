@@ -67,11 +67,10 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("Starting conversion")
     start_time = time.time()
 
-    # Non communications
+    # Non communications ---------------------------------------------------------------------------
     logger.info("Writing turn restrinctions...")
     create_non_comm = """
-        DROP TABLE IF EXISTS turn_restrictions;
-        CREATE TABLE turn_restrictions(
+        CREATE TABLE IF NOT EXISTS turn_restrictions(
             id text unique,
             id_from bigint,
             id_to bigint
@@ -101,15 +100,73 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             values_tuple += (row['cleabs'], row['id_from'], row['id_to'])
             index += 1
 
+        set_on_conflict = (
+            "id_from = excluded.id_from,id_to = excluded.id_to"
+        )
+
         sql_insert = """
             INSERT INTO turn_restrictions (id, id_from, id_to)
             VALUES {}
-        """.format(values_str)
+            ON CONFLICT (id) DO UPDATE
+              SET {};
+        """.format(values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
     logger.info("Writing turn restrinctions Done")
 
+    # Noeuds ---------------------------------------------------------------------------------------
+    logger.info("Writing vertices...")
+    create_nodes = """
+        CREATE TABLE IF NOT EXISTS ways_vertices_pgr(
+            id bigserial unique,
+            cnt int,
+            chk int,
+            ein int,
+            eout int,
+            the_geom geometry(Point,4326)
+    );"""
+    logger.debug("SQL: {}".format(create_nodes))
+    cursor_out.execute(create_nodes)
+
+    logger.info("Populating vertices")
+    nd_query = "SELECT id, geom FROM nodes;"
+
+    logger.debug("SQL: {}".format(nd_query))
+    cursor_in.execute(nd_query)
+    rows = cursor_in.fetchall()
+    # Insertion petit à petit -> plus performant
+    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    index = 0
+    for i in range(math.ceil(len(rows)/10000)):
+        tmp_rows = rows[i*10000:(i+1)*10000]
+        values_str = ""
+        for row in tmp_rows:
+            values_str += "(%s, %s),"
+        values_str = values_str[:-1]
+
+        # Tuple des valuers à insérer
+        values_tuple = ()
+        for row in tmp_rows:
+            values_tuple += (row['id'], row['geom'])
+            index += 1
+
+        set_on_conflict = (
+            "the_geom = excluded.the_geom"
+        )
+
+        sql_insert = """
+            INSERT INTO ways_vertices_pgr (id, the_geom)
+            VALUES {}
+            ON CONFLICT (id) DO UPDATE
+              SET {};
+        """.format(values_str, set_on_conflict)
+        cursor_out.execute(sql_insert, values_tuple)
+        connection_out.commit()
+
+    logger.info("Writing vertices Done")
+
+    # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
     in_columns = [
             'id',
@@ -168,22 +225,6 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             """.format(output_columns, values_str, set_on_conflict)
         cursor_out.execute(sql_insert.encode('utf-8'), values_tuple)
         connection_out.commit()
-
-    # Ecriture des nodes et création de la topologie
-    create_topology_sql = "SELECT pgr_createTopology('ways', 0.00001);"
-    logger.info("SQL: {}".format(create_topology_sql))
-    cursor_out.execute(create_topology_sql)
-    connection_out.commit()
-
-    # Check the routing topology TODO: remove? takes too much time
-    # analysegraph_sql = "SELECT pgr_analyzegraph('ways', 0.00001);"
-    # logger.info("SQL: {}".format(analysegraph_sql))
-    # cursor_out.execute(analysegraph_sql)
-    # connection_out.commit()
-
-    # analyzeOneway_sql = "SELECT pgr_analyzeoneway('ways', 0.00001)"
-    # logger.info("SQL: {}".format(analyzeOneway_sql))
-    # cursor.execute(create_topology_sql)
 
     cursor_in.close()
     cursor_out.close()
