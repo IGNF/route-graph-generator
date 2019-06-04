@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS edges (
   id bigserial primary key,
   source_id bigserial,
   target_id bigserial,
+  x1 double precision,
+  y1 double precision,
+  x2 double precision,
+  y2 double precision,
   length_m double precision,
   direction integer,
   geom geometry(Linestring,4326),
@@ -194,6 +198,10 @@ INSERT INTO edges
     nextval('edges_id_seq') AS id,
     nodes_id(ST_StartPoint(geom)) as source_id,
     nodes_id(ST_EndPoint(geom)) as target_id,
+    ST_X(ST_StartPoint(geom)) as x1,
+    ST_Y(ST_StartPoint(geom)) as y1,
+    ST_X(ST_EndPoint(geom)) as x2,
+    ST_X(ST_EndPoint(geom)) as y2,
     ST_length(geography(ST_Transform(geom, 4326))) as length_m,
     (CASE
       WHEN sens_de_circulation='Sens direct' THEN 1
@@ -206,7 +214,6 @@ INSERT INTO edges
     nature as nature,
     cleabs as cleabs,
     CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names
-
   FROM bduni_troncon
 ;
 
