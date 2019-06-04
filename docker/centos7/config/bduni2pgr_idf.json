@@ -67,7 +67,7 @@
           "id": "bduni-idf-car-fastest-pgr",
           "type": "pgr",
           "storage": {
-            "dbConfig": "db_config_output.json",
+            "dbConfig": "/home/docker/data/output_base.json",
             "costColumn": "cost_s_car",
             "rcostColumn": "reverse_cost_s_car"
           },
@@ -76,12 +76,12 @@
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "costs_calculation_sample.json"
+                "file": "/home/docker/data/costs_calculation_sample.json"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "./costs_calculation_sample.json"
+                  "file": "/home/docker/data/costs_calculation_sample.json"
                 }
               }
             }
@@ -91,7 +91,7 @@
           "id": "bduni-idf-car-shortest-pgr",
           "type": "pgr",
           "storage": {
-            "dbConfig": "db_config_output.json",
+            "dbConfig": "/home/docker/data/output_base.json",
             "costColumn": "cost_m_car",
             "rcostColumn": "reverse_cost_m_car"
           },
@@ -100,12 +100,12 @@
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "costs_calculation_sample.json"
+                "file": "/home/docker/data/costs_calculation_sample.json"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "./costs_calculation_sample.json"
+                  "file": "/home/docker/data/costs_calculation_sample.json"
                 }
               }
             }

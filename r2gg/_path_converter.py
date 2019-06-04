@@ -75,7 +75,7 @@ def _convert_path(in_path, out_dir):
     in_path: str
         chemin initial
     out_dir: str
-        doccier de sortie
+        dossier de sortie
     """
     out_path = out_dir
     filename = os.path.basename(in_path)

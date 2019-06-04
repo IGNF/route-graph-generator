@@ -212,11 +212,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
                 row['id'],
                 row['geom'],
                 row['source_id'],
+                row['target_id'],
                 row['x1'],
                 row['y1'],
                 row['x2'],
                 row['y2'],
-                row['target_id'],
                 row['length'],
                 row['length_m'],
                 row['way_names'].encode('utf-8')
