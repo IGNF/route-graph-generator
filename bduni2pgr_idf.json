@@ -50,6 +50,7 @@
           "dbConfig": "db_config_output.json"
         },
         "projection": "EPSG:4326",
+        "bbox": "1.7,48.4,3.3,49.1",
         "mapping": {
           "source": {
             "baseId": "base_bduni"
