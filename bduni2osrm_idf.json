@@ -164,6 +164,14 @@
                 "astar",
                 "trsp"
               ]
+            },
+            {
+              "id": "geometries_type",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
             }
           ]
         }
