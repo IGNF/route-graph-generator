@@ -167,9 +167,8 @@
             },
             {
               "id": "algorithm",
-              "defaultValueContent": "",
+              "defaultValueContent": "dijkstra",
               "values": [
-                "",
                 "dijkstra",
                 "astar",
                 "trsp"

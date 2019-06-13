@@ -20,7 +20,7 @@
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "bduni_config.json"
       }
     ],
     "workingSpace": {
@@ -145,12 +145,10 @@
             },
             {
               "id": "algorithm",
-              "defaultValueContent": "",
+              "defaultValueContent": "ch",
               "values": [
-                "",
-                "dijkstra",
-                "astar",
-                "trsp"
+                "ch",
+                "mld"
               ]
             },
             {
