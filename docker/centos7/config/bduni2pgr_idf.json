@@ -20,7 +20,7 @@
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "bduni_config.json"
+        "configFile": "/run/secrets/db_config"
       },
       {
         "id": "base_sortie",
