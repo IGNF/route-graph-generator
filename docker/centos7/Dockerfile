@@ -52,8 +52,7 @@ COPY docker/centos7/config/output_base.json /home/docker/data/output_base.json
 ENV LANG en_US.utf8
 
 # Commandes pour lancer une génération
-RUN ["chmod", "+x", "./populatepivot2osrm.sh"]
-RUN ["chmod", "+x", "./populatepivot2pgr.sh"]
+RUN ["chmod", "+x", "./r2gg_pipeline.sh"]
 
 # Montage du volume pour partager les données
 VOLUME ["/home/docker/data"]
