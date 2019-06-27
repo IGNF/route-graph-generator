@@ -185,7 +185,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         in_columns += [variable["column_name"]]
 
     # Ecriture des ways
-    sql_query = getQueryByTableAndBoundingBox('edges', resource['boundingBox'], in_columns)
+    sql_query = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], in_columns)
     logger.info("SQL: {}".format(sql_query))
     cursor_in.execute(sql_query)
     rows = cursor_in.fetchall()
