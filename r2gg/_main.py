@@ -38,7 +38,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     work_db_config = db_configs[ config['workingSpace']['baseId'] ]
 
     # Récupération de la bbox
-    bbox = [float(coord) for coord in resource["boundingBox"].split(",")]
+    bbox = [float(coord) for coord in resource["topology"]["bbox"].split(",")]
     assert len(bbox) == 4, "bondingBox invalide"
     xmin = bbox[0]
     ymin = bbox[1]
@@ -196,6 +196,9 @@ def _write_resource_file(config, resource, logger, convert_file_paths = False, c
 
     if convert_file_paths:
         in_paths, out_paths = convert_paths(config, resource, config["output_dirs"])
+
+    resource.pop("mapping")
+    resource["storage"].pop("baseId")
 
     final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:

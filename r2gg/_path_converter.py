@@ -14,8 +14,8 @@ def convert_paths(config, resource, output_dirs):
         dictionnaire correspondant à une resource
     output_dirs: dict
         mapping vers les répertoires de sortie. Doit contenir les clefs :
-        Pour pgrouting : dbConfigDir, sqlDir, profileDir, resourceDir
-        Pour osrm : dataDir, sqlDir, profileDir, resourceDir
+        Pour pgrouting : dbConfigDir, profileDir, resourceDir
+        Pour osrm : dataDir, profileDir, resourceDir
 
     Returns
     -------
@@ -37,10 +37,6 @@ def convert_paths(config, resource, output_dirs):
         in_paths.append(resource["topology"]["storage"]["file"])
         resource["topology"]["storage"]["file"] = _convert_path(resource["topology"]["storage"]["file"], output_dirs["dataDir"])
         out_paths.append(resource["topology"]["storage"]["file"])
-
-    in_paths.append(resource["topology"]["mapping"]["storage"])
-    resource["topology"]["mapping"]["storage"] = _convert_path(resource["topology"]["mapping"]["storage"], output_dirs["sqlDir"])
-    out_paths.append(resource["topology"]["mapping"]["storage"])
 
     for source in resource["sources"]:
         if source["type"] == "pgr":

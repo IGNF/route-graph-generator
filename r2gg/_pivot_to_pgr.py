@@ -219,7 +219,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
                 row['y2'],
                 row['length'],
                 row['length_m'],
-                row['way_names'].encode('utf-8')
+                row['way_names']
             ) + output_costs
 
         output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, way_names"
@@ -240,7 +240,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             ON CONFLICT (id) DO UPDATE
               SET {};
             """.format(output_columns, values_str, set_on_conflict)
-        cursor_out.execute(sql_insert.encode('utf-8'), values_tuple)
+        cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
     cursor_in.close()

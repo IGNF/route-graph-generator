@@ -22,7 +22,7 @@ function process_way (profile, way, result)
     local nature  = way:get_value_by_key("nature")
     local vitesse_moyenne = way:get_value_by_key("vitesse_moyenne_vl")
 
-    -- clé absolue du troncon
+    -- noms du troncon
     if way_names and way_names ~= "" then
         result.name = way_names
     end
