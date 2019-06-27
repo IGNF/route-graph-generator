@@ -197,8 +197,8 @@ def _write_resource_file(config, resource, logger, convert_file_paths = False, c
     if convert_file_paths:
         in_paths, out_paths = convert_paths(config, resource, config["output_dirs"])
 
-    resource.pop("mapping")
-    resource["storage"].pop("baseId")
+    resource.pop("mapping", None)
+    resource["storage"].pop("baseId", None)
 
     final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:
