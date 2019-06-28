@@ -243,6 +243,25 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
+    spacial_indices_query = """
+        CREATE INDEX IF NOT EXISTS ways_geom_gist ON ways USING GIST (the_geom);
+        CREATE INDEX IF NOT EXISTS vertices_geom_gist ON ways_vertices_pgr USING GIST (the_geom);
+        CLUSTER ways USING ways_geom_gist ;
+        CLUSTER ways_vertices_pgr USING vertices_geom_gist ;
+    """
+    logger.info("SQL: {}".format(spacial_indices_query))
+    cursor_out.execute(spacial_indices_query)
+    connection_out.commit()
+
+    old_isolation_level = connection_out.isolation_level
+    connection_out.set_isolation_level(0)
+    vacuum_query = "VACUUM ANALYZE;"
+    logger.info("SQL: {}".format(vacuum_query))
+    cursor_out.execute(vacuum_query)
+    connection_out.set_isolation_level(old_isolation_level)
+    connection_out.commit()
+
+
     cursor_in.close()
     cursor_out.close()
     end_time = time.time()
