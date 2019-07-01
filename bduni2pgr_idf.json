@@ -39,8 +39,23 @@
       "topology": {
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "baseId": "base_sortie",
-          "dbConfig": "db_config_output.json"
+          "base": {
+            "dbConfig": "db_config_output.json",
+            "table": "ways",
+            "attributes": [
+              {
+                "key": "name",
+                "column": "way_names",
+                "default": "false"
+              },
+              {
+                "key": "id",
+                "column": "id",
+                "default": "false"
+              }
+            ]
+          },
+          "baseId": "base_sortie"
         },
         "projection": "EPSG:4326",
         "bbox": "1.7,48.4,3.3,49.1",
