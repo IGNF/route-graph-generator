@@ -152,22 +152,23 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       -- n.numero as numero,
 
       -- NON BDTOPO
-      NULLIF(n.cleabs,'') as rn_cleabs,
+      -- NULLIF(n.cleabs,'') as rn_cleabs,
 
       -- NULLIF(t.acces,'') as acces,
-      t.urbain as urbain,
-      t.prive as prive,
+      -- t.urbain as urbain,
+      -- t.prive as prive,
 
       -- géométrie du troncon
       ST_Force2D(ST_Transform(ST_SetSrid(t.geometrie, bduni_srid(t.gcms_territoire)), 4326)) as geom
 
     FROM (
       -- decomposition liens_vers_route_nommee en lien_vers_route_nommee (split et duplication des lignes)
-      SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
+      SELECT * FROM troncon_de_route
+      -- SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
     ) t
-      LEFT JOIN route_numerotee_ou_nommee n
-        -- gestion du lien multiple
-        ON t.lien_vers_route_nommee = n.cleabs
+      -- LEFT JOIN route_numerotee_ou_nommee n
+      --   -- gestion du lien multiple
+      --   ON t.lien_vers_route_nommee = n.cleabs
   ) s
     WHERE NOT detruit
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
@@ -201,7 +202,7 @@ INSERT INTO edges
     ST_X(ST_StartPoint(geom)) as x1,
     ST_Y(ST_StartPoint(geom)) as y1,
     ST_X(ST_EndPoint(geom)) as x2,
-    ST_X(ST_EndPoint(geom)) as y2,
+    ST_Y(ST_EndPoint(geom)) as y2,
     ST_length(geography(ST_Transform(geom, 4326))) as length_m,
     (CASE
       WHEN sens_de_circulation='Sens direct' THEN 1
