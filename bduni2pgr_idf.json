@@ -37,6 +37,8 @@
       "type": "pgr",
       "description": "Données BDUNI v2.",
       "topology": {
+        "id": "base-bduni",
+        "type": "db",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
           "base": {

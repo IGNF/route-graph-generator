@@ -32,6 +32,8 @@
       "type": "osrm",
       "description": "Données BDUNI v2.",
       "topology": {
+        "id": "osm-bduni",
+        "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
           "file": "/home/docker/data/bduni-idf.osm"
