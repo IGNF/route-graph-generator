@@ -177,7 +177,7 @@
             },
             {
               "id": "algorithm",
-              "defaultValueContent": "dijkstra",
+              "defaultValueContent": "trsp",
               "values": [
                 "dijkstra",
                 "astar",
