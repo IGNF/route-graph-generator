@@ -125,7 +125,7 @@ def _build_process_way(costs_config, output_cost):
         process_way_string += string
 
     # pour le nom
-    process_way_string += "    local way_names = way:get_value_by_key(way_names)\n"
+    process_way_string += "    local way_names = way:get_value_by_key(\"way_names\")\n"
 
     process_way_string += (
         "    -- noms du troncon\n"

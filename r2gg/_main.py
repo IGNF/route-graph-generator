@@ -177,7 +177,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
     _write_resource_file(config, resource, logger)
 
 
-def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = True):
+def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = False):
     """
     Fonction pour l'écriture du fhcier de ressource
 
@@ -195,7 +195,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
 
     if convert_file_paths:
-        in_paths, out_paths = convert_paths(config, resource, config["output_dirs"])
+        in_paths, out_paths = convert_paths(config, resource, config["outputs"]["dirs"])
 
     resource.pop("mapping", None)
     resource["topology"]["storage"].pop("baseId", None)

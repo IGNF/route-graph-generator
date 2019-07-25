@@ -51,9 +51,9 @@ def convert_paths(config, resource, output_dirs):
         in_paths.append(source["cost"]["compute"]["storage"]["file"])
         source["cost"]["compute"]["storage"]["file"] = _convert_path(source["cost"]["compute"]["storage"]["file"], output_dirs["profileDir"])
         out_paths.append(source["cost"]["compute"]["storage"]["file"])
-        in_paths.append(source["cost"]["configuration"]["storage"]["file"])
-        source["cost"]["configuration"]["storage"]["file"] = _convert_path(source["cost"]["configuration"]["storage"]["file"], output_dirs["profileDir"])
-        out_paths.append(source["cost"]["configuration"]["storage"]["file"])
+        in_paths.append(source["cost"]["compute"]["configuration"]["storage"]["file"])
+        source["cost"]["compute"]["configuration"]["storage"]["file"] = _convert_path(source["cost"]["compute"]["configuration"]["storage"]["file"], output_dirs["profileDir"])
+        out_paths.append(source["cost"]["compute"]["configuration"]["storage"]["file"])
 
     in_paths.append(config["outputs"]["configuration"]["storage"]["file"])
     config["outputs"]["configuration"]["storage"]["file"] = _convert_path(config["outputs"]["configuration"]["storage"]["file"], output_dirs["resourceDir"])
@@ -75,6 +75,5 @@ def _convert_path(in_path, out_dir):
     """
     out_path = out_dir
     filename = os.path.basename(in_path)
-    out_path += filename
 
-    return out_path
+    return os.path.join(out_path, filename)

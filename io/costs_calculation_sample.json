@@ -1,11 +1,6 @@
 {
   "variables": [
     {
-      "name": "cleabs",
-      "column_name": "cleabs",
-      "mapping": "value"
-    },
-    {
       "name": "nature",
       "column_name": "nature",
       "mapping": "value"
