@@ -45,7 +45,7 @@ def convert_paths(config, resource, output_dirs):
             out_paths.append(source["storage"]["dbConfig"])
         elif source["type"] == "osrm":
             in_paths.append(source["storage"]["file"])
-            source["storage"]["file"] = _convert_path(source["storage"]["file"], output_dirs["dataDir"])
+            source["storage"]["file"] = _convert_path(source["storage"]["file"], output_dirs["dataDir"], source["id"])
             out_paths.append(source["storage"]["file"])
 
         in_paths.append(source["cost"]["compute"]["storage"]["file"])
@@ -62,7 +62,7 @@ def convert_paths(config, resource, output_dirs):
     return in_paths, out_paths
 
 
-def _convert_path(in_path, out_dir):
+def _convert_path(in_path, out_dir, subdir=""):
     """
     Convertit un chemin de fichier
 
@@ -76,4 +76,4 @@ def _convert_path(in_path, out_dir):
     out_path = out_dir
     filename = os.path.basename(in_path)
 
-    return os.path.join(out_path, filename)
+    return os.path.join(out_path, subdir, filename)
