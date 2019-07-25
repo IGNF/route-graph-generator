@@ -108,7 +108,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     _write_resource_file(config, resource, logger)
 
 
-def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = False):
+def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = True):
     """
     Fonction de conversion depuis la bdd pivot vers les fichiers osm et osrm
 
@@ -177,7 +177,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
     _write_resource_file(config, resource, logger)
 
 
-def _write_resource_file(config, resource, logger, convert_file_paths = False, copy_files_out = False):
+def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = True):
     """
     Fonction pour l'écriture du fhcier de ressource
 

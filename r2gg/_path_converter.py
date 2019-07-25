@@ -29,9 +29,9 @@ def convert_paths(config, resource, output_dirs):
 
     resource_type = resource["type"]
     if resource_type == "pgr":
-        in_paths.append(resource["topology"]["storage"]["dbConfig"])
-        resource["topology"]["storage"]["dbConfig"] = _convert_path(resource["topology"]["storage"]["dbConfig"], output_dirs["dbConfigDir"])
-        out_paths.append(resource["topology"]["storage"]["dbConfig"])
+        in_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
+        resource["topology"]["storage"]["base"]["dbConfig"] = _convert_path(resource["topology"]["storage"]["base"]["dbConfig"], output_dirs["dbConfigDir"])
+        out_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
 
     elif resource_type == "osrm":
         in_paths.append(resource["topology"]["storage"]["file"])
@@ -48,9 +48,9 @@ def convert_paths(config, resource, output_dirs):
             source["storage"]["file"] = _convert_path(source["storage"]["file"], output_dirs["dataDir"])
             out_paths.append(source["storage"]["file"])
 
-        in_paths.append(source["cost"]["storage"]["file"])
-        source["cost"]["storage"]["file"] = _convert_path(source["cost"]["storage"]["file"], output_dirs["profileDir"])
-        out_paths.append(source["cost"]["storage"]["file"])
+        in_paths.append(source["cost"]["compute"]["storage"]["file"])
+        source["cost"]["compute"]["storage"]["file"] = _convert_path(source["cost"]["compute"]["storage"]["file"], output_dirs["profileDir"])
+        out_paths.append(source["cost"]["compute"]["storage"]["file"])
         in_paths.append(source["cost"]["configuration"]["storage"]["file"])
         source["cost"]["configuration"]["storage"]["file"] = _convert_path(source["cost"]["configuration"]["storage"]["file"], output_dirs["profileDir"])
         out_paths.append(source["cost"]["configuration"]["storage"]["file"])

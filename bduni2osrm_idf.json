@@ -33,6 +33,7 @@
       "description": "Données BDUNI v2.",
       "topology": {
         "id": "osm-bduni",
+        "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
           "file": "/mnt/data/bduni-idf.osm"
@@ -176,9 +177,9 @@
         }
       },
       "dirs": {
-        "dbConfigDir": "/home/docker/data",
-        "profileDir": "/home/docker/data",
-        "resourceDir": "/home/docker/data/resources"
+        "dataDir": "/home/geoevolution/data/bduni-idf",
+        "profileDir": "/home/geoevolution/road2-config",
+        "resourceDir": "/home/geoevolution/road2-config/resources"
       },
       "sshConfig":{
         "host": "127.0.0.1",

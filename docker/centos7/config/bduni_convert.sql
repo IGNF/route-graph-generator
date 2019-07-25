@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS edges (
   vitesse_moyenne_vl integer,
   nature text,
   cleabs text,
+  importance integer,
   way_names text
 );
 
@@ -130,7 +131,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       -- NULLIF(t.etat_de_l_objet,'') as etat,
       -- n.type_de_route as cl_admin,
       t.nature as nature,
-      t.importance as importance,
+      NULLIF(t.importance,'')::int as importance,
       -- t.fictif as fictif,
       -- t.position_par_rapport_au_sol as pos_sol,
       -- t.nombre_de_voies as nb_voies,
@@ -172,6 +173,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
   ) s
     WHERE NOT detruit
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
+    AND importance < 6
     -- décommenter pour tester :
     -- AND territoire='REU'
 ;
@@ -214,6 +216,7 @@ INSERT INTO edges
     vitesse_moyenne_vl as vitesse_moyenne_vl,
     nature as nature,
     cleabs as cleabs,
+    importance as importance,
     CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names
   FROM bduni_troncon
 ;

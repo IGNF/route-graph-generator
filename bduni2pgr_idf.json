@@ -203,9 +203,9 @@
         }
       },
       "dirs": {
-        "dbConfigDir": "/home/docker/data",
-        "profileDir": "/home/docker/data",
-        "resourceDir": "/home/docker/data/resources"
+        "dbConfigDir": "/home/geoevolution/road2-config",
+        "profileDir": "/home/geoevolution/road2-config",
+        "resourceDir": "/home/geoevolution/road2-config/resources"
       },
       "sshConfig":{
         "host": "127.0.0.1",

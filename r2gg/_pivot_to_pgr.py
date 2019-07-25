@@ -179,6 +179,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'y2',
             'ST_Length(geom) as length',
             'length_m as length_m',
+            'importance as priority',
             'way_names as way_names'
         ]
     for variable in costs["variables"]:
@@ -191,7 +192,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (11 + 2 * len(costs["outputs"]))
+    single_value_str = "%s," * (12 + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -219,14 +220,16 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
                 row['y2'],
                 row['length'],
                 row['length_m'],
+                row['priority'],
                 row['way_names']
             ) + output_costs
 
-        output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, way_names"
+        output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, priority, way_names"
         set_on_conflict = (
             "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,"
             "x1 = excluded.x1,y1 = excluded.y1,x2 = excluded.x2,y2 = excluded.y2,"
-            "length = excluded.length,length_m = excluded.length_m,way_names = excluded.way_names"
+            "length = excluded.length,length_m = excluded.length_m,priority = excluded.priority,"
+            "way_names = excluded.way_names"
         )
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]
