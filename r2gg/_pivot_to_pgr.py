@@ -50,7 +50,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             maxspeed_backward double precision,
             priority double precision DEFAULT 1,
             the_geom geometry(Linestring,4326),
-            way_names text
+            way_names text,
+            nature text,
+            vitesse_moyenne_vl text
         );"""
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -180,7 +182,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'ST_Length(geom) as length',
             'length_m as length_m',
             'importance as priority',
-            'way_names as way_names'
+            'way_names as way_names',
+            'nature as nature',
+            'vitesse_moyenne_vl as vitesse_moyenne_vl'
         ]
     for variable in costs["variables"]:
         in_columns += [variable["column_name"]]
@@ -192,7 +196,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (12 + 2 * len(costs["outputs"]))
+    single_value_str = "%s," * (14 + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -221,15 +225,17 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
                 row['length'],
                 row['length_m'],
                 row['priority'],
-                row['way_names']
+                row['way_names'],
+                row['nature'],
+                row['vitesse_moyenne_vl']
             ) + output_costs
 
-        output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, priority, way_names"
+        output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, priority, way_names, nature, vitesse_moyenne_vl"
         set_on_conflict = (
             "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,"
             "x1 = excluded.x1,y1 = excluded.y1,x2 = excluded.x2,y2 = excluded.y2,"
             "length = excluded.length,length_m = excluded.length_m,priority = excluded.priority,"
-            "way_names = excluded.way_names"
+            "way_names = excluded.way_names,nature = excluded.nature,vitesse_moyenne_vl = excluded.vitesse_moyenne_vl"
         )
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]

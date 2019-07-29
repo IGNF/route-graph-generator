@@ -194,7 +194,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
 
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
 
-    if convert_file_paths:
+    if convert_file_paths and config["outputs"].get("dirs", None) is not None:
         in_paths, out_paths = convert_paths(config, resource, config["outputs"]["dirs"])
 
     resource.pop("mapping", None)

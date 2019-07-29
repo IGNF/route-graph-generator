@@ -51,8 +51,13 @@
                 "default": "false"
               },
               {
-                "key": "id",
-                "column": "id",
+                "key": "vitesse",
+                "column": "vitesse_moyenne_vl",
+                "default": "false"
+              },
+              {
+                "key": "nature",
+                "column": "nature",
                 "default": "false"
               }
             ]
@@ -172,7 +177,9 @@
             {
               "id": "waysAttributes",
               "values": [
-                "name"
+                "name",
+                "nature",
+                "vitesse"
               ]
             },
             {
