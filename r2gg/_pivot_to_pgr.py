@@ -31,7 +31,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_out = connection_out.cursor()
     # Création de la edge_table pgrouting
     create_table = """
-        CREATE TABLE IF NOT EXISTS ways(
+        DROP TABLE IF EXISTS ways;
+        CREATE TABLE ways(
             id bigserial unique,
             tag_id integer,
             length double precision,
@@ -72,7 +73,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Non communications ---------------------------------------------------------------------------
     logger.info("Writing turn restrinctions...")
     create_non_comm = """
-        CREATE TABLE IF NOT EXISTS turn_restrictions(
+        DROP TABLE IF EXISTS turn_restrictions;
+        CREATE TABLE turn_restrictions(
             id text unique,
             id_from bigint,
             id_to bigint
@@ -120,7 +122,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
     create_nodes = """
-        CREATE TABLE IF NOT EXISTS ways_vertices_pgr(
+        DROP TABLE IF EXISTS ways_vertices_pgr;
+        CREATE TABLE ways_vertices_pgr(
             id bigserial unique,
             cnt int,
             chk int,
