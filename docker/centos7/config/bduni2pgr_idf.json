@@ -216,6 +216,17 @@
         "storage": {
           "file": "/home/docker/data/resources/bduni_idf_pgr.resource"
         }
+      },
+      "dirs": {
+        "dbConfigDir": "/home/geoevolution/road2-config",
+        "profileDir": "/home/geoevolution/road2-config",
+        "resourceDir": "/home/geoevolution/road2-config/resources"
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
       }
     }
   }
