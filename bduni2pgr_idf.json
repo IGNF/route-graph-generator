@@ -215,6 +215,58 @@
               ]
             }
           ]
+        },
+        {
+          "id": "isochrone",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "corse-osm"
+              ]
+            },
+            {
+              "id": "point",
+              "values": {
+                "bbox": "-90,-180,90,180",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "costType",
+              "defaultValueContent": "time",
+              "values": [
+                "time",
+                "distance"
+              ]
+            },
+            {
+              "id": "costValue"
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car",
+                "pedestrian"
+              ]
+            },
+            {
+              "id": "optimization",
+              "defaultValueContent": "fastest",
+              "values": [
+                "fastest"
+              ]
+            },
+            {
+              "id": "direction",
+              "defaultValueContent": "departure",
+              "values": [
+                "departure",
+                "arrival"
+              ]
+            }
+          ]
         }
       ]
     },
