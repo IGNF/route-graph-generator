@@ -3,5 +3,6 @@
 	"database": "pgrouting",
 	"user": "postgres",
 	"password": "postgres",
-	"port": "5432"
+	"port": "5432", 
+	"max": 8
 }

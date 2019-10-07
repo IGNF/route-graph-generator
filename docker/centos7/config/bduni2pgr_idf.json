@@ -130,20 +130,20 @@
             {
               "id": "resource",
               "values": [
-                "corse-osm"
+                "bduni-idf-pgr"
               ]
             },
             {
               "id": "start",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -164,12 +164,12 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
             {
-              "id": "stepsGeometry",
+              "id": "getSteps",
               "defaultValueContent": "true"
             },
             {
@@ -205,6 +205,23 @@
               "values": [
                 "EPSG:4326",
                 "EPSG:2154"
+              ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "minute",
+              "values": [
+                "hour",
+                "minute",
+                "second"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
               ]
             }
           ]
@@ -262,6 +279,17 @@
         "storage": {
           "file": "/home/docker/data/resources/bduni_idf_pgr.resource"
         }
+      },
+      "dirs": {
+        "dbConfigDir": "/home/docker/data",
+        "profileDir": "/home/docker/data",
+        "resourceDir": "/home/docker/data/resources"
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
       }
     }
   }

@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2osrm",
+      "id": "bduni2pgr",
       "logs": {
         "configFile": "sample_log_config.json"
       },
@@ -21,6 +21,11 @@
         "id": "base_bduni",
         "type": "bdd",
         "configFile": "bduni_config.json"
+      },
+      {
+        "id": "base_sortie",
+        "type": "bdd",
+        "configFile": "db_config_output.json"
       }
     ],
     "workingSpace": {
@@ -28,15 +33,36 @@
       "baseId": "base_pivot"
     },
     "resource": {
-      "id": "bduni-idf-osrm",
-      "type": "osrm",
+      "id": "bduni-idf-pgr",
+      "type": "pgr",
       "description": "Données BDUNI v2.",
       "topology": {
-        "id": "osm-bduni",
-        "type":"osm",
+        "id": "base-bduni",
+        "type": "db",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/mnt/data/bduni-idf.osm"
+          "base": {
+            "dbConfig": "db_config_output.json",
+            "table": "ways",
+            "attributes": [
+              {
+                "key": "name",
+                "column": "way_names",
+                "default": "false"
+              },
+              {
+                "key": "vitesse",
+                "column": "vitesse_moyenne_vl",
+                "default": "false"
+              },
+              {
+                "key": "nature",
+                "column": "nature",
+                "default": "false"
+              }
+            ]
+          },
+          "baseId": "base_sortie"
         },
         "projection": "EPSG:4326",
         "bbox": "1.7,48.4,3.3,49.1",
@@ -54,17 +80,19 @@
       },
       "sources": [
         {
-          "id": "bduni-idf-car-fastest",
-          "type": "osrm",
+          "id": "bduni-idf-car-fastest-pgr",
+          "type": "pgr",
           "storage": {
-            "file": "/mnt/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+            "dbConfig": "db_config_output.json",
+            "costColumn": "cost_s_car",
+            "rcostColumn": "reverse_cost_s_car"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "./docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua"
+                "file": "io/costs_calculation_sample.json"
               },
               "configuration": {
                 "name": "cost_s_car",
@@ -76,20 +104,22 @@
           }
         },
         {
-          "id": "bduni-idf-car-shortest",
-          "type": "osrm",
+          "id": "bduni-idf-car-shortest-pgr",
+          "type": "pgr",
           "storage": {
-            "file": "/mnt/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+            "dbConfig": "db_config_output.json",
+            "costColumn": "cost_m_car",
+            "rcostColumn": "reverse_cost_m_car"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "./docker/centos7/config/bduniv2_distance.lua"
+                "file": "io/costs_calculation_sample.json"
               },
               "configuration": {
-                "name": "cost_s_car",
+                "name": "cost_m_car",
                 "storage": {
                   "file": "./io/costs_calculation_sample.json"
                 }
@@ -144,21 +174,24 @@
               }
             },
             {
-              "id": "stepsGeometry",
+              "id": "getSteps",
               "defaultValueContent": "true"
             },
             {
               "id": "waysAttributes",
               "values": [
-                "name"
+                "name",
+                "nature",
+                "vitesse"
               ]
             },
             {
               "id": "algorithm",
-              "defaultValueContent": "ch",
+              "defaultValueContent": "trsp",
               "values": [
-                "ch",
-                "mld"
+                "dijkstra",
+                "astar",
+                "trsp"
               ]
             },
             {
@@ -182,17 +215,69 @@
               ]
             }
           ]
+        },
+        {
+          "id": "isochrone",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "corse-osm"
+              ]
+            },
+            {
+              "id": "point",
+              "values": {
+                "bbox": "-90,-180,90,180",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "costType",
+              "defaultValueContent": "time",
+              "values": [
+                "time",
+                "distance"
+              ]
+            },
+            {
+              "id": "costValue"
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car",
+                "pedestrian"
+              ]
+            },
+            {
+              "id": "optimization",
+              "defaultValueContent": "fastest",
+              "values": [
+                "fastest"
+              ]
+            },
+            {
+              "id": "direction",
+              "defaultValueContent": "departure",
+              "values": [
+                "departure",
+                "arrival"
+              ]
+            }
+          ]
         }
       ]
     },
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "./bduni_idf_osrm.resource"
+          "file": "./bduni_idf_pgr.resource"
         }
       },
       "dirs": {
-        "dataDir": "/home/geoevolution/data/bduni-idf",
+        "dbConfigDir": "/home/geoevolution/road2-config",
         "profileDir": "/home/geoevolution/road2-config",
         "resourceDir": "/home/geoevolution/road2-config/resources"
       },
