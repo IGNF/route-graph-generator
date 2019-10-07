@@ -118,7 +118,7 @@
               "default": "application/json"
             },
             {
-              "id": "getGeometry",
+              "id": "getSteps",
               "default": true
             },
             {
