@@ -53,7 +53,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             the_geom geometry(Linestring,4326),
             way_names text,
             nature text,
-            vitesse_moyenne_vl text
+            vitesse_moyenne_vl integer
         );"""
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
