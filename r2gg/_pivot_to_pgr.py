@@ -49,11 +49,13 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             y2 double precision,
             maxspeed_forward double precision,
             maxspeed_backward double precision,
-            priority double precision DEFAULT 1,
+            priority double precision DEFAULT 6,
             the_geom geometry(Linestring,4326),
             way_names text,
             nature text,
-            vitesse_moyenne_vl integer
+            vitesse_moyenne_vl integer,
+            position_par_rapport_au_sol text,
+            acces_vehicule_leger text
         );"""
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -150,7 +152,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             values_str += "(%s, %s),"
         values_str = values_str[:-1]
 
-        # Tuple des valuers à insérer
+        # Tuple des valeurs à insérer
         values_tuple = ()
         for row in tmp_rows:
             values_tuple += (row['id'], row['geom'])
@@ -173,7 +175,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
     # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
-    in_columns = [
+    attribute_columns = [
             'id',
             'geom',
             'source_id',
@@ -187,8 +189,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'importance as priority',
             'way_names as way_names',
             'nature as nature',
-            'vitesse_moyenne_vl as vitesse_moyenne_vl'
+            'vitesse_moyenne_vl as vitesse_moyenne_vl',
+            'position_par_rapport_au_sol as position_par_rapport_au_sol',
+            'acces_vehicule_leger as acces_vehicule_leger'
         ]
+    in_columns = attribute_columns.copy()
     for variable in costs["variables"]:
         in_columns += [variable["column_name"]]
 
@@ -199,7 +204,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
-    single_value_str = "%s," * (14 + 2 * len(costs["outputs"]))
+    single_value_str = "%s," * (len(attribute_columns) + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
@@ -230,15 +235,21 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
                 row['priority'],
                 row['way_names'],
                 row['nature'],
-                row['vitesse_moyenne_vl']
+                row['vitesse_moyenne_vl'],
+                row['position_par_rapport_au_sol'],
+                row['acces_vehicule_leger']
             ) + output_costs
 
-        output_columns = "(id, the_geom, source, target, x1, y1, x2, y2, length, length_m, priority, way_names, nature, vitesse_moyenne_vl"
+        output_columns = (
+            "(id, the_geom, source, target, x1, y1, x2, y2, length,"
+            "length_m, priority, way_names, nature, vitesse_moyenne_vl, position_par_rapport_au_sol, acces_vehicule_leger"
+        )
         set_on_conflict = (
             "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,"
             "x1 = excluded.x1,y1 = excluded.y1,x2 = excluded.x2,y2 = excluded.y2,"
             "length = excluded.length,length_m = excluded.length_m,priority = excluded.priority,"
-            "way_names = excluded.way_names,nature = excluded.nature,vitesse_moyenne_vl = excluded.vitesse_moyenne_vl"
+            "way_names = excluded.way_names,nature = excluded.nature,vitesse_moyenne_vl = excluded.vitesse_moyenne_vl,"
+            "position_par_rapport_au_sol = excluded.position_par_rapport_au_sol,acces_vehicule_leger = excluded.acces_vehicule_leger"
         )
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]

@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS edges (
   nature text,
   cleabs text,
   importance integer,
-  way_names text
+  way_names text,
+  position_par_rapport_au_sol text,
+  acces_vehicule_leger text
 );
 
 
@@ -145,6 +147,9 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.cpx_numero as cpx_numero,
       t.cpx_toponyme_route_nommee as cpx_toponyme,
 
+      t.position_par_rapport_au_sol as position_par_rapport_au_sol,
+      t.acces_vehicule_leger as acces_vehicule_leger,
+
       -- NULLIF(t.insee_commune_gauche,'') as inseecom_g,
       -- NULLIF(t.insee_commune_droite,'') as inseecom_d,
       -- t.largeur_de_chaussee as largeur,
@@ -216,7 +221,9 @@ INSERT INTO edges
     nature as nature,
     cleabs as cleabs,
     importance as importance,
-    CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names
+    CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names,
+    position_par_rapport_au_sol as position_par_rapport_au_sol,
+    acces_vehicule_leger as acces_vehicule_leger
   FROM bduni_troncon
 ;
 
