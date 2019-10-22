@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 import os
+import time
 
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
@@ -31,6 +32,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     logger: logging.Logger
     """
 
+    logger.info("Conversion from BDD to pivot")
     # Configuration de la bdd source
     source_db_config = db_configs[ resource['topology']['mapping']['source']['baseId'] ]
 
@@ -45,6 +47,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
     xmax = bbox[2]
     ymax = bbox[3]
 
+    st_sql_conversion = time.time()
+
     # Lancement du script SQL de conversion source --> pivot
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor()
@@ -56,6 +60,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
             if instruction == '':
                 continue
             logger.debug("SQL:\n{}\n".format(instruction) )
+            st_instruction = time.time()
             cur.execute(instruction,
                 {
                   'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
@@ -64,8 +69,14 @@ def sql_convert(config, resource, db_configs, connection, logger):
                   'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
                 }
             )
+            et_instruction = time.time()
+            logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
         connection.commit()
     connection.close()
+
+    et_sql_conversion = time.time()
+
+    logger.info("Conversion from BDD to pivot ended. Elapsed time : %s seconds." %(et_sql_conversion - st_sql_conversion))
 
 def pgr_convert(config, resource, db_configs, connection, logger):
     """
@@ -86,6 +97,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     if (resource['type'] != 'pgr'):
         raise ValueError("Wrong resource type, should be 'pgr'")
+    logger.info("Conversion from pivot to PGR")
+    st_pivot_to_pgr = time.time()
 
     # Configuration et connection à la base de sortie
     out_db_config = db_configs[ resource['topology']['storage']['baseId'] ]
@@ -105,6 +118,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     connection.close()
     connection_out.close()
+    et_pivot_to_pgr = time.time()
+    logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(et_pivot_to_pgr - st_pivot_to_pgr))
     _write_resource_file(config, resource, logger)
 
 
@@ -127,10 +142,13 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
 
     if (resource['type'] != 'osrm'):
         raise ValueError("Wrong resource type, should be 'osrm'")
+    logger.info("Conversion from pivot to OSRM")
 
+    logger.info("Conversion from pivot to OSM")
     pivot_to_osm(resource, connection, logger)
     connection.close()
 
+    logger.info("Conversion from OSM to OSRM")
     # osm2osrm
     osm_file = resource['topology']['storage']['file']
     logger.info("Generating graphs for each cost...")
@@ -169,8 +187,13 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
 
         subprocess_exexution(mkdir_args, logger)
         subprocess_exexution(copy_args, logger)
+        start_command = time.time()
         subprocess_exexution(osrm_extract_args, logger)
+        end_command = time.time()
+        logger.info("OSRM extract ended. Elapsed time : %s seconds." %(end_command - start_command))
         subprocess_exexution(osrm_contract_args, logger)
+        final_command = time.time()
+        logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
         subprocess_exexution(rm_args, logger)
         i += 1
 
