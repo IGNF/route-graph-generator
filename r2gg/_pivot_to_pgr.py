@@ -24,15 +24,15 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     """
 
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
-
+    ways_table_name = resource["topology"]["storage"]["base"]["table"]
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
     cursor_out = connection_out.cursor()
     # Création de la edge_table pgrouting
     create_table = """
-        DROP TABLE IF EXISTS ways;
-        CREATE TABLE ways(
+        DROP TABLE IF EXISTS {0};
+        CREATE TABLE {0}(
             id bigserial unique,
             tag_id integer,
             length double precision,
@@ -56,12 +56,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             vitesse_moyenne_vl integer,
             position_par_rapport_au_sol text,
             acces_vehicule_leger text
-        );"""
+        );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
 
     # Ajout des colonnes de coûts
-    add_columns = "ALTER TABLE ways "
+    add_columns = "ALTER TABLE {} ".format(ways_table_name)
     for output in costs["outputs"]:
         add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format(output["name"])
         add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format("reverse_" + output["name"])
@@ -75,12 +75,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Non communications ---------------------------------------------------------------------------
     logger.info("Writing turn restrinctions...")
     create_non_comm = """
-        DROP TABLE IF EXISTS turn_restrictions;
-        CREATE TABLE turn_restrictions(
+        DROP TABLE IF EXISTS {0}_turn_restrictions;
+        CREATE TABLE {0}_turn_restrictions(
             id text unique,
             id_from bigint,
             id_to bigint
-    );"""
+    );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_non_comm))
     cursor_out.execute(create_non_comm)
 
@@ -111,11 +111,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         )
 
         sql_insert = """
-            INSERT INTO turn_restrictions (id, id_from, id_to)
+            INSERT INTO {}_turn_restrictions (id, id_from, id_to)
             VALUES {}
             ON CONFLICT (id) DO UPDATE
               SET {};
-        """.format(values_str, set_on_conflict)
+        """.format(ways_table_name, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
@@ -124,15 +124,15 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
     create_nodes = """
-        DROP TABLE IF EXISTS ways_vertices_pgr;
-        CREATE TABLE ways_vertices_pgr(
+        DROP TABLE IF EXISTS {0}_vertices_pgr;
+        CREATE TABLE {0}_vertices_pgr(
             id bigserial unique,
             cnt int,
             chk int,
             ein int,
             eout int,
             the_geom geometry(Point,4326)
-    );"""
+    );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_nodes))
     cursor_out.execute(create_nodes)
 
@@ -163,11 +163,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         )
 
         sql_insert = """
-            INSERT INTO ways_vertices_pgr (id, the_geom)
+            INSERT INTO {}_vertices_pgr (id, the_geom)
             VALUES {}
             ON CONFLICT (id) DO UPDATE
               SET {};
-        """.format(values_str, set_on_conflict)
+        """.format(ways_table_name, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
@@ -258,20 +258,20 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
         output_columns += ")"
         sql_insert = """
-            INSERT INTO ways {}
+            INSERT INTO {} {}
             VALUES {}
             ON CONFLICT (id) DO UPDATE
               SET {};
-            """.format(output_columns, values_str, set_on_conflict)
+            """.format(ways_table_name, output_columns, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
     spacial_indices_query = """
-        CREATE INDEX IF NOT EXISTS ways_geom_gist ON ways USING GIST (the_geom);
-        CREATE INDEX IF NOT EXISTS vertices_geom_gist ON ways_vertices_pgr USING GIST (the_geom);
-        CLUSTER ways USING ways_geom_gist ;
-        CLUSTER ways_vertices_pgr USING vertices_geom_gist ;
-    """
+        CREATE INDEX IF NOT EXISTS ways_geom_gist ON {0} USING GIST (the_geom);
+        CREATE INDEX IF NOT EXISTS ways_vertices_geom_gist ON {0}_vertices_pgr USING GIST (the_geom);
+        CLUSTER {0} USING ways_geom_gist ;
+        CLUSTER {0}_vertices_pgr USING ways_vertices_geom_gist ;
+    """.format(ways_table_name)
     logger.info("SQL: {}".format(spacial_indices_query))
     cursor_out.execute(spacial_indices_query)
     connection_out.commit()

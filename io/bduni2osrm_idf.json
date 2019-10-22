@@ -20,7 +20,7 @@
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "bduni_config.json"
+        "configFile": "/run/secrets/db_config"
       }
     ],
     "workingSpace": {
@@ -36,7 +36,7 @@
         "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/mnt/data/bduni-idf.osm"
+          "file": "/home/docker/data/bduni-idf.osm"
         },
         "projection": "EPSG:4326",
         "bbox": "1.7,48.4,3.3,49.1",
@@ -45,7 +45,7 @@
             "baseId": "base_bduni"
           },
           "storage": {
-            "file": "sql/bduni_convert.sql"
+            "file": "bduni_convert.sql"
           }
         },
         "defaultAttributes": [
@@ -57,19 +57,19 @@
           "id": "bduni-idf-car-fastest",
           "type": "osrm",
           "storage": {
-            "file": "/mnt/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+            "file": "/home/docker/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "./docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua"
+                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "./io/costs_calculation_sample.json"
+                  "file": "/home/docker/data/costs_calculation_sample.json"
                 }
               }
             }
@@ -79,19 +79,19 @@
           "id": "bduni-idf-car-shortest",
           "type": "osrm",
           "storage": {
-            "file": "/mnt/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+            "file": "/home/docker/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "./docker/centos7/config/bduniv2_distance.lua"
+                "file": "/home/docker/data/bduniv2_distance.lua"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "./io/costs_calculation_sample.json"
+                  "file": "/home/docker/data/costs_calculation_sample.json"
                 }
               }
             }
@@ -105,20 +105,20 @@
             {
               "id": "resource",
               "values": [
-                "corse-osm"
+                "bduni-idf-osrm"
               ]
             },
             {
               "id": "start",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -139,7 +139,7 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -180,6 +180,23 @@
                 "EPSG:4326",
                 "EPSG:2154"
               ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "minute",
+              "values": [
+                "hour",
+                "minute",
+                "second"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
+              ]
             }
           ]
         }
@@ -188,13 +205,13 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "./bduni_idf_osrm.resource"
+          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
         }
       },
       "dirs": {
-        "dataDir": "/home/geoevolution/data/bduni-idf",
-        "profileDir": "/home/geoevolution/road2-config",
-        "resourceDir": "/home/geoevolution/road2-config/resources"
+        "dataDir": "/home/docker/data/",
+        "profileDir": "/home/docker/data/",
+        "resourceDir": "/home/docker/data/resources"
       },
       "sshConfig":{
         "host": "127.0.0.1",
