@@ -32,7 +32,7 @@ def pivot_to_osm(resource, connection, logger):
     edgeSequence = cursor.fetchone()[0]
     logger.info(edgeSequence)
 
-    logger.info("Starting conversion")
+    logger.info("Starting conversion from pivot to OSM")
     start_time = time.time()
 
     filename = resource['topology']['storage']['file']
@@ -46,8 +46,13 @@ def pivot_to_osm(resource, connection, logger):
             # Ecriture des nodes
             sql_query = getQueryByTableAndBoundingBox('nodes', resource['topology']['bbox'])
             logger.info("SQL: {}".format(sql_query))
+            st_execute = time.time()
             cursor.execute(sql_query)
+            et_execute = time.time()
+            logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
             row = cursor.fetchone()
+            logger.info("Writing nodes")
+            st_execute = time.time()
             i = 1
             while row:
                 nodeEl = writeNode(row)
@@ -56,12 +61,19 @@ def pivot_to_osm(resource, connection, logger):
                 if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s nodes ajoutés" %(i, cursor.rowcount))
                 i += 1
+            et_execute = time.time()
+            logger.info("Writing nodes ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
             # Ecriture des ways
             sql_query2 = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], ['*', 'inter_nodes(geom) as internodes'])
             logger.info("SQL: {}".format(sql_query2))
+            st_execute = time.time()
             cursor.execute(sql_query2)
+            et_execute = time.time()
+            logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
             row = cursor.fetchone()
+            logger.info("Writing ways")
+            st_execute = time.time()
             i = 1
             while row:
                 wayEl = writeWay(row)
@@ -77,12 +89,19 @@ def pivot_to_osm(resource, connection, logger):
                 if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s ways ajoutés" %(i, cursor.rowcount))
                 i += 1
+            et_execute = time.time()
+            logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
             # Ecriture des restrictions
             sql_query3 = "select * from non_comm"
             logger.info("SQL: {}".format(sql_query3))
+            st_execute = time.time()
             cursor.execute(sql_query3)
+            et_execute = time.time()
+            logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
             row = cursor.fetchone()
+            logger.info("Writing restrictions")
+            st_execute = time.time()
             i = 1
             while row:
                 if row['common_vertex_id'] == -1:
@@ -95,7 +114,9 @@ def pivot_to_osm(resource, connection, logger):
                 if (i % ceil(cursor.rowcount/10) == 0):
                     logger.info("%s / %s restrictions ajoutés" %(i, cursor.rowcount))
                 i += 1
+            et_execute = time.time()
+            logger.info("Writing restrictions ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     cursor.close()
     end_time = time.time()
-    logger.info("Conversion ended. Elapsed time : %s seconds." %(end_time - start_time))
+    logger.info("Conversion from pivot to OSM ended. Elapsed time : %s seconds." %(end_time - start_time))

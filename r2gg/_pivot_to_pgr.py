@@ -9,7 +9,7 @@ from r2gg._sql_building import getQueryByTableAndBoundingBox
 
 def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connection_out, logger):
     """
-    Fonction de conversion depuis la bdd pivot vers le fichier osm
+    Fonction de conversion depuis la bdd pivot vers la base pgr
 
     Parameters
     ----------
@@ -88,10 +88,14 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     tr_query = "SELECT cleabs, id_from, id_to FROM non_comm;"
 
     logger.debug("SQL: {}".format(tr_query))
+    st_execute = time.time()
     cursor_in.execute(tr_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     rows = cursor_in.fetchall()
     # Insertion petit à petit -> plus performant
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    st_execute = time.time()
     index = 0
     for i in range(math.ceil(len(rows)/10000)):
         tmp_rows = rows[i*10000:(i+1)*10000]
@@ -119,7 +123,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
-    logger.info("Writing turn restrinctions Done")
+    et_execute = time.time()
+    logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
@@ -140,10 +145,14 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     nd_query = "SELECT id, geom FROM nodes;"
 
     logger.debug("SQL: {}".format(nd_query))
+    st_execute = time.time()
     cursor_in.execute(nd_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     rows = cursor_in.fetchall()
     # Insertion petit à petit -> plus performant
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    st_execute = time.time()
     index = 0
     for i in range(math.ceil(len(rows)/10000)):
         tmp_rows = rows[i*10000:(i+1)*10000]
@@ -171,7 +180,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
-    logger.info("Writing vertices Done")
+    et_execute = time.time()
+    logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
@@ -200,7 +210,10 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Ecriture des ways
     sql_query = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], in_columns)
     logger.info("SQL: {}".format(sql_query))
+    st_execute = time.time()
     cursor_in.execute(sql_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
@@ -209,6 +222,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
     # Insertion petit à petit -> plus performant
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    st_execute = time.time()
     for i in range(math.ceil(len(rows)/10000)):
         tmp_rows = rows[i*10000:(i+1)*10000]
         # Chaîne permettant l'insertion de valeurs via psycopg
@@ -266,6 +280,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
+    et_execute = time.time()
+    logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+
     spacial_indices_query = """
         CREATE INDEX IF NOT EXISTS ways_geom_gist ON ways USING GIST (the_geom);
         CREATE INDEX IF NOT EXISTS vertices_geom_gist ON ways_vertices_pgr USING GIST (the_geom);
@@ -273,14 +290,20 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         CLUSTER ways_vertices_pgr USING vertices_geom_gist ;
     """
     logger.info("SQL: {}".format(spacial_indices_query))
+    st_execute = time.time()
     cursor_out.execute(spacial_indices_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     connection_out.commit()
 
     old_isolation_level = connection_out.isolation_level
     connection_out.set_isolation_level(0)
     vacuum_query = "VACUUM ANALYZE;"
     logger.info("SQL: {}".format(vacuum_query))
+    st_execute = time.time()
     cursor_out.execute(vacuum_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     connection_out.set_isolation_level(old_isolation_level)
     connection_out.commit()
 
@@ -288,4 +311,4 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_in.close()
     cursor_out.close()
     end_time = time.time()
-    logger.info("Conversion ended. Elapsed time : %s seconds." %(end_time - start_time))
+    logger.info("Conversion for one cost from pivot to PGR ended. Elapsed time : %s seconds." %(end_time - start_time))
