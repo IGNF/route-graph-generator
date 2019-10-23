@@ -22,14 +22,6 @@ def writeNode(node):
     nodeEl.set('lon', '%s' % node['lon'])
     nodeEl.set('lat', '%s' % node['lat'])
 
-    nodeEl.set('user', 'bduni')
-    nodeEl.set('uid', '1')
-    nodeEl.set('visible', 'true')
-
-    nodeEl.set('version', '1')
-    nodeEl.set('changeset', '1')
-    nodeEl.set('timestamp', '2016-01-01T00:00:00Z')
-
     return nodeEl
 
 def writeWay(way):
@@ -50,13 +42,6 @@ def writeWay(way):
 
     wayEl = etree.Element("way", id="%s" %way['id'])
 
-    wayEl.set('user', 'bduni')
-    wayEl.set('uid', '1')
-    wayEl.set('visible', 'true')
-
-    wayEl.set('version', '1')
-    wayEl.set('changeset', '1')
-    wayEl.set('timestamp', '2016-01-01T00:00:00Z')
     return wayEl
 
 def writeWayNds(wayEl, way, internodes):
@@ -109,12 +94,6 @@ def writeRes(res, i):
     """
 
     resEl = etree.Element("relation", id="%s" %i)
-    resEl.set('visible', 'true')
-    resEl.set('version', '1')
-    resEl.set('uid', '1')
-    resEl.set('user', 'bduniv2')
-    resEl.set('changeset', '1')
-    resEl.set('timestamp', '2016-01-01T00:00:00Z')
 
     _from = etree.SubElement(resEl, 'member')
     _from.set('type', 'way')
