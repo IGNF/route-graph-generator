@@ -223,6 +223,30 @@
                 "meter",
                 "kilometer"
               ]
+            },
+            {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "kvp",
+                  "key": "wayType",
+                  "id": "way_type",
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "id": "autoroute"
+                    },
+                    {
+                      "value": "tunnel",
+                      "id": "tunnel"
+                    },
+                    {
+                      "value": "pont",
+                      "id": "pont"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -268,6 +292,30 @@
               "values": [
                 "departure",
                 "arrival"
+              ]
+            },
+            {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "kvp",
+                  "key": "wayType",
+                  "id": "way_type",
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "id": "autoroute"
+                    },
+                    {
+                      "value": "tunnel",
+                      "id": "tunnel"
+                    },
+                    {
+                      "value": "pont",
+                      "id": "pont"
+                    }
+                  ]
+                }
               ]
             }
           ]
