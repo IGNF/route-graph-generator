@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS edges (
   cleabs text,
   importance integer,
   way_names text,
-  position_par_rapport_au_sol text,
+  position_par_rapport_au_sol integer,
   acces_vehicule_leger text
 );
 
@@ -135,7 +135,6 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.nature as nature,
       NULLIF(t.importance,'')::int as importance,
       -- t.fictif as fictif,
-      -- t.position_par_rapport_au_sol as pos_sol,
       -- t.nombre_de_voies as nb_voies,
       t.sens_de_circulation as sens_de_circulation,
       -- t.itineraire_vert as it_vert,
@@ -150,9 +149,10 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.position_par_rapport_au_sol as position_par_rapport_au_sol,
       t.acces_vehicule_leger as acces_vehicule_leger,
 
+      t.largeur_de_chaussee as largeur_de_chaussee,
+
       -- NULLIF(t.insee_commune_gauche,'') as inseecom_g,
       -- NULLIF(t.insee_commune_droite,'') as inseecom_d,
-      -- t.largeur_de_chaussee as largeur,
 
       -- n.gestionnaire as gestion,
       -- n.numero as numero,
@@ -222,8 +222,12 @@ INSERT INTO edges
     cleabs as cleabs,
     importance as importance,
     CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names,
-    position_par_rapport_au_sol as position_par_rapport_au_sol,
-    acces_vehicule_leger as acces_vehicule_leger
+    (CASE
+      WHEN position_par_rapport_au_sol='Gué ou radier' THEN 0
+      ELSE position_par_rapport_au_sol::integer
+      END) as position_par_rapport_au_sol,
+    acces_vehicule_leger as acces_vehicule_leger,
+    largeur_de_chaussee as largeur_de_chaussee
   FROM bduni_troncon
 ;
 

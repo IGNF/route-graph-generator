@@ -54,8 +54,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             way_names text,
             nature text,
             vitesse_moyenne_vl integer,
-            position_par_rapport_au_sol text,
-            acces_vehicule_leger text
+            position_par_rapport_au_sol integer,
+            acces_vehicule_leger text,
+            largeur_de_chaussee double precision
         );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -97,8 +98,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
     st_execute = time.time()
     index = 0
-    for i in range(math.ceil(len(rows)/10000)):
-        tmp_rows = rows[i*10000:(i+1)*10000]
+    batchsize = 10000
+    for i in range(math.ceil( len(rows) / batchsize )):
+        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize ]
         values_str = ""
         for row in tmp_rows:
             values_str += "(%s, %s, %s),"
@@ -154,8 +156,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
     st_execute = time.time()
     index = 0
-    for i in range(math.ceil(len(rows)/10000)):
-        tmp_rows = rows[i*10000:(i+1)*10000]
+    batchsize = 10000
+    for i in range(math.ceil( len(rows) / batchsize )):
+        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize ]
         values_str = ""
         for row in tmp_rows:
             values_str += "(%s, %s),"
@@ -187,7 +190,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
     attribute_columns = [
             'id',
-            'geom',
+            'geom as the_geom',
             'source_id',
             'target_id',
             'x1',
@@ -196,16 +199,19 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'y2',
             'ST_Length(geom) as length',
             'length_m as length_m',
-            'importance as priority',
+            'importance as importance',
             'way_names as way_names',
             'nature as nature',
             'vitesse_moyenne_vl as vitesse_moyenne_vl',
             'position_par_rapport_au_sol as position_par_rapport_au_sol',
-            'acces_vehicule_leger as acces_vehicule_leger'
+            'acces_vehicule_leger as acces_vehicule_leger',
+            'largeur_de_chaussee as largeur_de_chaussee'
         ]
     in_columns = attribute_columns.copy()
     for variable in costs["variables"]:
         in_columns += [variable["column_name"]]
+
+    output_columns_names = [column.split(' ')[-1] for column in attribute_columns]
 
     # Ecriture des ways
     sql_query = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], in_columns)
@@ -223,8 +229,9 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Insertion petit à petit -> plus performant
     logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
     st_execute = time.time()
-    for i in range(math.ceil(len(rows)/10000)):
-        tmp_rows = rows[i*10000:(i+1)*10000]
+    batchsize = 10000
+    for i in range(math.ceil( len(rows) / batchsize )):
+        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize]
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in tmp_rows:
@@ -236,35 +243,19 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         for row in tmp_rows:
             output_costs = output_costs_from_costs_config(costs, row)
             values_tuple += (
-                row['id'],
-                row['geom'],
-                row['source_id'],
-                row['target_id'],
-                row['x1'],
-                row['y1'],
-                row['x2'],
-                row['y2'],
-                row['length'],
-                row['length_m'],
-                row['priority'],
-                row['way_names'],
-                row['nature'],
-                row['vitesse_moyenne_vl'],
-                row['position_par_rapport_au_sol'],
-                row['acces_vehicule_leger']
+                row[ output_columns_name ] for output_columns_name in output_columns_names
             ) + output_costs
 
-        output_columns = (
-            "(id, the_geom, source, target, x1, y1, x2, y2, length,"
-            "length_m, priority, way_names, nature, vitesse_moyenne_vl, position_par_rapport_au_sol, acces_vehicule_leger"
-        )
-        set_on_conflict = (
-            "the_geom = excluded.the_geom,source = excluded.source,target = excluded.target,"
-            "x1 = excluded.x1,y1 = excluded.y1,x2 = excluded.x2,y2 = excluded.y2,"
-            "length = excluded.length,length_m = excluded.length_m,priority = excluded.priority,"
-            "way_names = excluded.way_names,nature = excluded.nature,vitesse_moyenne_vl = excluded.vitesse_moyenne_vl,"
-            "position_par_rapport_au_sol = excluded.position_par_rapport_au_sol,acces_vehicule_leger = excluded.acces_vehicule_leger"
-        )
+        output_columns = "("
+        for output_columns_name in output_columns_names:
+            output_columns += output_columns_name + ', '
+        output_columns.strip(',')
+
+        set_on_conflict = ''
+        for output_columns_name in output_columns_names:
+            set_on_conflict += "{0} = excluded.{0},".format(output_columns_name)
+        output_columns.strip(',')
+
         for output in costs["outputs"]:
             output_columns += ", " + output["name"] + ", reverse_" + output["name"]
             set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
