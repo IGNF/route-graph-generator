@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS edges (
   importance integer,
   way_names text,
   position_par_rapport_au_sol integer,
-  acces_vehicule_leger text
+  acces_vehicule_leger text,
+  largeur_de_chaussee double precision
 );
 
 

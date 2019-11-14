@@ -49,7 +49,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             y2 double precision,
             maxspeed_forward double precision,
             maxspeed_backward double precision,
-            priority double precision DEFAULT 6,
+            importance double precision DEFAULT 6,
             the_geom geometry(Linestring,4326),
             way_names text,
             nature text,
@@ -191,8 +191,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     attribute_columns = [
             'id',
             'geom as the_geom',
-            'source_id',
-            'target_id',
+            'source_id as source',
+            'target_id as target',
             'x1',
             'y1',
             'x2',
@@ -242,22 +242,22 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         values_tuple = ()
         for row in tmp_rows:
             output_costs = output_costs_from_costs_config(costs, row)
-            values_tuple += (
+            values_tuple += tuple(
                 row[ output_columns_name ] for output_columns_name in output_columns_names
             ) + output_costs
 
         output_columns = "("
         for output_columns_name in output_columns_names:
-            output_columns += output_columns_name + ', '
-        output_columns.strip(',')
+            output_columns += output_columns_name + ','
+        output_columns = output_columns[:-1]
 
         set_on_conflict = ''
         for output_columns_name in output_columns_names:
             set_on_conflict += "{0} = excluded.{0},".format(output_columns_name)
-        output_columns.strip(',')
+        set_on_conflict = set_on_conflict[:-1]
 
         for output in costs["outputs"]:
-            output_columns += ", " + output["name"] + ", reverse_" + output["name"]
+            output_columns += "," + output["name"] + ",reverse_" + output["name"]
             set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
             set_on_conflict += ",{0} = excluded.{0}".format("reverse_" + output["name"])
 

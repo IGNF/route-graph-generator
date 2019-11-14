@@ -257,6 +257,12 @@
                       }
                     }
                   ]
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "roadWidth",
+                  "availableConstraintType": ["banned"],
+                  "field": "largeur_de_chaussee"
                 }
               ]
             }
@@ -339,6 +345,12 @@
                       }
                     }
                   ]
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "roadWidth",
+                  "availableConstraintType": ["banned"],
+                  "field": "largeur_de_chaussee"
                 }
               ]
             }
