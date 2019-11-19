@@ -154,14 +154,6 @@
               ]
             },
             {
-              "id": "algorithm",
-              "defaultValueContent": "ch",
-              "values": [
-                "ch",
-                "mld"
-              ]
-            },
-            {
               "id": "geometryFormat",
               "defaultValueContent": "geojson",
               "values": [
