@@ -246,7 +246,7 @@ SELECT * FROM (
     -- liens_vers_troncon_sortie
     regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS lien_vers_troncon_sortie
   FROM bduni_non_com_tmp
-  WHERE lien_vers_troncon_entree IN (SELECT cleabs from edges)
+  WHERE lien_vers_troncon_entree IN (SELECT cleabs from edges) AND NOT gcms_detruit
 ) AS non_comm_split
 WHERE non_comm_split.lien_vers_troncon_sortie IN (SELECT cleabs from edges);
 
