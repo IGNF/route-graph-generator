@@ -110,10 +110,6 @@
           ],
           "defaultParameters": [
             {
-              "id": "algorythme",
-              "default": "contraction-hierarchies"
-            },
-            {
               "id": "format",
               "default": "application/json"
             },
