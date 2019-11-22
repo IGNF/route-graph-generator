@@ -43,7 +43,7 @@
         "storage": {
           "base": {
             "dbConfig": "/home/docker/data/output_base.json",
-            "table": "ways",
+            "schema": "ways",
             "attributes": [
               {
                 "key": "name",
