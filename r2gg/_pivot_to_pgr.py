@@ -24,7 +24,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     """
 
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
-    ways_table_name = resource["topology"]["storage"]["base"]["table"]
+    ways_table_name = resource["topology"]["storage"]["base"]["schema"] + '.ways'
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
@@ -299,10 +299,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Nettoyage du graphe
     logger.info("Cleaning isolated edges...")
     cursor_isolated = connection_out.cursor()
-    if len(ways_table_name.split('.')) == 2:
-        schema = ways_table_name.split('.')[0]
-    else:
-        schema = "public"
+    schema = resource["topology"]["storage"]["base"]["schema"]
 
     profile_names = set([ source['cost']['profile'] for source in resource["sources"] ])
     st_execute = time.time()

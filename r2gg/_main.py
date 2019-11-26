@@ -222,6 +222,8 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
 
     resource.pop("mapping", None)
     resource["topology"]["storage"].pop("baseId", None)
+    for source in resource["sources"]:
+        source["storage"].pop("dbConfig", None)
 
     final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:
