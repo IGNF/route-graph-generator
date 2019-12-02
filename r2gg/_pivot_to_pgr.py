@@ -71,12 +71,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Non communications ---------------------------------------------------------------------------
     logger.info("Writing turn restrinctions...")
     create_non_comm = """
-        DROP TABLE IF EXISTS {0}_turn_restrictions;
-        CREATE TABLE {0}_turn_restrictions(
+        DROP TABLE IF EXISTS turn_restrictions;
+        CREATE TABLE turn_restrictions(
             id text unique,
             id_from bigint,
             id_to bigint
-    );""".format(ways_table_name)
+    );"""
     logger.debug("SQL: {}".format(create_non_comm))
     cursor_out.execute(create_non_comm)
 
@@ -112,11 +112,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         )
 
         sql_insert = """
-            INSERT INTO {}_turn_restrictions (id, id_from, id_to)
+            INSERT INTO turn_restrictions (id, id_from, id_to)
             VALUES {}
             ON CONFLICT (id) DO UPDATE
               SET {};
-        """.format(ways_table_name, values_str, set_on_conflict)
+        """.format(values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 

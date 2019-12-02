@@ -131,7 +131,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.gcms_territoire as territoire,
 
       -- BD TOPO
-      -- NULLIF(t.etat_de_l_objet,'') as etat,
+      t.etat_de_l_objet as etat,
       -- n.type_de_route as cl_admin,
       t.nature as nature,
       NULLIF(t.importance,'')::int as importance,
@@ -177,7 +177,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       --   -- gestion du lien multiple
       --   ON t.lien_vers_route_nommee = n.cleabs
   ) s
-    WHERE NOT detruit
+    WHERE NOT detruit AND etat LIKE 'En service'
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
     -- décommenter pour tester :
     -- AND territoire='REU'
