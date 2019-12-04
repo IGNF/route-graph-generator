@@ -24,7 +24,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     """
 
     cursor_in = connection_work.cursor(cursor_factory=DictCursor)
-    ways_table_name = resource["topology"]["storage"]["base"]["schema"] + '.ways'
+    schema = resource["topology"]["storage"]["base"]["schema"]
+    ways_table_name = schema + '.ways'
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
@@ -51,7 +52,25 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             vitesse_moyenne_vl integer,
             position_par_rapport_au_sol integer,
             acces_vehicule_leger text,
-            largeur_de_chaussee double precision
+            largeur_de_chaussee double precision,
+            nombre_de_voies text,
+            insee_commune_gauche text,
+            insee_commune_droite text,
+            bande_cyclable text,
+            itineraire_vert boolean,
+            reserve_aux_bus text,
+            urbain boolean,
+            acces_pieton text,
+            nature_de_la_restriction text,
+            restriction_de_hauteur text,
+            restriction_de_poids_total text,
+            restriction_de_poids_par_essieu text,
+            restriction_de_largeur text,
+            restriction_de_longueur text,
+            matieres_dangereuses_interdites boolean,
+            cpx_gestionnaire text,
+            cpx_numero_route_europeenne text,
+            cpx_classement_administratif text
         );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -71,12 +90,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Non communications ---------------------------------------------------------------------------
     logger.info("Writing turn restrinctions...")
     create_non_comm = """
-        DROP TABLE IF EXISTS turn_restrictions;
-        CREATE TABLE turn_restrictions(
+        DROP TABLE IF EXISTS {0}.turn_restrictions;
+        CREATE TABLE {0}.turn_restrictions(
             id text unique,
             id_from bigint,
             id_to bigint
-    );"""
+    );""".format(schema)
     logger.debug("SQL: {}".format(create_non_comm))
     cursor_out.execute(create_non_comm)
 
@@ -112,11 +131,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         )
 
         sql_insert = """
-            INSERT INTO turn_restrictions (id, id_from, id_to)
+            INSERT INTO {}.turn_restrictions (id, id_from, id_to)
             VALUES {}
             ON CONFLICT (id) DO UPDATE
               SET {};
-        """.format(values_str, set_on_conflict)
+        """.format(schema, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
 
@@ -200,7 +219,25 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             'vitesse_moyenne_vl as vitesse_moyenne_vl',
             'position_par_rapport_au_sol as position_par_rapport_au_sol',
             'acces_vehicule_leger as acces_vehicule_leger',
-            'largeur_de_chaussee as largeur_de_chaussee'
+            'largeur_de_chaussee as largeur_de_chaussee',
+            'nombre_de_voies as nombre_de_voies',
+            'insee_commune_gauche as insee_commune_gauche',
+            'insee_commune_droite as insee_commune_droite',
+            'bande_cyclable as bande_cyclable',
+            'itineraire_vert as itineraire_vert',
+            'reserve_aux_bus as reserve_aux_bus',
+            'urbain as urbain',
+            'acces_pieton as acces_pieton',
+            'nature_de_la_restriction as nature_de_la_restriction',
+            'restriction_de_hauteur as restriction_de_hauteur',
+            'restriction_de_poids_total as restriction_de_poids_total',
+            'restriction_de_poids_par_essieu as restriction_de_poids_par_essieu',
+            'restriction_de_largeur as restriction_de_largeur',
+            'restriction_de_longueur as restriction_de_longueur',
+            'matieres_dangereuses_interdites as matieres_dangereuses_interdites',
+            'cpx_gestionnaire as cpx_gestionnaire',
+            'cpx_numero_route_europeenne as cpx_numero_route_europeenne',
+            'cpx_classement_administratif as cpx_classement_administratif'
         ]
     in_columns = attribute_columns.copy()
     for variable in costs["variables"]:
@@ -299,7 +336,6 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Nettoyage du graphe
     logger.info("Cleaning isolated edges...")
     cursor_isolated = connection_out.cursor()
-    schema = resource["topology"]["storage"]["base"]["schema"]
 
     profile_names = set([ source['cost']['profile'] for source in resource["sources"] ])
     st_execute = time.time()

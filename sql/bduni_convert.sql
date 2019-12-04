@@ -56,7 +56,25 @@ CREATE TABLE IF NOT EXISTS edges (
   way_names text,
   position_par_rapport_au_sol integer,
   acces_vehicule_leger text,
-  largeur_de_chaussee double precision
+  largeur_de_chaussee double precision,
+  nombre_de_voies text,
+  insee_commune_gauche text,
+  insee_commune_droite text,
+  bande_cyclable text,
+  itineraire_vert boolean,
+  reserve_aux_bus text,
+  urbain boolean,
+  acces_pieton text,
+  nature_de_la_restriction text,
+  restriction_de_hauteur text,
+  restriction_de_poids_total text,
+  restriction_de_poids_par_essieu text,
+  restriction_de_largeur text,
+  restriction_de_longueur text,
+  matieres_dangereuses_interdites boolean,
+  cpx_gestionnaire text,
+  cpx_numero_route_europeenne text,
+  cpx_classement_administratif text
 );
 
 
@@ -126,19 +144,14 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     SELECT
       -- GCVS (système d'historique)
       t.cleabs as cleabs,
-      -- t.gcms_numrec as numrec,
       t.gcms_detruit AS detruit,
       t.gcms_territoire as territoire,
 
       -- BD TOPO
       t.etat_de_l_objet as etat,
-      -- n.type_de_route as cl_admin,
       t.nature as nature,
       NULLIF(t.importance,'')::int as importance,
-      -- t.fictif as fictif,
-      -- t.nombre_de_voies as nb_voies,
       t.sens_de_circulation as sens_de_circulation,
-      -- t.itineraire_vert as it_vert,
       t.vitesse_moyenne_vl as vitesse_moyenne_vl,
 
       -- Pour l'attribut name
@@ -152,18 +165,25 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
 
       t.largeur_de_chaussee as largeur_de_chaussee,
 
-      -- NULLIF(t.insee_commune_gauche,'') as inseecom_g,
-      -- NULLIF(t.insee_commune_droite,'') as inseecom_d,
-
-      -- n.gestionnaire as gestion,
-      -- n.numero as numero,
-
-      -- NON BDTOPO
-      -- NULLIF(n.cleabs,'') as rn_cleabs,
-
-      -- NULLIF(t.acces,'') as acces,
-      -- t.urbain as urbain,
-      -- t.prive as prive,
+      -- Champs demandés par la DP
+      t.itineraire_vert as itineraire_vert,
+      t.nombre_de_voies as nombre_de_voies,
+      t.insee_commune_gauche as insee_commune_gauche,
+      t.insee_commune_droite as insee_commune_droite,
+      t.bande_cyclable as bande_cyclable,
+      t.reserve_aux_bus as reserve_aux_bus,
+      t.urbain as urbain,
+      t.acces_pieton as acces_pieton,
+      t.nature_de_la_restriction as nature_de_la_restriction,
+      t.restriction_de_hauteur as restriction_de_hauteur,
+      t.restriction_de_poids_total as restriction_de_poids_total,
+      t.restriction_de_poids_par_essieu as restriction_de_poids_par_essieu,
+      t.restriction_de_largeur as restriction_de_largeur,
+      t.restriction_de_longueur as restriction_de_longueur,
+      t.matieres_dangereuses_interdites as matieres_dangereuses_interdites,
+      t.cpx_gestionnaire as cpx_gestionnaire,
+      t.cpx_numero_route_europeenne as cpx_numero_route_europeenne,
+      t.cpx_classement_administratif as cpx_classement_administratif,
 
       -- géométrie du troncon
       ST_Force2D(ST_Transform(ST_SetSrid(t.geometrie, bduni_srid(t.gcms_territoire)), 4326)) as geom
@@ -228,7 +248,25 @@ INSERT INTO edges
       ELSE position_par_rapport_au_sol::integer
       END) as position_par_rapport_au_sol,
     acces_vehicule_leger as acces_vehicule_leger,
-    largeur_de_chaussee as largeur_de_chaussee
+    largeur_de_chaussee as largeur_de_chaussee,
+    nombre_de_voies as nombre_de_voies,
+    insee_commune_gauche as insee_commune_gauche,
+    insee_commune_droite as insee_commune_droite,
+    bande_cyclable as bande_cyclable,
+    itineraire_vert as itineraire_vert,
+    reserve_aux_bus as reserve_aux_bus,
+    urbain as urbain,
+    acces_pieton as acces_pieton,
+    nature_de_la_restriction as nature_de_la_restriction,
+    restriction_de_hauteur as restriction_de_hauteur,
+    restriction_de_poids_total as restriction_de_poids_total,
+    restriction_de_poids_par_essieu as restriction_de_poids_par_essieu,
+    restriction_de_largeur as restriction_de_largeur,
+    restriction_de_longueur as restriction_de_longueur,
+    matieres_dangereuses_interdites as matieres_dangereuses_interdites,
+    cpx_gestionnaire as cpx_gestionnaire,
+    cpx_numero_route_europeenne as cpx_numero_route_europeenne,
+    cpx_classement_administratif as cpx_classement_administratif
   FROM bduni_troncon
 ;
 
