@@ -121,6 +121,54 @@
               }
             }
           }
+        },
+        {
+          "id": "bduni-idf-pedestrian-fastest-pgr",
+          "type": "pgr",
+          "storage": {
+            "dbConfig": "/home/docker/data/output_base.json",
+            "costColumn": "cost_s_pedestrian",
+            "rcostColumn": "reverse_cost_s_pedestrian"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/data/costs_calculation_sample.json"
+              },
+              "configuration": {
+                "name": "cost_s_pedestrian",
+                "storage": {
+                  "file": "/home/docker/data/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bduni-idf-pedestrian-shortest-pgr",
+          "type": "pgr",
+          "storage": {
+            "dbConfig": "/home/docker/data/output_base.json",
+            "costColumn": "cost_m_pedestrian",
+            "rcostColumn": "reverse_cost_m_pedestrian"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/data/costs_calculation_sample.json"
+              },
+              "configuration": {
+                "name": "cost_m_pedestrian",
+                "storage": {
+                  "file": "/home/docker/data/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
         }
       ],
       "availableOperations":[
