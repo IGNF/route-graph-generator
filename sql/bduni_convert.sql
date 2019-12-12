@@ -54,6 +54,11 @@ CREATE TABLE IF NOT EXISTS edges (
   cleabs text,
   importance integer,
   way_names text,
+  nom_1_gauche text,
+  nom_1_droite text,
+  cpx_numero text,
+  cpx_toponyme_route_nommee text,
+  sens_de_circulation text,
   position_par_rapport_au_sol integer,
   acces_vehicule_leger text,
   largeur_de_chaussee double precision,
@@ -155,12 +160,15 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.vitesse_moyenne_vl as vitesse_moyenne_vl,
 
       -- Pour l'attribut name
-      t.nom_1_gauche as nom_g,
-      t.nom_1_droite as nom_d,
+      t.nom_1_gauche as nom_1_gauche,
+      t.nom_1_droite as nom_1_droite,
       t.cpx_numero as cpx_numero,
       t.cpx_toponyme_route_nommee as cpx_toponyme,
 
-      t.position_par_rapport_au_sol as position_par_rapport_au_sol,
+      (CASE
+      WHEN t.position_par_rapport_au_sol='Gué ou radier' THEN 0
+      ELSE t.position_par_rapport_au_sol::integer
+      END) as position_par_rapport_au_sol,
       t.acces_vehicule_leger as acces_vehicule_leger,
 
       t.largeur_de_chaussee as largeur_de_chaussee,
@@ -242,11 +250,13 @@ INSERT INTO edges
     nature as nature,
     cleabs as cleabs,
     importance as importance,
-    CONCAT(nom_g, '&&', nom_d, '&&', cpx_numero, '&&', cpx_toponyme) as way_names,
-    (CASE
-      WHEN position_par_rapport_au_sol='Gué ou radier' THEN 0
-      ELSE position_par_rapport_au_sol::integer
-      END) as position_par_rapport_au_sol,
+    CONCAT(nom_1_gauche, '&&', nom_1_droite, '&&', cpx_numero, '&&', cpx_toponyme) as way_names,
+    nom_1_gauche as nom_1_gauche,
+    nom_1_droite as nom_1_droite,
+    cpx_numero as cpx_numero,
+    cpx_toponyme as cpx_toponyme_route_nommee,
+    sens_de_circulation as sens_de_circulation,
+    position_par_rapport_au_sol as position_par_rapport_au_sol,
     acces_vehicule_leger as acces_vehicule_leger,
     largeur_de_chaussee as largeur_de_chaussee,
     nombre_de_voies as nombre_de_voies,
