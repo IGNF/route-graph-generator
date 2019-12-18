@@ -51,9 +51,24 @@
                 "default": "false"
               },
               {
-                "key": "id",
-                "column": "id",
-                "default": "false"
+                "key": "nom_1_gauche",
+                "column": "nom_1_gauche",
+                "default": "true"
+              },
+              {
+                "key": "nom_1_droite",
+                "column": "nom_1_droite",
+                "default": "true"
+              },
+              {
+                "key": "cpx_numero",
+                "column": "cpx_numero",
+                "default": "true"
+              },
+              {
+                "key": "cpx_toponyme_route_nommee",
+                "column": "cpx_toponyme_route_nommee",
+                "default": "true"
               }
             ]
           },
@@ -225,7 +240,11 @@
             {
               "id": "waysAttributes",
               "values": [
-                "name"
+                "name",
+                "nom_1_gauche",
+                "nom_1_droite",
+                "cpx_numero",
+                "cpx_toponyme_route_nommee"
               ]
             },
             {
