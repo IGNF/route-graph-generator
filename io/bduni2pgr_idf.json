@@ -199,14 +199,16 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car"
+                "car",
+                "pedestrian"
               ]
             },
             {
               "id": "optimization",
               "defaultValueContent": "fastest",
               "values": [
-                "fastest"
+                "fastest",
+                "shortest"
               ]
             },
             {
