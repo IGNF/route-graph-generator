@@ -479,6 +479,67 @@
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "importance",
+                  "availableConstraintType": ["banned"],
+                  "field": "importance"
+                },
+                {
+                  "keyType": "name",
+                  "key": "cpx_classement_administratif",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": ""
+                      }
+                    },
+                    {
+                      "value": "autoroute",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "like",
+                        "value": "'%Autoroute%'"
+                      }
+                    },
+                    {
+                      "value": "nationale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Nationale'"
+                      }
+                    },
+                    {
+                      "value": "departementale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Départementale'"
+                      }
+                    },
+                    {
+                      "value": "voie_communale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Voie communale'"
+                      }
+                    },
+                    {
+                      "value": "chemin_rural",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Chemin rural'"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -567,6 +628,67 @@
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "importance",
+                  "availableConstraintType": ["banned"],
+                  "field": "importance"
+                },
+                {
+                  "keyType": "name",
+                  "key": "cpx_classement_administratif",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vide",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": ""
+                      }
+                    },
+                    {
+                      "value": "autoroute",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "like",
+                        "value": "'%Autoroute%'"
+                      }
+                    },
+                    {
+                      "value": "nationale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Nationale'"
+                      }
+                    },
+                    {
+                      "value": "departementale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Départementale'"
+                      }
+                    },
+                    {
+                      "value": "voie_communale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Voie communale'"
+                      }
+                    },
+                    {
+                      "value": "chemin_rural",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Chemin rural'"
+                      }
+                    }
+                  ]
                 }
               ]
             }
