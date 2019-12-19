@@ -492,7 +492,7 @@
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
-                      "value": "",
+                      "value": "vide",
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
