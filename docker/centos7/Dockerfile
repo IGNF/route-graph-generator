@@ -48,8 +48,6 @@ RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
 RUN mkdir /home/docker/data/
 COPY docker/centos7/config/* ./
-COPY docker/centos7/config/bduniv2_avec_sens_vitesse_fixe.lua /home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua
-COPY docker/centos7/config/bduniv2_distance.lua /home/docker/data/bduniv2_distance.lua
 COPY docker/centos7/config/costs_calculation_sample.json /home/docker/data/costs_calculation_sample.json
 COPY docker/centos7/config/output_base.json /home/docker/data/output_base.json
 COPY sql/bduni_convert.sql ./bduni_convert.sql
