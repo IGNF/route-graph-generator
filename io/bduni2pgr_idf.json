@@ -51,8 +51,153 @@
                 "default": "false"
               },
               {
-                "key": "id",
-                "column": "id",
+                "key": "nom_1_gauche",
+                "column": "nom_1_gauche",
+                "default": "true"
+              },
+              {
+                "key": "nom_1_droite",
+                "column": "nom_1_droite",
+                "default": "true"
+              },
+              {
+                "key": "cpx_numero",
+                "column": "cpx_numero",
+                "default": "true"
+              },
+              {
+                "key": "cpx_toponyme_route_nommee",
+                "column": "cpx_toponyme_route_nommee",
+                "default": "true"
+              },
+              {
+                "key": "cleabs",
+                "column": "cleabs",
+                "default": "false"
+              },
+              {
+                "key": "nature",
+                "column": "nature",
+                "default": "false"
+              },
+              {
+                "key": "importance",
+                "column": "importance",
+                "default": "false"
+              },
+              {
+                "key": "position_par_rapport_au_sol",
+                "column": "position_par_rapport_au_sol",
+                "default": "false"
+              },
+              {
+                "key": "nombre_de_voies",
+                "column": "nombre_de_voies",
+                "default": "false"
+              },
+              {
+                "key": "largeur_de_chaussee",
+                "column": "largeur_de_chaussee",
+                "default": "false"
+              },
+              {
+                "key": "itineraire_vert",
+                "column": "itineraire_vert",
+                "default": "false"
+              },
+              {
+                "key": "sens_de_circulation",
+                "column": "sens_de_circulation",
+                "default": "false"
+              },
+              {
+                "key": "bande_cyclable",
+                "column": "bande_cyclable",
+                "default": "false"
+              },
+              {
+                "key": "reserve_aux_bus",
+                "column": "reserve_aux_bus",
+                "default": "false"
+              },
+              {
+                "key": "urbain",
+                "column": "urbain",
+                "default": "false"
+              },
+              {
+                "key": "vitesse_moyenne_vl",
+                "column": "vitesse_moyenne_vl",
+                "default": "false"
+              },
+              {
+                "key": "acces_vehicule_leger",
+                "column": "acces_vehicule_leger",
+                "default": "false"
+              },
+              {
+                "key": "acces_pieton",
+                "column": "acces_pieton",
+                "default": "false"
+              },
+              {
+                "key": "nature_de_la_restriction",
+                "column": "nature_de_la_restriction",
+                "default": "false"
+              },
+              {
+                "key": "restriction_de_hauteur",
+                "column": "restriction_de_hauteur",
+                "default": "false"
+              },
+              {
+                "key": "restriction_de_poids_total",
+                "column": "restriction_de_poids_total",
+                "default": "false"
+              },
+              {
+                "key": "restriction_de_poids_par_essieu",
+                "column": "restriction_de_poids_par_essieu",
+                "default": "false"
+              },
+              {
+                "key": "restriction_de_largeur",
+                "column": "restriction_de_largeur",
+                "default": "false"
+              },
+              {
+                "key": "restriction_de_longueur",
+                "column": "restriction_de_longueur",
+                "default": "false"
+              },
+              {
+                "key": "matieres_dangereuses_interdites",
+                "column": "matieres_dangereuses_interdites",
+                "default": "false"
+              },
+              {
+                "key": "insee_commune_gauche",
+                "column": "insee_commune_gauche",
+                "default": "false"
+              },
+              {
+                "key": "insee_commune_droite",
+                "column": "insee_commune_droite",
+                "default": "false"
+              },
+              {
+                "key": "cpx_numero_route_europeenne",
+                "column": "cpx_numero_route_europeenne",
+                "default": "false"
+              },
+              {
+                "key": "cpx_classement_administratif",
+                "column": "cpx_classement_administratif",
+                "default": "false"
+              },
+              {
+                "key": "cpx_gestionnaire",
+                "column": "cpx_gestionnaire",
                 "default": "false"
               }
             ]
@@ -70,7 +215,7 @@
           }
         },
         "defaultAttributes": [
-          "name"
+          "nom_1_gauche", "nom_1_droite", "cpx_numero", "cpx_toponyme_route_nommee"
         ]
       },
       "sources": [
@@ -199,14 +344,16 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car"
+                "car",
+                "pedestrian"
               ]
             },
             {
               "id": "optimization",
               "defaultValueContent": "fastest",
               "values": [
-                "fastest"
+                "fastest",
+                "shortest"
               ]
             },
             {
@@ -223,7 +370,37 @@
             {
               "id": "waysAttributes",
               "values": [
-                "name"
+                "name",
+                "nom_1_gauche",
+                "nom_1_droite",
+                "cpx_numero",
+                "cpx_toponyme_route_nommee",
+                "cleabs",
+                "nature",
+                "importance",
+                "position_par_rapport_au_sol",
+                "nombre_de_voies",
+                "largeur_de_chaussee",
+                "itineraire_vert",
+                "sens_de_circulation",
+                "bande_cyclable",
+                "reserve_aux_bus",
+                "urbain",
+                "vitesse_moyenne_vl",
+                "acces_vehicule_leger",
+                "acces_pieton",
+                "nature_de_la_restriction",
+                "restriction_de_hauteur",
+                "restriction_de_poids_total",
+                "restriction_de_poids_par_essieu",
+                "restriction_de_largeur",
+                "restriction_de_longueur",
+                "matieres_dangereuses_interdites",
+                "insee_commune_gauche",
+                "insee_commune_droite",
+                "cpx_numero_route_europeenne",
+                "cpx_classement_administratif",
+                "cpx_gestionnaire"
               ]
             },
             {
@@ -302,6 +479,67 @@
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "importance",
+                  "availableConstraintType": ["banned"],
+                  "field": "importance"
+                },
+                {
+                  "keyType": "name",
+                  "key": "cpx_classement_administratif",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vide",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": ""
+                      }
+                    },
+                    {
+                      "value": "autoroute",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "like",
+                        "value": "'%Autoroute%'"
+                      }
+                    },
+                    {
+                      "value": "nationale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Nationale'"
+                      }
+                    },
+                    {
+                      "value": "departementale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Départementale'"
+                      }
+                    },
+                    {
+                      "value": "voie_communale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Voie communale'"
+                      }
+                    },
+                    {
+                      "value": "chemin_rural",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Chemin rural'"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -390,6 +628,67 @@
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
+                },
+                {
+                  "keyType": "numerical",
+                  "key": "importance",
+                  "availableConstraintType": ["banned"],
+                  "field": "importance"
+                },
+                {
+                  "keyType": "name",
+                  "key": "cpx_classement_administratif",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vide",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": ""
+                      }
+                    },
+                    {
+                      "value": "autoroute",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "like",
+                        "value": "'%Autoroute%'"
+                      }
+                    },
+                    {
+                      "value": "nationale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Nationale'"
+                      }
+                    },
+                    {
+                      "value": "departementale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Départementale'"
+                      }
+                    },
+                    {
+                      "value": "voie_communale",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Voie communale'"
+                      }
+                    },
+                    {
+                      "value": "chemin_rural",
+                      "field": "cpx_classement_administratif",
+                      "condition": {
+                        "type": "equal",
+                        "value": "'Chemin rural'"
+                      }
+                    }
+                  ]
                 }
               ]
             }

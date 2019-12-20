@@ -250,7 +250,7 @@ INSERT INTO edges
     nature as nature,
     cleabs as cleabs,
     importance as importance,
-    CONCAT(nom_1_gauche, '&&', nom_1_droite, '&&', cpx_numero, '&&', cpx_toponyme) as way_names,
+    CONCAT('{{"nom_1_gauche": "', nom_1_gauche, '", "nom_1_droite": "', nom_1_droite, '", "cpx_numero": "', cpx_numero, '", "cpx_toponyme": "', cpx_toponyme, '"}}') as way_names,
     nom_1_gauche as nom_1_gauche,
     nom_1_droite as nom_1_droite,
     cpx_numero as cpx_numero,
