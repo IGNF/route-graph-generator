@@ -64,9 +64,19 @@ def _build_setup(turn_res, cost_type = 'duration'):
     setup_string += "    return {\n"
     setup_string += "        properties = {\n"
     setup_string += "            use_turn_restrictions = " + str(turn_res).lower() + ",\n"
-    setup_string += "            weight_name = \'" + cost_type + "\'\n"
+    setup_string += "            weight_name = \'" + cost_type + "\',\n"
+    setup_string += "        },\n"
+    setup_string += "        classes = { \"toll\", \"bridge\", \"tunnel\" },\n"
+    setup_string += "        excludable = {\n"
+    setup_string += "            { [\"toll\"] = true },\n"
+    setup_string += "            { [\"bridge\"] = true },\n"
+    setup_string += "            { [\"tunnel\"] = true },\n"
+    setup_string += "            { [\"toll\"] = true, [\"bridge\"] = true },\n"
+    setup_string += "            { [\"toll\"] = true, [\"tunnel\"] = true },\n"
+    setup_string += "            { [\"bridge\"] = true, [\"tunnel\"] = true },\n"
+    setup_string += "            { [\"toll\"] = true, [\"bridge\"] = true, [\"tunnel\"] = true }\n"
     setup_string += "        }\n"
-    setup_string += "     }\n"
+    setup_string += "    }\n"
     setup_string += "end\n"
 
     return setup_string
@@ -120,6 +130,10 @@ def _build_process_way(costs_config, output_cost):
     for variable in costs_config["variables"]:
         var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\"))\n".format(variable["name"], variable["column_name"])
         get_variables_strings.append(var_str)
+
+    # Récupération des attributs nécéssaires à la gestion des péages, ponts et tunnels.
+    get_variables_strings.append("    local acces_vehicule_leger = way:get_value_by_key(\"acces_vehicule_leger\")\n")
+    get_variables_strings.append("    local position_par_rapport_au_sol = tonumber(way:get_value_by_key(\"position_par_rapport_au_sol\"))\n")
 
     for string in get_variables_strings:
         process_way_string += string
@@ -175,6 +189,31 @@ def _build_process_way(costs_config, output_cost):
     process_way_string += "        result.backward_mode  = mode.inaccessible\n"
     process_way_string += "    end\n"
     process_way_string += "\n"
+
+    # Gestion des pếages.
+    process_way_string += "    -- Gestion des pếages.\n"
+    process_way_string += "    if acces_vehicule_leger == 'A péage' then\n"
+    process_way_string += "        result.forward_classes[\"toll\"] = true\n"
+    process_way_string += "        result.backward_classes[\"toll\"] = true\n"
+    process_way_string += "    end\n"
+    process_way_string += "\n"
+
+    # Gestion des ponts.
+    process_way_string += "    -- Gestion des ponts.\n"
+    process_way_string += "    if position_par_rapport_au_sol > 0 then\n"
+    process_way_string += "        result.forward_classes[\"bridge\"] = true\n"
+    process_way_string += "        result.backward_classes[\"bridge\"] = true\n"
+    process_way_string += "    end\n"
+    process_way_string += "\n"
+
+    # Gestion des tunnels.
+    process_way_string += "    -- Gestion des tunnels.\n"
+    process_way_string += "    if position_par_rapport_au_sol < 0 then\n"
+    process_way_string += "        result.forward_classes[\"tunnel\"] = true\n"
+    process_way_string += "        result.backward_classes[\"tunnel\"] = true\n"
+    process_way_string += "    end\n"
+    process_way_string += "\n"
+
     process_way_string += "end\n"
 
     return process_way_string
