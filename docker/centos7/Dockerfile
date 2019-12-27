@@ -47,7 +47,7 @@ COPY setup.py /usr/lib/python3.6/site-packages/r2gg
 RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
 RUN mkdir /home/docker/data/
-COPY docker/centos7/config/* ./
+COPY docker/centos7/config/* /home/docker/data/
 COPY sql/bduni_convert.sql ./bduni_convert.sql
 
 ENV LANG en_US.utf8
