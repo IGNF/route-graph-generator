@@ -96,6 +96,50 @@
               }
             }
           }
+        },
+        {
+          "id": "bduni-idf-pedestrian-fastest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bduni-idf-pedestrian-fastest/bduni-idf-pedestrian-fastest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
+              },
+              "configuration": {
+                "name": "cost_s_pedestrian",
+                "storage": {
+                  "file": "/home/docker/data/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bduni-idf-pedestrian-shortest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bduni-idf-pedestrian-shortest/bduni-idf-pedestrian-shortest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/data/bduniv2_distance.lua"
+              },
+              "configuration": {
+                "name": "cost_s_pedestrian",
+                "storage": {
+                  "file": "/home/docker/data/costs_calculation_sample.json"
+                }
+              }
+            }
+          }
         }
       ],
       "availableOperations":[

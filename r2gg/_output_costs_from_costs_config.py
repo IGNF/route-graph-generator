@@ -127,7 +127,7 @@ def _condition_to_bool(condition, values):
     if len(test) == 2:
         return values[test[0]] == test[1]
 
-    test = condition.split("!=")
+    test = condition.split("~=")
     if len(test) == 2:
         return values[test[0]] != test[1]
 
