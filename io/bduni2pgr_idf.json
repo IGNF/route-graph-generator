@@ -444,7 +444,7 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name",
+                  "keyType": "name-pgr",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
@@ -475,19 +475,19 @@
                   ]
                 },
                 {
-                  "keyType": "numerical",
+                  "keyType": "numerical-pgr",
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
-                  "keyType": "numerical",
+                  "keyType": "numerical-pgr",
                   "key": "importance",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
                 {
-                  "keyType": "name",
+                  "keyType": "name-pgr",
                   "key": "cpx_classement_administratif",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
@@ -593,7 +593,7 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name",
+                  "keyType": "name-pgr",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
@@ -624,19 +624,19 @@
                   ]
                 },
                 {
-                  "keyType": "numerical",
+                  "keyType": "numerical-pgr",
                   "key": "roadWidth",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
-                  "keyType": "numerical",
+                  "keyType": "numerical-pgr",
                   "key": "importance",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
                 {
-                  "keyType": "name",
+                  "keyType": "name-pgr",
                   "key": "cpx_classement_administratif",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
