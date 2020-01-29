@@ -590,6 +590,13 @@
               ]
             },
             {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326"
+              ]
+            },
+            {
               "id": "constraints",
               "values": [
                 {
