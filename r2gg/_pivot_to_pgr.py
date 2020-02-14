@@ -1,5 +1,6 @@
 import math
 import time
+import sys
 
 from psycopg2.extras import DictCursor
 
@@ -112,9 +113,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_in.execute(tr_query)
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    rows = cursor_in.fetchall()
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating values in out db")
+    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     index = 0
     batchsize = 10000
@@ -172,7 +172,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating values in out db")
+    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     index = 0
     batchsize = 10000
@@ -264,18 +264,21 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_in.execute(sql_query)
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    rows = cursor_in.fetchall()
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
     single_value_str = "%s," * (len(attribute_columns) + 2 * len(costs["outputs"]))
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating values in out db")
+    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     batchsize = 10000
+    # percent = 0
     rows = cursor_in.fetchmany(batchsize)
     while rows:
+        # percent += 100 / cursor_in.rowcount
+        # sys.stdout.write('{}%'.format(percent))
+        # sys.stdout.flush()
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in rows:
