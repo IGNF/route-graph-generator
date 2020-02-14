@@ -114,20 +114,20 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     rows = cursor_in.fetchall()
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    logger.info("SQL: Inserting or updating values in out db")
     st_execute = time.time()
     index = 0
     batchsize = 10000
-    for i in range(math.ceil( len(rows) / batchsize )):
-        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize ]
+    rows = cursor_in.fetchmany(batchsize)
+    while rows:
         values_str = ""
-        for row in tmp_rows:
+        for row in rows:
             values_str += "(%s, %s, %s),"
         values_str = values_str[:-1]
 
         # Tuple des valuers à insérer
         values_tuple = ()
-        for row in tmp_rows:
+        for row in rows:
             values_tuple += (row['cleabs'], row['id_from'], row['id_to'])
             index += 1
 
@@ -143,6 +143,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         """.format(schema, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
+        rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
     logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
@@ -170,22 +171,21 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_in.execute(nd_query)
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    rows = cursor_in.fetchall()
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    logger.info("SQL: Inserting or updating values in out db")
     st_execute = time.time()
     index = 0
     batchsize = 10000
-    for i in range(math.ceil( len(rows) / batchsize )):
-        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize ]
+    rows = cursor_in.fetchmany(batchsize)
+    while rows:
         values_str = ""
-        for row in tmp_rows:
+        for row in rows:
             values_str += "(%s, %s),"
         values_str = values_str[:-1]
 
         # Tuple des valeurs à insérer
         values_tuple = ()
-        for row in tmp_rows:
+        for row in rows:
             values_tuple += (row['id'], row['geom'])
             index += 1
 
@@ -201,6 +201,8 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         """.format(ways_table_name, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
+        rows = cursor_in.fetchmany(batchsize)
+
 
     et_execute = time.time()
     logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
@@ -269,20 +271,20 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(len(rows)))
+    logger.info("SQL: Inserting or updating values in out db")
     st_execute = time.time()
     batchsize = 10000
-    for i in range(math.ceil( len(rows) / batchsize )):
-        tmp_rows = rows[ i * batchsize : (i + 1) * batchsize]
+    rows = cursor_in.fetchmany(batchsize)
+    while rows:
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
-        for row in tmp_rows:
+        for row in rows:
             values_str += "(" + single_value_str + "),"
         values_str = values_str[:-1]
 
         # Tuple des valuers à insérer
         values_tuple = ()
-        for row in tmp_rows:
+        for row in rows:
             output_costs = output_costs_from_costs_config(costs, row)
             values_tuple += tuple(
                 row[ output_columns_name ] for output_columns_name in output_columns_names
@@ -312,6 +314,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
             """.format(ways_table_name, output_columns, values_str, set_on_conflict)
         cursor_out.execute(sql_insert, values_tuple)
         connection_out.commit()
+        rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
     logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
