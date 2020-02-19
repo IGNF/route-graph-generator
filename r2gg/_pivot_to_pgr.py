@@ -273,12 +273,11 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     batchsize = 10000
-    # percent = 0
+    percent = 0
     rows = cursor_in.fetchmany(batchsize)
     while rows:
-        # percent += 100 / cursor_in.rowcount
-        # sys.stdout.write('{}%'.format(percent))
-        # sys.stdout.flush()
+        percent += 1000000 / cursor_in.rowcount
+        print('{}%'.format(percent), end='\r')
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in rows:
