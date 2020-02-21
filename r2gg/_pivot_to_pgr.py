@@ -348,23 +348,23 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_in.close()
     cursor_out.close()
 
-    # Nettoyage du graphe
-    logger.info("Cleaning isolated edges...")
-    cursor_isolated = connection_out.cursor()
+    # # Nettoyage du graphe
+    # logger.info("Cleaning isolated edges...")
+    # cursor_isolated = connection_out.cursor()
 
-    profile_names = set([ source['cost']['profile'] for source in resource["sources"] ])
-    st_execute = time.time()
+    # profile_names = set([ source['cost']['profile'] for source in resource["sources"] ])
+    # st_execute = time.time()
 
-    for profile_name in profile_names:
-        logger.info("Cleaning isolated edges for profile {}...".format(profile_name))
-        clean_graph_query = "SELECT {0}.clean_graph('{1}')".format(schema, profile_name)
-        logger.info("SQL: {}".format(clean_graph_query))
-        cursor_isolated.execute(clean_graph_query)
+    # for profile_name in profile_names:
+    #     logger.info("Cleaning isolated edges for profile {}...".format(profile_name))
+    #     clean_graph_query = "SELECT {0}.clean_graph('{1}')".format(schema, profile_name)
+    #     logger.info("SQL: {}".format(clean_graph_query))
+    #     cursor_isolated.execute(clean_graph_query)
 
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    connection_out.commit()
-    cursor_isolated.close()
+    # et_execute = time.time()
+    # logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    # connection_out.commit()
+    # cursor_isolated.close()
 
     end_time = time.time()
     logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(end_time - start_time))
