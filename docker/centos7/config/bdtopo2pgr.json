@@ -454,7 +454,7 @@
                       "field": "acces_vehicule_leger",
                       "condition": {
                         "type": "equal",
-                        "value": "'A péage'"
+                        "value": "$niv4$A péage$niv4$"
                       }
                     },
                     {
@@ -505,7 +505,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "like",
-                        "value": "'%Autoroute%'"
+                        "value": "$niv4$%Autoroute%$niv4$"
                       }
                     },
                     {
@@ -513,7 +513,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": "'Nationale'"
+                        "value": "$niv4$Nationale$niv4$"
                       }
                     },
                     {
@@ -521,7 +521,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": "'Départementale'"
+                        "value": "$niv4$Départementale$niv4$"
                       }
                     },
                     {
@@ -529,7 +529,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": "'Voie communale'"
+                        "value": "$niv4$Voie communale$niv4$"
                       }
                     },
                     {
@@ -537,7 +537,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": "'Chemin rural'"
+                        "value": "$niv4$Chemin rural$niv4$"
                       }
                     }
                   ]

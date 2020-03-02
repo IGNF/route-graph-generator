@@ -200,7 +200,7 @@ def _build_process_way(costs_config, output_cost):
 
     # Gestion des ponts.
     process_way_string += "    -- Gestion des ponts.\n"
-    process_way_string += "    if position_par_rapport_au_sol > 0 then\n"
+    process_way_string += "    if position_par_rapport_au_sol and position_par_rapport_au_sol > 0 then\n"
     process_way_string += "        result.forward_classes[\"bridge\"] = true\n"
     process_way_string += "        result.backward_classes[\"bridge\"] = true\n"
     process_way_string += "    end\n"
@@ -208,7 +208,7 @@ def _build_process_way(costs_config, output_cost):
 
     # Gestion des tunnels.
     process_way_string += "    -- Gestion des tunnels.\n"
-    process_way_string += "    if position_par_rapport_au_sol < 0 then\n"
+    process_way_string += "    if position_par_rapport_au_sol and position_par_rapport_au_sol < 0 then\n"
     process_way_string += "        result.forward_classes[\"tunnel\"] = true\n"
     process_way_string += "        result.backward_classes[\"tunnel\"] = true\n"
     process_way_string += "    end\n"
