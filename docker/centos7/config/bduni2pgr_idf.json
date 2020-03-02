@@ -429,7 +429,8 @@
               "values": [
                 "hour",
                 "minute",
-                "second"
+                "second",
+                "standard"
               ]
             },
             {
@@ -557,7 +558,7 @@
             {
               "id": "point",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
