@@ -1,8 +1,9 @@
 {
-	"host": "pgrouting-procedures-centos",
-	"database": "pgrouting",
-	"user": "postgres",
-	"password": "postgres",
-	"port": "5432", 
-	"max": 8
+  "host": "pgrouting-procedures-centos",
+  "database": "pgrouting",
+  "user": "postgres",
+  "password": "postgres",
+  "port": "5432",
+  "statement_timeout": 20000,
+  "max": 8
 }

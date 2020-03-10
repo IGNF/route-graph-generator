@@ -1,7 +1,8 @@
 {
-	"host": "host",
-	"database": "roads",
-	"user,": "user",
+  "host": "host",
+  "database": "roads",
+  "user,": "user",
   "password": "pass",
-  "port": 5432
+  "port": 5432,
+  "statement_timeout": 20000
 }

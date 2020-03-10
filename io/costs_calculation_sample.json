@@ -66,7 +66,7 @@
       "cost_type": "duration",
       "operations": [
         ["add", "length_m"],
-        ["multiply", 0.72]
+        ["multiply", 0.9]
       ]
     }
   ]
