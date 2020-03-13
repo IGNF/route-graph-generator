@@ -489,7 +489,102 @@
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "cpx_classement_administratif",
+                  "key": "NATURE",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "sentier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Sentier$niv4$"
+                      }
+                    },
+                    {
+                      "value": "bac_ou_liaison_maritime",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Bac ou liaison maritime$niv4$"
+                      }
+                    },
+                    {
+                      "value": "bretelle",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Bretelle$niv4$"
+                      }
+                    },
+                    {
+                      "value": "chemin",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Chemin$niv4$"
+                      }
+                    },
+                    {
+                      "value": "escalier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Escalier$niv4$"
+                      }
+                    },
+                    {
+                      "value": "piste_cyclable",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Piste cyclable$niv4$"
+                      }
+                    },
+                    {
+                      "value": "rond-point",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Rond-point$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_a_1_chaussee",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route à 1 chaussée$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_a_2_chaussees",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route à 2 chaussées$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_empierree",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route empierrée$niv4$"
+                      }
+                    },
+                    {
+                      "value": "type_autoroutier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Type autoroutier$niv4$"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "name-pgr",
+                  "key": "CL_ADMIN",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -497,7 +592,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": ""
+                        "value": "$niv4$$niv4$"
                       }
                     },
                     {
@@ -645,7 +740,102 @@
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "cpx_classement_administratif",
+                  "key": "NATURE",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "sentier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Sentier$niv4$"
+                      }
+                    },
+                    {
+                      "value": "bac_ou_liaison_maritime",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Bac ou liaison maritime$niv4$"
+                      }
+                    },
+                    {
+                      "value": "bretelle",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Bretelle$niv4$"
+                      }
+                    },
+                    {
+                      "value": "chemin",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Chemin$niv4$"
+                      }
+                    },
+                    {
+                      "value": "escalier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Escalier$niv4$"
+                      }
+                    },
+                    {
+                      "value": "piste_cyclable",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Piste cyclable$niv4$"
+                      }
+                    },
+                    {
+                      "value": "rond-point",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Rond-point$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_a_1_chaussee",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route à 1 chaussée$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_a_2_chaussees",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route à 2 chaussées$niv4$"
+                      }
+                    },
+                    {
+                      "value": "route_empierree",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Route empierrée$niv4$"
+                      }
+                    },
+                    {
+                      "value": "type_autoroutier",
+                      "field": "nature",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv4$Type autoroutier$niv4$"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "name-pgr",
+                  "key": "CL_ADMIN",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -653,7 +843,7 @@
                       "field": "cpx_classement_administratif",
                       "condition": {
                         "type": "equal",
-                        "value": ""
+                        "value": "$niv4$$niv4$"
                       }
                     },
                     {
