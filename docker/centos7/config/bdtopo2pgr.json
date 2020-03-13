@@ -477,13 +477,13 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
@@ -578,6 +578,53 @@
                       "condition": {
                         "type": "equal",
                         "value": "$niv4$Type autoroutier$niv4$"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_H",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_hauteur"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_LAR",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_largeur"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_P",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_poids_total"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_PPE",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_poids_par_essieu"
+                },
+                {
+                  "keyType": "name-pgr",
+                  "key": "RESTR_MAT",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vrai",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "value": "faux",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "false"
                       }
                     }
                   ]
@@ -728,13 +775,13 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
@@ -829,6 +876,53 @@
                       "condition": {
                         "type": "equal",
                         "value": "$niv4$Type autoroutier$niv4$"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_H",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_hauteur"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_LAR",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_largeur"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_P",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_poids_total"
+                },
+                {
+                  "keyType": "numerical-pgr",
+                  "key": "RESTR_PPE",
+                  "availableConstraintType": ["banned"],
+                  "field": "restriction_de_poids_par_essieu"
+                },
+                {
+                  "keyType": "name-pgr",
+                  "key": "RESTR_MAT",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vrai",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "value": "faux",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "false"
                       }
                     }
                   ]

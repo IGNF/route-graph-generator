@@ -477,13 +477,13 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
@@ -728,15 +728,38 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
+                },
+                {
+                  "keyType": "name-pgr",
+                  "key": "RESTR_MAT",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vrai",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "value": "faux",
+                      "field": "matieres_dangereuses_interdites",
+                      "condition": {
+                        "type": "equal",
+                        "value": "false"
+                      }
+                    }
+                  ]
                 },
                 {
                   "keyType": "name-pgr",

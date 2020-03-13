@@ -477,13 +477,13 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
@@ -728,13 +728,13 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "roadWidth",
+                  "key": "LARGEUR",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "importance",
+                  "key": "IMPORTANCE",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
