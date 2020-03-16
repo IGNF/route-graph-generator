@@ -477,19 +477,19 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "LARGEUR",
+                  "key": "largeur_de_chaussee",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "IMPORTANCE",
+                  "key": "importance",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "NATURE",
+                  "key": "nature",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -584,31 +584,31 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_H",
+                  "key": "restriction_de_hauteur",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_hauteur"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_LAR",
+                  "key": "restriction_de_largeur",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_largeur"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_P",
+                  "key": "restriction_de_poids_total",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_poids_total"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_PPE",
+                  "key": "restriction_de_poids_par_essieu",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_poids_par_essieu"
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "RESTR_MAT",
+                  "key": "matieres_dangereuses_interdites",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -631,7 +631,7 @@
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "CL_ADMIN",
+                  "key": "cpx_classement_administratif",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -775,19 +775,19 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "LARGEUR",
+                  "key": "largeur_de_chaussee",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "IMPORTANCE",
+                  "key": "importance",
                   "availableConstraintType": ["banned"],
                   "field": "importance"
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "NATURE",
+                  "key": "nature",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -882,31 +882,31 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_H",
+                  "key": "restriction_de_hauteur",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_hauteur"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_LAR",
+                  "key": "restriction_de_largeur",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_largeur"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_P",
+                  "key": "restriction_de_poids_total",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_poids_total"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "RESTR_PPE",
+                  "key": "restriction_de_poids_par_essieu",
                   "availableConstraintType": ["banned"],
                   "field": "restriction_de_poids_par_essieu"
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "RESTR_MAT",
+                  "key": "matieres_dangereuses_interdites",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
@@ -929,7 +929,7 @@
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "CL_ADMIN",
+                  "key": "cpx_classement_administratif",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
