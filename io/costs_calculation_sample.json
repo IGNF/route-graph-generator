@@ -49,8 +49,8 @@
     {
       "name": "cost_m_pedestrian",
       "speed_value": 4,
-      "direct_conditions" : "nature~='Type autoroutier';nature~='Bretelle'",
-      "reverse_conditions" : "nature~='Type autoroutier';nature~='Bretelle'",
+      "direct_conditions" : "nature~=Type autoroutier;nature~=Bretelle",
+      "reverse_conditions" : "nature~=Type autoroutier;nature~=Bretelle",
       "turn_restrictions": false,
       "cost_type": "distance",
       "operations": [
@@ -60,8 +60,8 @@
     {
       "name": "cost_s_pedestrian",
       "speed_value": 4,
-      "direct_conditions" : "nature~='Type autoroutier';nature~='Bretelle'",
-      "reverse_conditions" : "nature~='Type autoroutier';nature~='Bretelle'",
+      "direct_conditions" : "nature~=Type autoroutier;nature~=Bretelle",
+      "reverse_conditions" : "nature~=Type autoroutier;nature~=Bretelle",
       "turn_restrictions": false,
       "cost_type": "duration",
       "operations": [
