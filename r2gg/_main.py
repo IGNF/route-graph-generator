@@ -70,8 +70,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
                 }
             )
             et_instruction = time.time()
+            connection.commit()
             logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
-        connection.commit()
     connection.close()
 
     et_sql_conversion = time.time()
