@@ -123,11 +123,11 @@ def _condition_to_bool(condition, values):
     #
     # La conversion en float ne se fait qu'ici (dans les opérateurs > < >= <=) car on pourrait comparer des strings
     # avec == et !=
-    test = condition.split("==")
+    test = condition.split("==").strip('"')
     if len(test) == 2:
         return values[test[0]] == test[1]
 
-    test = condition.split("~=")
+    test = condition.split("~=").strip('"')
     if len(test) == 2:
         return values[test[0]] != test[1]
 
