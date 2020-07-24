@@ -631,6 +631,29 @@
                 },
                 {
                   "keyType": "name-pgr",
+                  "key": "itineraire_vert",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "vrai",
+                      "field": "itineraire_vert",
+                      "condition": {
+                        "type": "equal",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "value": "faux",
+                      "field": "itineraire_vert",
+                      "condition": {
+                        "type": "equal",
+                        "value": "false"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "name-pgr",
                   "key": "cpx_classement_administratif",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
