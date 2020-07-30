@@ -28,7 +28,7 @@
       "baseId": "base_pivot"
     },
     "resource": {
-      "id": "bduni-idf-osrm",
+      "id": "bduni-fxx-osrm",
       "type": "osrm",
       "description": "Données BDUNI v2.",
       "topology": {
@@ -36,7 +36,7 @@
         "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/home/docker/data/bduni-idf.osm"
+          "file": "/home/docker/data/bduni-fxx.osm"
         },
         "projection": "EPSG:4326",
         "bbox": "-90,-180,90,180",
@@ -54,10 +54,10 @@
       },
       "sources": [
         {
-          "id": "bduni-idf-car-fastest",
+          "id": "bduni-fxx-car-fastest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+            "file": "/home/docker/data/bduni-fxx-car-fastest/bduni-fxx-car-fastest.osrm"
           },
           "cost": {
             "profile": "car",
@@ -76,10 +76,10 @@
           }
         },
         {
-          "id": "bduni-idf-car-shortest",
+          "id": "bduni-fxx-car-shortest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+            "file": "/home/docker/data/bduni-fxx-car-shortest/bduni-fxx-car-shortest.osrm"
           },
           "cost": {
             "profile": "car",
@@ -98,10 +98,10 @@
           }
         },
         {
-          "id": "bduni-idf-pedestrian-fastest",
+          "id": "bduni-fxx-pedestrian-fastest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-pedestrian-fastest/bduni-idf-pedestrian-fastest.osrm"
+            "file": "/home/docker/data/bduni-fxx-pedestrian-fastest/bduni-fxx-pedestrian-fastest.osrm"
           },
           "cost": {
             "profile": "pedestrian",
@@ -120,10 +120,10 @@
           }
         },
         {
-          "id": "bduni-idf-pedestrian-shortest",
+          "id": "bduni-fxx-pedestrian-shortest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-pedestrian-shortest/bduni-idf-pedestrian-shortest.osrm"
+            "file": "/home/docker/data/bduni-fxx-pedestrian-shortest/bduni-fxx-pedestrian-shortest.osrm"
           },
           "cost": {
             "profile": "pedestrian",
@@ -149,7 +149,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-osrm"
+                "bduni-fxx-osrm"
               ]
             },
             {
@@ -268,7 +268,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
+          "file": "/home/docker/data/resources/bduni_fxx_osrm.resource"
         }
       },
       "dirs": {
