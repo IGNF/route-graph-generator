@@ -484,7 +484,7 @@
                 {
                   "keyType": "numerical-pgr",
                   "key": "importance",
-                  "availableConstraintType": ["banned"],
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "field": "importance"
                 },
                 {
@@ -632,7 +632,7 @@
                 {
                   "keyType": "name-pgr",
                   "key": "itineraire_vert",
-                  "availableConstraintType": ["banned"],
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "availableValues": [
                     {
                       "value": "vrai",
@@ -655,7 +655,7 @@
                 {
                   "keyType": "name-pgr",
                   "key": "cpx_classement_administratif",
-                  "availableConstraintType": ["banned"],
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "availableValues": [
                     {
                       "value": "vide",
