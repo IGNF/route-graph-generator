@@ -746,6 +746,14 @@
               ]
             },
             {
+              "id": "geometryFormat",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
+            },
+            {
               "id": "constraints",
               "values": [
                 {
