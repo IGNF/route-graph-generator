@@ -50,6 +50,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     st_sql_conversion = time.time()
 
     # Lancement du script SQL de conversion source --> pivot
+    connection.autocommit = True
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor()
         logger.info("Executing SQL conversion script")
@@ -71,7 +72,6 @@ def sql_convert(config, resource, db_configs, connection, logger):
             )
             et_instruction = time.time()
             logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
-        connection.commit()
     connection.close()
 
     et_sql_conversion = time.time()

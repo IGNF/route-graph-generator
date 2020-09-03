@@ -323,20 +323,20 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-pgr"
+                "bduni-fxx-pgr"
               ]
             },
             {
               "id": "start",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
@@ -359,7 +359,7 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
@@ -484,7 +484,7 @@
                 {
                   "keyType": "numerical-pgr",
                   "key": "importance",
-                  "availableConstraintType": ["banned"],
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "field": "importance"
                 },
                 {
@@ -631,8 +631,31 @@
                 },
                 {
                   "keyType": "name-pgr",
+                  "key": "itineraire_vert",
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
+                  "availableValues": [
+                    {
+                      "value": "vrai",
+                      "field": "itineraire_vert",
+                      "condition": {
+                        "type": "equal",
+                        "value": "true"
+                      }
+                    },
+                    {
+                      "value": "faux",
+                      "field": "itineraire_vert",
+                      "condition": {
+                        "type": "equal",
+                        "value": "false"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "keyType": "name-pgr",
                   "key": "cpx_classement_administratif",
-                  "availableConstraintType": ["banned"],
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "availableValues": [
                     {
                       "value": "vide",
@@ -694,7 +717,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-pgr"
+                "bduni-fxx-pgr"
               ]
             },
             {

@@ -125,11 +125,11 @@ def _condition_to_bool(condition, values):
     # avec == et !=
     test = condition.split("==")
     if len(test) == 2:
-        return values[test[0]] == test[1]
+        return values[test[0]] == test[1].strip("'")
 
     test = condition.split("~=")
     if len(test) == 2:
-        return values[test[0]] != test[1]
+        return values[test[0]] != test[1].strip("'")
 
     test = condition.split(">=")
     if len(test) == 2:

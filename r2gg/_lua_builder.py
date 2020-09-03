@@ -128,7 +128,7 @@ def _build_process_way(costs_config, output_cost):
     # récupération des attributs utiles
     get_variables_strings = []
     for variable in costs_config["variables"]:
-        var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\"))\n".format(variable["name"], variable["column_name"])
+        var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
         get_variables_strings.append(var_str)
 
     # Récupération des attributs nécéssaires à la gestion des péages, ponts et tunnels.
