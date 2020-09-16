@@ -326,6 +326,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         CREATE INDEX IF NOT EXISTS ways_vertices_geom_gist ON {0}_vertices_pgr USING GIST (the_geom);
         CLUSTER {0} USING ways_geom_gist ;
         CLUSTER {0}_vertices_pgr USING ways_vertices_geom_gist ;
+        CREATE INDEX IF NOT EXISTS ways_importance_idx ON {0} (importance);
     """.format(ways_table_name)
     logger.info("SQL: {}".format(spacial_indices_query))
     st_execute = time.time()
