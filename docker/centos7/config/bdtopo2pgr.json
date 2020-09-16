@@ -443,6 +443,8 @@
             },
             {
               "id": "constraints",
+              "defaultPreferredCostRatio": 0.8,
+              "defaultAvoidCostRatio": 1.2,
               "values": [
                 {
                   "keyType": "name-pgr",
