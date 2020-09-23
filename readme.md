@@ -37,3 +37,6 @@ Pour convertir les données au fromat osrm (le trype de ressource dans config.js
 ```
 r2gg:pivot2osrm config.json
 ```
+## Version 
+
+Version du code 1.0.01
