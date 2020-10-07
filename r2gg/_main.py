@@ -53,7 +53,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     # Ecriture dans un fichier temporaire de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = work_dir_config + "/r2gg.date"
-    date_time = extraction_date.strftime("%m/%d/%Y %H:%M:%S")
+    date_time = extraction_date.strftime("%m/%d/%Y")
     logger.info("extraction date to save in " + date_file + ": " + date_time)
 
     f = open(date_file, "w")

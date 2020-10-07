@@ -4,7 +4,7 @@
 Ce fichier de configuration est conséquent, pour le comprendre il est conseillé de lire ses spécifications et ses exemples.
 
 ### Exemple
-Plusieurs exemples sont présents dans le dossier io.
+Plusieurs exemples sont présents dans le dossier `docker/centos7/config/`.
 
 ## Configuration des logs
 #### Attribut "level"
