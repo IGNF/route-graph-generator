@@ -58,8 +58,8 @@ RUN make linux test && make linux install
 # https://github.com/door2door-io/osrm-express-server-demo
 # https://github.com/Project-OSRM/osrm-backend/blob/master/CMakeLists.txt
 WORKDIR /home/docker/osrm
-RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.22.0.zip && unzip v5.22.0.zip -d ./osrm-backend
-WORKDIR /home/docker/osrm/osrm-backend/osrm-backend-5.22.0/build 
+RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.23.0.zip && unzip v5.23.0.zip -d ./osrm-backend
+WORKDIR /home/docker/osrm/osrm-backend/osrm-backend-5.23.0/build 
 # https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/
 RUN export CC=/opt/gcc-6/home/docker/gcc/objdir/bin/gcc && export CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" && cmake3 .. -DCMAKE_BUILD_TYPE=Release -DENABLE_MASON=OFF -DCMAKE_CXX_COMPILER=/opt/gcc-6/home/docker/gcc/objdir/bin/g++ && make -j4 && make install
 # https://gcc.gnu.org/onlinedocs/libstdc++/faq.html#faq.how_to_set_paths
