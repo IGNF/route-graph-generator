@@ -1,8 +1,5 @@
 FROM centos:7.8.2003
 
-ARG proxy=""
-
-ENV http_proxy=$proxy https_proxy=$proxy HTTP_PROXY=$proxy HTTPS_PROXY=$proxy
 ENV PYTHON_VERSION "3.6.5"
 ENV HOME=/home
 
