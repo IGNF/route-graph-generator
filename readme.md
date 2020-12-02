@@ -39,4 +39,4 @@ r2gg:pivot2osrm config.json
 ```
 ## Version 
 
-Version du code 1.0.02-DEVELOP
+Version du code 1.0.1
