@@ -1,446 +1,358 @@
-# Description d'un fichier de configuration de génération pour des ressources PGR
+# Description d'un fichier de configuration de génération pour des ressources OSRM
 
 # Une génération est un objet qui contient toutes les informations utiles pour que les scripts de génération puissent créer une ressource.
 "generation":
-  type: object
-  required: true
-  properties:
-    # Généralités sur la génération
-    "general":
-      type: object
-      required: true
-      properties:
-        # Id de la génération
-        "id":
-          type: string
-          required: true
-        # Gestion des logs
-        "logs":
-          type: object
-          required: true
-          properties:
-            # Emplacement du fichier de configuration des logs
-            "configFile":
-              type: string
-              required: true
-        # Gestion de la parallélisation
-        "parallelization":
-          type: object
-          required: false
-          properties:
-            # Nombre de thread utilisable
-            "threads":
-              type: number
-              format: integer
-              required: true
-        # Gestion de la reprise sur erreur
-        "overwrite":
-          type: "boolean"
-          required: false
-        # Permet d'indiquer si la génération va partir de 0 ou s'il s'agit de mettre à jour une ressource déjà existante
-        "operation":
-          type: string
-          required: true
-          enum: {"creation","update"}
-    # Informations sur les bases de données qui seront utilisées pour la génération
-    "bases":
-      type: array
-      required: true
-      minItems: 1
-      items:
-        type: object
-        properties:
-          # Id de la base qui va être utile dans la suite de la configuration
-          "id":
-            type: string
-            required: true
-          # Type de base, pour le moment, il n'y aura que des bases de données
-          "type":
-            type: string
-            required: true
-            enum: ["bdd"]
-          # Fichier de configuration contenant toutes les informations pour se connecter à la base
-          "configFile":
-            type: string
-            required: true
-    # Espace de travail nécessaire à l'application pour travailler. Il faut un endroit sur disque où écrire et une base de données accessible en écriture.
-    "workingSpace":
-      type: object
-      required: true
-      properties:
-        "directory":
-          type: string
-          required: true
-        "baseId":
-          type: string
-          required: true
-    # Information sur la ressource générée. La plupart de ces informations permettront de générer le fichier de ressource utilisable par l'application de calcul d'itinéraire.
-    "resource":
-      type: object
-      required: true
-      properties:
-        # Id de la ressource
-        "ressourceId":
-          type: string
-          required: true
-        # Type de la ressource
-        "type":
-          type: string
-          required: true
-        # Description de la ressource
-        "description":
-          type: string
-          required: true
-        # Bbox des données diffusées
-        "boundingBox":
-          type: string
-          required: true
-        # Projection par défaut
-        "defaultProjection":
-          type: string
-          required: true
-        # Projections disponibles
-        "availableProjection":
-          type: array
-          required: false
-          items:
-            type: string
-            required: true
-        # Informations sur la topologie de la ressource
-        "topology":
-          type: object
-          required: true
-          properties:
-            # Description de la ressource
-            "description":
-              type: string
-              required: true
-            # Stockage de la ressource
-            "storage":
-              $ref: "#/components/schemas/fileStorage"
-              required: true
-            # Projection des données sources
-            "projection":
-              type: string
-              required: true
-            # Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération.
-            "mapping":
-              type: object
-              required: true
-              properties:
-                # Identifiant de la bdd source
-                "source":
-                  $ref: "#/components/schemas/baseStorage"
-                  required: true
-                # Emplacement du script SQL
-                "storage":
-                  $ref: "#/components/schemas/fileStorage"
-                  required: true
-            # Liste des attributs qui seront des attributs par défaut pour la ressource
-            "defaultAttributs":
-              type: array
-              required: false
-              minItems: 1
-              items:
-                type: "string"
-        # Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs.
-        "costs":
-          type: array
-          required: true
-          items:
-            type: object
-            required: true
-            properties:
-              # Chaque coût correspond à un profil
-              "profile":
-                type: string
-                required: true
-              # Chaque coût correspond à un profil
-                "optmization":
-                  type: string
-                  required: true
-                # Fichier permettant de calculer le coût
-                "compute":
-                  type: object
-                  required: true
-                  properties:
-                    # Stockage du fichier permettant de calculer le coût
-                    "storage":
-                      $ref: "#/components/schemas/fileStorage"
-        # Informations sur les opérations autorisées sur la ressource qui va être générée.
-        "operations":
-          type: array
-          required: false
-            items:
-              anyOf:
-                - $ref: "#/components/schemas/routeOperation"
-                - $ref: "#/components/schemas/nearestOperation"
-                - $ref: "#/components/schemas/isochroneOperation"
-        # Informations sur les résultats de la génération.
-        "outputs":
-          type: object
-          required: true
-          properties:
-            # La génération doit produire un fichier de ressource utilisable par l'application de calcul d'itinéraire.
-            "configuration":
-              type: object
-              required: true
-              properties:
-                # Stockage du fichier de configuration.
-                "storage":
-                  $ref: "#/components/schemas/fileStorage"
-                  required: true
-            # La génération doit produire des graphes utilisables par l'application de calcul d'itinéraire.
-            "graphs":
-              type: object
-              required: true
-              properties:
-                # Stockage des graphes dans une base
-                "storage":
-                  $ref: "#/components/schemas/baseStorage"
+	type: object
+	required: true
+	properties:	
+		# Généralités sur la génération
+		"general":
+			type: object
+			required: true
+			properties:	
+				# Id de la génération
+				"id":
+					type: string
+					required: true
+				# Gestion des logs
+				"logs":
+					type: object
+					required: true
+					properties:
+						# Emplacement du fichier de configuration des logs
+						"configFile":
+							type: string
+							required: true
+				# Gestion de la parallélisation
+				"parallelization":
+					type: object
+					required: false
+					properties:
+						# Nombre de thread utilisable
+						"threads":
+							type: number
+							format: integer
+							required: true
+				# Gestion de la reprise sur erreur
+				"overwrite":
+					type: "boolean"
+					required: false
+				# Permet d'indiquer si la génération va partir de 0 ou s'il s'agit de mettre à jour une ressource déjà existante
+				"operation":
+				type: string
+				required: true
+				enum: {"creation","update"}
+		# Informations sur les bases de données qui seront utilisées pour la génération
+		"bases":
+			type: array
+			required: true
+			minItems: 1
+			items:
+				type: object
+				properties:
+					# Id de la base qui va être utile dans la suite de la configuration
+					"id":
+						type: string
+						required: true
+					# Type de base, pour le moment, il n'y aura que des bases de données
+					"type":
+						type: string
+						required: true
+						enum: ["bdd"]
+					# Fichier de configuration contenant toutes les informations pour se connecter à la base
+					"configFile":
+						type: string
+						required: true
+		# Information pour pouvoir se connecter, lire et écrire dans un cluster CEPH
+		"ceph":
+			type: object
+			required: false
+			properties:	
+				# Nom du cluster
+				"clusterName":
+					type: string
+					required: true
+				# Nom de l'utilisateur
+				"userName":
+					type: string
+					required: true
+				# Fichier de configuration 
+				"configFile":
+					type: string
+					required: true
+		# Espace de travail nécessaire à l'application pour travailler. Il faut un endroit sur disque où écrire et une base de données accessible en écriture. 
+		"workingSpace":
+			type: object
+			required: true
+			properties:	
+				"directory":
+					type: string
+					required: true
+				"baseId":
+					type: string
+					required: true
+		# Information sur la ressource générée. La plupart de ces informations permettront de générer le fichier de ressource utilisable par l'application de calcul d'itinéraire.
+		"resource":
+			type: object
+			required: true
+			properties:	
+				# Id de la ressource
+				"id":
+					type: string
+					required: true
+				# Type de la ressource, pge dans ce cas
+				"type":
+					type: string
+					required: true
+				# Description de la ressource
+				"description":
+					type: string
+					required: true
+				# Informations sur la topologie de la ressource
+				"topology":
+					type: object
+					required: true
+					properties:
+						# id de la topologie, utile pour la charger une seule fois dans Road2
+						"id":
+							type: string
+							required: true
+						# Type de la topologie
+						"type":
+							type: string
+							required: true
+						# Description de la topologie
+						"description":
+							type: string
+							required: true
+						# Stockage de la topologie
+						"storage":
+							type: object
+							required: true
+							properties:
+								# Id de la base utilisée en sortie, utile que pour r2gg
+								"baseId":
+									type: string 
+									required: true
+								# Information sur la base qui contient la topologie
+								"base":
+									type: object
+									required: true 
+									properties:
+										# Fichier de configuration pour se connecter à la base de données, utile que pour Road2 
+										"dbConfig":
+											type: string 
+											required: true
+										# Schéma dans la base de données 
+										"schema": 
+											type: string 
+											required: true 
+										# Liste des attributs de le topologie disponibles dans la réponse
+										"attributes":
+											type: array
+											required: false 
+											items:
+												type: object 
+												properties: 
+													# Clé utilisée par le client de l'api 
+													"key":
+														type: string 
+														required: true
+													# Nom de la colonne dans la base de donnés 
+													"column":
+														type: string 
+														required: true
+													# Indique si l'attribut est présent par défaut dans la réponse, "true" ou "false"
+													"default":
+														type: string 
+														required: true
+						# Projection des données sources
+						"projection":
+							type: string
+							required: true
+						# Bbox des données de la topologie, pas nécessairement la même que pour la ressource 
+						"bbox":
+							type: string
+							required: true 
+						# Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération. 
+						"mapping":
+							type: object
+							required: true
+							properties:
+								# Source des données, il s'agit de l'id d'une base de données 
+								"source":
+									type: object 
+									required: true
+									properties:
+										# Id de la base de données qui doit être présentes dans les bases de ce fichier
+										"baseId":
+											type: string
+											required: true
+								# Emplacement du script SQL 
+								"storage":
+									$ref: "#/components/schemas/storage"
+									required: true
+						# Liste des attributs qui seront des attributs par défaut pour la ressource
+			            "defaultAttributes":
+			              type: array
+			              required: false
+			              minItems: 1
+			              items:
+							type: "string"
+				# Liste des sources qui vont être générées 
+				"sources":
+					type: array 
+					required: true
+					minItems: 1
+					items:
+						type: object
+						properties:
+							# id de la source, utile pour la charger une seule fois dans Road2.  
+							"id":
+								type: string
+								required: true
+							# Type de la source, ici ce doit être osrm
+							"type":
+								type: string
+								required: true
+							# Stockage de la source, du .osrm en l'occurence
+							"storage":
+								type: object 
+								required: true 
+								properties: 
+									# Fichier de configuration de la base de données
+									"dbConfig":
+										type: string 
+										required: true
+									# Colonne des coûts 
+									"costColumn":
+										type: string 
+										required: true
+									# Colonne des coûts inverse
+									"rcostColumn":
+										type: string 
+										required: true
+							# Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs. 
+							"cost":
+								type: object
+								required: true
+								properties:
+									# Chaque coût correspond à un profil
+									"profile":
+										type: string
+										required: true
+									# Chaque coût correspond à un profil
+									"optmization":
+										type: string
+										required: true
+									# Fichier permettant de calculer le coût
+									"compute":
+										type: object
+										required: true
+										properties:
+											# Stockage du fichier permettant de calculer le coût
+											"storage":
+												$ref: "#/components/schemas/storage"
+									# Configuration pour le calcul des couts 
+									"configuration":
+										type: object 
+										required: true 
+										properties:
+											# Nom du coût dans le fichier de configuration 
+											"name":
+												type: string 
+												required: true
+											# Stockage du fichier de calcul des couts. C'est un JSON. 
+											"storage":
+												$ref: "#/components/schemas/storage"
+				# Informations sur les opérations autorisées sur la ressource qui va être générée. 
+				"availableOperations":
+					type: array
+					required: true
+					minItems: 1
+					items:
+						# Id de l'opération
+						"id":
+							type: string 
+							required: true 
+						# Paramètres de l'opération 
+						"parameters":
+							type: array
+							required: true
+							items:
+								type: object 
+								properties:
+									# Id du parametre
+									"id":
+										type: string
+										required: true
+									# Valeur par défaut possible pour ce parametre
+									"defaultValueContent":
+										type: string 
+										required: false 
+									# Valeurs possibles pour ce parametre
+									"values":
+										type: string or array or object 
+										required: true
+				# Informations sur les résultats de la génération. 
+				"outputs":
+					type: object
+					required: true
+					properties:
+						# La génération doit produire un fichier de ressource utilisable par l'application de calcul d'itinéraire. 
+						"configuration":
+							type: object
+							required: true
+							properties:
+								# Stockage du fichier de configuration.
+								"storage":
+									$ref: "#/components/schemas/storage"
+									required: true
+				# Dossiers utilisés à la fin de la génération pour mettre les données au bons emplacements
+				"dirs":
+					type: object 
+					required: false 
+					properties:
+						# Dossier final des données 
+						"dataDir":
+							type: string 
+							required: true 
+						# Dossier pour les profiles 
+						"profileDir":
+							type: string 
+							required: true 
+						# Dossier pour les ressources
+						"resourceDir":
+							type: string 
+							required: true 
+				# Configuration ssh
+				"sshConfig":
+					type: object 
+					required: false 
+					properties:
+						# Hôte
+						"host":
+							type: string 
+							required: true 
+						# Port de l'hôte
+						"port":
+							type: integer 
+							required: true 
+						# Nom de l'utilisateur
+						"username":
+							type: string 
+							required: true 
+						# Mot de passe de l'utilisateur
+						"password":
+							type: string 
+							required: true 
 components:
   schemas:
-    # stockage d'un document: fichier ou ceph
-    "fileStorage":
-      type: object
-      properties:
-        oneOf:
-              # Fichier
-          - "file":
-              type: string
-                    required: false
-          - "ceph":
-          type: object
-                required: false
-            properties:
-                    # Pool contenant l'objet.
-              "pool":
-                type: string
-                      required: true
-                    # Id de l'objet.
-              "objectId":
-                type: string
-                        required: true
-    # stockage d'une base
-    "baseStorage":
-      type: object
-      properties:
-            # Id d'une base précisé dans la section "bases"
-            "baseId":
-              type: string
-              required: true
-    # Configuration des contraintes que l'on peut formuler dans les requêtes.
-    "constraint":
-      type: object
-      properties:
-        # Id de la contrainte
-        "id":
-          type: string
-          required: true
-        # type de la contrainte: parmi une liste prédéfinie. Le type va indiquer les opérations possibles.
-        "type":
-          type: string
-          required: true
-          enum: ["constraint-pgr-enum","constraint-pgr-number","constraint-pgr-string","constraint-pgr-isochrone"]
-        # Description de la contrainte qui va apparaître dans le getcap.
-        "description":
-          type: string
-          required: true
-        # Mot clé permettant de formuler la contrainte. Indiqué dans le getcap.
-        "key":
-          type: string
-          required: true
-        # Valeurs possibles pour la contrainte. Dans le cas de PGR, les valeurs disponibles vont être calculées en fonction du type de contrainte et de la colonne contenant les valeurs. Elles seront alors visible dans le getcap.
-        "values":
-          type: string
-          required: true
-        # Colonne contenant les propriété permettant de définir des contraintes. Il faut reprendre la key indiquée dans la topologie de la ressource.
-        "propertiesColumn":
-          type: string
-          required: true
-        "availableConstraintType":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"banned","prefered","unprefered"}
-        "availableOperators":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"=","!=","<",">","<=",">=","like"}
-    # Configuration des contraintes que l'on peut formuler dans les requêtes.
-    "constraintIsochrone":
-      type: object
-      properties:
-        # Id de la contrainte
-        "id":
-          type: string
-          required: true
-        # type de la contrainte: parmi une liste prédéfinie. Le type va indiquer les opérations possibles.
-        "type":
-          type: string
-          required: true
-          enum: ["constraint-pgr-enum","constraint-pgr-number","constraint-pgr-string","constraint-pgr-isochrone"]
-        # Description de la contrainte qui va apparaître dans le getcap.
-        "description":
-          type: string
-          required: true
-        # Mot clé permettant de formuler la contrainte. Indiqué dans le getcap.
-        "key":
-          type: string
-          required: true
-        # Valeurs possibles pour la contrainte. Dans le cas de PGR, les valeurs disponibles vont être calculées en fonction du type de contrainte et de la colonne contenant les valeurs. Elles seront alors visible dans le getcap.
-        "values":
-          type: string
-          required: true
-        # Colonne contenant les propriété permettant de définir des contraintes. Il faut reprendre la key indiquée dans la topologie de la ressource.
-        "propertiesColumn":
-          type: string
-          required: true
-        "availableConstraintType":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"banned"}
-        "availableOperators":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"="}
-    # Configuration des paramètres par défaut d'une opération
-    "defaultParameters":
-      type: array
-      required: false
-      minItems: 1
-      items:
-        type: object
-        properties:
-          # Id du paramètre concerné
-          "id":
-            type: string
-            required: true
-          # valeur par défaut du paramètre concerné
-          "default":
-            type: string
-            required: true
-    # Configuration nécessaire pour paramètrer l'opération route de PGR.
-    "routeOperation":
-      type: object
-      properties:
-        # Type de l'opération: route dans ce cas
-        "type":
-          type: string
-          required: true
-          enum: ["route"]
-        # Nombre de requête par seconde maximal
-        "rate":
-          type: number
-          required: false
-          format: integer
-        # Nombre maximal de points intermédiaires par requête
-        "maxIntermediatePoints":
-          type: number
-          required: false
-          format: integer
-        # Nombre maximal de contraintes formulables par requête
-        "maxNumberOfConstraints":
-          type: number
-          required: false
-          format: integer
-        # Contraintes
-        "constraints":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            $ref: "#/components/schemas/constraint"
-      # Paramètres par défaut
-        "defaultParameters":
-          $ref: "#/components/schemas/defaultParameters"
-    # Configuration nécessaire pour paramètrer l'opération nearest de PGR.
-    "nearestOperation":
-      type: object
-      properties:
-        # Type de l'opération: nearest dans ce cas
-        "type":
-          type: string
-          required: true
-          enum: ["nearest"]
-        # Nombre de requête par seconde maximal
-        "rate":
-          type: number
-          required: false
-          format: integer
-        # Nombre maximal d'entités que l'opération peut renvoyé.
-        "maxNumber":
-          type: number
-          required: false
-          format: integer
-      # Paramètres par défaut
-        "defaultParameters":
-          $ref: "#/components/schemas/defaultParameters"
-    "isochroneOperation":
-      type: object
-      properties:
-        # Type de l'opération: isochrone dans ce cas
-        "type":
-          type: string
-          required: true
-          enum: ["isochrone"]
-        # Nombre de requête par seconde maximal
-        "rate":
-          type: number
-          required: false
-          format: integer
-        # Coûts disponibles pour faire des calculs d'iso-cost
-        "cost":
-          type: array
-          required: true
-          minItems: 1
-          items:
-            type: object
-            properties:
-              # Clé pour définir le coût que l'on veut. C'est ce qui apparaîtra dans le getcap.
-              "key":
-                type: string
-                required: true
-              # Description du coût
-              "description":
-                type: string
-                required: true
-              # Liens avec les sources pour savoir comment calculer les coûts selon chaque mode de déplacement.
-              "sourceIds":
-                type: array
-                required: true
-                items:
-                  type: string
-              # Unité du coût
-              "unit":
-                type: string
-                required: true
-              # Valeur min du coût
-              "min":
-                type: number
-                required: false
-              # Valeur max du coût
-              "max":
-                type: number
-                required: false
-        # Contraintes
-        "constraints":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            $ref: "#/components/schemas/constraintIsochrone"
-      # Paramètres par défaut
-        "defaultParameters":
-          $ref: "#/components/schemas/defaultParameters"
+    # storage d'un document: fichier ou ceph
+  	"storage":
+  		type: object
+  		properties:
+        	# Fichier 
+  			"file":
+  				type: string
+            	required: false

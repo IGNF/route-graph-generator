@@ -586,8 +586,8 @@
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "CL_ADMIN",
-                  "availableConstraintType": ["banned"],
+                  "key": "cpx_classement_administratif",
+                  "availableConstraintType": ["banned", "prefer", "avoid"],
                   "availableValues": [
                     {
                       "value": "vide",

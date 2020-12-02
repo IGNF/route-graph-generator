@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 import time
+from datetime import datetime
 
 import psycopg2
 # https://github.com/andialbrecht/sqlparse
@@ -46,6 +47,18 @@ def sql_convert(config, resource, db_configs, connection, logger):
     ymin = bbox[1]
     xmax = bbox[2]
     ymax = bbox[3]
+
+    # Date de l'extraction pour la noter dans la configuration de la ressource
+    extraction_date = datetime.now() 
+    # Ecriture dans un fichier temporaire de la date d'extraction
+    work_dir_config = config['workingSpace']['directory']
+    date_file = work_dir_config + "/r2gg.date"
+    date_time = extraction_date.strftime("%m/%d/%Y")
+    logger.info("extraction date to save in " + date_file + ": " + date_time)
+
+    f = open(date_file, "w")
+    f.write(date_time)
+    f.close()
 
     st_sql_conversion = time.time()
 
@@ -215,6 +228,14 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     filename = config["outputs"]["configuration"]["storage"]["file"]
     logger.info("Writing resource file: " + filename)
 
+    # Récupération de la date d'extraction 
+    work_dir_config = config['workingSpace']['directory']
+    date_file = work_dir_config + "/r2gg.date"
+    f = open(date_file, "r")
+    extraction_date = f.read()
+    logger.info("extraction date to add in resource (from "+ date_file +"): " + extraction_date)
+    f.close()
+
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
 
     if convert_file_paths and config["outputs"].get("dirs", None) is not None:
@@ -224,6 +245,8 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     resource["topology"]["storage"].pop("baseId", None)
     for source in resource["sources"]:
         source["storage"].pop("dbConfig", None)
+
+    resource["resourceVersion"] = extraction_date
 
     final_resource = {"resource": resource}
     with open(filename, "w") as resource_file:

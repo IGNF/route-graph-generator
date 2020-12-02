@@ -37,11 +37,11 @@
 				"overwrite":
 					type: "boolean"
 					required: false
-		# Permet d'indiquer si la génération va partir de 0 ou s'il s'agit de mettre à jour une ressource déjà existante
-        "operation":
-          type: string
-          required: true
-          enum: {"creation","update"}
+				# Permet d'indiquer si la génération va partir de 0 ou s'il s'agit de mettre à jour une ressource déjà existante
+				"operation":
+				type: string
+				required: true
+				enum: {"creation","update"}
 		# Informations sur les bases de données qui seront utilisées pour la génération
 		"bases":
 			type: array
@@ -92,15 +92,15 @@
 					type: string
 					required: true
 		# Information sur la ressource générée. La plupart de ces informations permettront de générer le fichier de ressource utilisable par l'application de calcul d'itinéraire.
-		"ressource":
+		"resource":
 			type: object
 			required: true
 			properties:	
 				# Id de la ressource
-				"ressourceId":
+				"id":
 					type: string
 					required: true
-				# Type de la ressource
+				# Type de la ressource, osrm dans ce cas
 				"type":
 					type: string
 					required: true
@@ -108,31 +108,24 @@
 				"description":
 					type: string
 					required: true
-				# Bbox des données diffusées
-				"boundingBox":
-					type: string
-					required: true
-				# Projection par défaut
-				"defaultProjection":
-					type: string
-					required: true
-				# Projections disponibles
-				"availableProjection":
-					type: array
-					required: false
-					items:
-						type: string
-						required: true
 				# Informations sur la topologie de la ressource
 				"topology":
 					type: object
 					required: true
 					properties:
-						# Description de la ressource
+						# id de la topologie, utile pour la charger une seule fois dans Road2
+						"id":
+							type: string
+							required: true
+						# Type de la topologie
+						"type":
+							type: string
+							required: true
+						# Description de la topologie
 						"description":
 							type: string
 							required: true
-						# Stockage de la ressource
+						# Stockage de la topologie
 						"storage":
 							$ref: "#/components/schemas/storage"
 							required: true
@@ -140,54 +133,117 @@
 						"projection":
 							type: string
 							required: true
+						# Bbox des données de la topologie, pas nécessairement la même que pour la ressource 
+						"bbox":
+							type: string
+							required: true 
 						# Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération. 
 						"mapping":
 							type: object
 							required: true
 							properties:
+								# Source des données, il s'agit de l'id d'une base de données 
+								"source":
+									type: object 
+									required: true
+									properties:
+										# Id de la base de données qui doit être présentes dans les bases de ce fichier
+										"baseId":
+											type: string
+											required: true
 								# Emplacement du script SQL 
 								"storage":
 									$ref: "#/components/schemas/storage"
 									required: true
 						# Liste des attributs qui seront des attributs par défaut pour la ressource
-			            "defaultAttributs":
+			            "defaultAttributes":
 			              type: array
 			              required: false
 			              minItems: 1
 			              items:
-			                type: "string"
-				# Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs. 
-				"costs":
-					type: array
+							type: "string"
+				# Liste des sources qui vont être générées 
+				"sources":
+					type: array 
 					required: true
+					minItems: 1
 					items:
 						type: object
-						required: true
 						properties:
-							# Chaque coût correspond à un profil
-							"profile":
+							# id de la source, utile pour la charger une seule fois dans Road2.  
+							"id":
 								type: string
 								required: true
-							# Chaque coût correspond à un profil
-						  	"optmization":
-						  		type: string
-						  		required: true
-						  	# Fichier permettant de calculer le coût
-						  	"compute":
-						  		type: object
-						  		required: true
-						  		properties:
-						  			# Stockage du fichier permettant de calculer le coût
-						  			"storage":
-						  				$ref: "#/components/schemas/storage"
+							# Type de la source, ici ce doit être osrm
+							"type":
+								type: string
+								required: true
+							# Stockage de la source, du .osrm en l'occurence
+							"storage":
+								$ref: "#/components/schemas/storage"
+								required: true
+							# Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs. 
+							"cost":
+								type: object
+								required: true
+								properties:
+										# Chaque coût correspond à un profil
+										"profile":
+											type: string
+											required: true
+										# Chaque coût correspond à un profil
+										"optmization":
+											type: string
+											required: true
+										# Fichier permettant de calculer le coût
+										"compute":
+											type: object
+											required: true
+											properties:
+												# Stockage du fichier permettant de calculer le coût
+												"storage":
+													$ref: "#/components/schemas/storage"
+										# Configuration pour le calcul des couts 
+										"configuration":
+											type: object 
+											required: true 
+											properties:
+												# Nom du coût dans le fichier de configuration 
+												"name":
+													type: string 
+													required: true
+												# Stockage du fichier de calcul des couts. C'est un JSON. 
+												"storage":
+													$ref: "#/components/schemas/storage"
 				# Informations sur les opérations autorisées sur la ressource qui va être générée. 
-				"operations":
+				"availableOperations":
 					type: array
-					required: false
-						items:
-							anyOf:
-								- $ref: "#/components/schemas/routeOperation"
-								- $ref: "#/components/schemas/nearestOperation"
+					required: true
+					minItems: 1
+					items:
+						# Id de l'opération
+						"id":
+							type: string 
+							required: true 
+						# Paramètres de l'opération 
+						"parameters":
+							type: array
+							required: true
+							items:
+								type: object 
+								properties:
+									# Id du parametre
+									"id":
+										type: string
+										required: true
+									# Valeur par défaut possible pour ce parametre
+									"defaultValueContent":
+										type: string 
+										required: false 
+									# Valeurs possibles pour ce parametre
+									"values":
+										type: string or array or object 
+										required: true
 				# Informations sur les résultats de la génération. 
 				"outputs":
 					type: object
@@ -202,161 +258,51 @@
 								"storage":
 									$ref: "#/components/schemas/storage"
 									required: true
-						# La génération doit produire des graphes utilisables par l'application de calcul d'itinéraire. 
-						"graphs":
-							type: object
-							required: true
-							properties:
-								# Stockage des graphes sur un disque ou dans un pool CEPH. (sans préciser l'id qui lui sera généré par les scripts de génération et apparaîtra dans le fichier de ressource).
-								"storage":
-									type: object
-									required: true
-									properties:
-										oneOf:
-											- "file":
-												type: string
-												required: true
-											- "ceph":
-												type: object
-												required: true
-												properties:
-													"pool":
-														type: string
-														required: true
+				# Dossiers utilisés à la fin de la génération pour mettre les données au bons emplacements
+				"dirs":
+					type: object 
+					required: false 
+					properties:
+						# Dossier final des données 
+						"dataDir":
+							type: string 
+							required: true 
+						# Dossier pour les profiles 
+						"profileDir":
+							type: string 
+							required: true 
+						# Dossier pour les ressources
+						"resourceDir":
+							type: string 
+							required: true 
+				# Configuration ssh
+				"sshConfig":
+					type: object 
+					required: false 
+					properties:
+						# Hôte
+						"host":
+							type: string 
+							required: true 
+						# Port de l'hôte
+						"port":
+							type: integer 
+							required: true 
+						# Nom de l'utilisateur
+						"username":
+							type: string 
+							required: true 
+						# Mot de passe de l'utilisateur
+						"password":
+							type: string 
+							required: true 
 components:
   schemas:
     # storage d'un document: fichier ou ceph
   	"storage":
   		type: object
   		properties:
-  			oneOf:
-          # Fichier 
-  				- "file":
-  						type: string
-              required: false
-          # storage objet ceph. Les informations de connexion sont dans la configuration principale de l'application. 
-  				- "ceph":
-  						type: object
-              required: false
-  						properties:
-                # Pool contenant l'objet.
-  							"pool":
-  								type: string
-                  required: true
-                # Id de l'objet.
-  							"objectId":
-  								type: string
-                  required: true
-    # Configuration des contraintes que l'on peut formuler dans les requêtes. 
-  	"constraint":
-  		type: object
-      properties: 
-        # Id de la contrainte
-      	"id":
-      		type: string
-          required: true
-        # type de la contrainte: parmi une liste prédéfinie. Le type va indiquer les opérations possibles. 
-      	"type":
-      		type: string
-          required: true
-      		enum: ["filter-osrm"]
-        # Description de la contrainte qui va apparaître dans le getcap.
-      	"description":
-      		type: string
-          required: true
-        # Mot clé permettant de formuler la contrainte. Indiqué dans le getcap. 
-        "key":
-          type: string
-          required: true
-        # Valeurs possibles pour la contrainte. Dans le cas d'OSRM, il n'y aura que des filtres précalculés lors de la génération des .osrm. Ce sont ces valeurs qui devront être indiquée ici. Elles seront alors visible dans le getcap. 
-        "values":
-        	type: array
-          required: true
-        	minItems: 1
-        	items:
-          	type: string
-        "availableConstraintType":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"banned"}
-        "availableOperators":
-          type: array
-          required: false
-          minItems: 1
-          items:
-            type: string
-            enum: {"="}
-    # Configuration des paramètres par défaut d'une opération
-    "defaultParameters":
-      type: array
-      required: false
-      minItems: 1
-      items:
-        type: object
-        properties:
-          # Id du paramètre concerné
-          "id":
-            type: string
-            required: true
-          # valeur par défaut du paramètre concerné
-          "default":
-            type: string
-            required: true
-    # Configuration nécessaire pour paramètrer l'opération route d'OSRM. 
-  	"routeOperation":
-  		type: object
-  		properties:
-        # Id de l'opération: route dans ce cas
-  			"type":
+        	# Fichier 
+  			"file":
   				type: string
-          required: true
-          enum: ["route"]
-        # Nombre de requête par seconde maximal
-  			"rate":
-  				type: number
-          required: false
-  				foramt: integer
-        # Nombre maximal de points intermédiaires par requête
-  			"maxIntermediatePoints":
-  				type: number
-          required: false
-  				foramt: integer
-        # Nombre maximal de contraintes formulables par requête
-  			"maxNumberOfConstraints":
-   				type: number
-          required: false
-  				foramt: integer
-        # Contraintes 
-  			"constraints":
-  				type: array
-          required: false
-  				minItems: 1
-  				items:
-  					$ref: "#/components/schemas/constraint"
-  		# Paramètres par défaut
-        "defaultParameters":
-          $ref: "#/components/schemas/defaultParameters"
-  	"nearestOperation":
-  		type: object
-  		properties:
-        # Id de l'opération: nearest dans ce cas
-  			"type":
-  				type: string
-          required: true
-          enum: ["nearest"]
-        # Nombre de requête par seconde maximal
-  			"rate":
-  				type: number
-          required: false
-  				foramt: integer
-        # Nombre maximal d'entités que l'opération peut renvoyé.
-  			"maxNumber":
-  				type: number
-          required: false
-  				foramt: integer
-  		# Paramètres par défaut
-        "defaultParameters":
-          $ref: "#/components/schemas/defaultParameters"
+            	required: false
