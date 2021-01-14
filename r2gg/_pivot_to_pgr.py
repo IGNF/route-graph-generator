@@ -326,11 +326,23 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         CREATE INDEX IF NOT EXISTS ways_vertices_geom_gist ON {0}_vertices_pgr USING GIST (the_geom);
         CLUSTER {0} USING ways_geom_gist ;
         CLUSTER {0}_vertices_pgr USING ways_vertices_geom_gist ;
-        CREATE INDEX IF NOT EXISTS ways_importance_idx ON {0} (importance);
+        CREATE INDEX IF NOT EXISTS ways_importance_idx ON {0} USING btree (importance);
     """.format(ways_table_name)
     logger.info("SQL: {}".format(spacial_indices_query))
     st_execute = time.time()
     cursor_out.execute(spacial_indices_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    connection_out.commit()
+
+    turn_restrictions_indices_query = """
+        CREATE INDEX IF NOT EXISTS turn_restrictions_id_key ON {0}.turn_restricions USING btree (id);
+        CREATE INDEX IF NOT EXISTS ways_id_key ON {1} USING btree (id);
+        CREATE INDEX IF NOT EXISTS ways_vertices_pgr_id_key ON {1}_vertices_pgr USING btree (id);
+    """.format(ways_table_name)
+    logger.info("SQL: {}".format(turn_restrictions_indices_query))
+    st_execute = time.time()
+    cursor_out.execute(turn_restrictions_indices_query)
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     connection_out.commit()
