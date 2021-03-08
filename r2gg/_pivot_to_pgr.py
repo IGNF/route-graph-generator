@@ -106,7 +106,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     cursor_out.execute(create_non_comm)
 
     logger.info("Populating turn restrictions")
-    tr_query = "SELECT id, id_from, id_to FROM non_comm;"
+    tr_query = "SELECT id_from, id_to FROM non_comm;"
 
     logger.debug("SQL: {}".format(tr_query))
     st_execute = time.time()
