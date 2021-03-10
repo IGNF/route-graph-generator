@@ -339,7 +339,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         CREATE INDEX IF NOT EXISTS turn_restrictions_id_key ON {0}.turn_restricions USING btree (id);
         CREATE INDEX IF NOT EXISTS ways_id_key ON {1} USING btree (id);
         CREATE INDEX IF NOT EXISTS ways_vertices_pgr_id_key ON {1}_vertices_pgr USING btree (id);
-    """.format(ways_table_name)
+    """.format(schema, ways_table_name)
     logger.info("SQL: {}".format(turn_restrictions_indices_query))
     st_execute = time.time()
     cursor_out.execute(turn_restrictions_indices_query)
