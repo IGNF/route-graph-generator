@@ -479,19 +479,19 @@
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "LARGEUR",
+                  "key": "largeur",
                   "availableConstraintType": ["banned"],
                   "field": "largeur_de_chaussee"
                 },
                 {
                   "keyType": "numerical-pgr",
-                  "key": "IMPORTANCE",
-                  "availableConstraintType": ["banned"],
+                  "key": "importance",
+                  "availableConstraintType": ["banned", "avoid", "prefer"],
                   "field": "importance"
                 },
                 {
                   "keyType": "name-pgr",
-                  "key": "NATURE",
+                  "key": "nature",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
