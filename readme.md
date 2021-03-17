@@ -39,6 +39,6 @@ r2gg:pivot2osrm config.json
 ```
 ## Version 
 
-Version du code 1.0.2-DEVELOP
+Version du code 1.0.3-DEVELOP
 
 NB: penser à mettre à jour la version dans le script `__init__.py`
