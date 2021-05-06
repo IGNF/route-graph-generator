@@ -49,7 +49,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     ymax = bbox[3]
 
     # Date de l'extraction pour la noter dans la configuration de la ressource
-    extraction_date = datetime.now() 
+    extraction_date = datetime.now()
     # Ecriture dans un fichier temporaire de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = work_dir_config + "/r2gg.date"
@@ -65,7 +65,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     # Lancement du script SQL de conversion source --> pivot
     connection.autocommit = True
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
-        cur = connection.cursor()
+        cur = connection.cursor(name="convert_cursor")
         logger.info("Executing SQL conversion script")
         instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
 
@@ -228,7 +228,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     filename = config["outputs"]["configuration"]["storage"]["file"]
     logger.info("Writing resource file: " + filename)
 
-    # Récupération de la date d'extraction 
+    # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = work_dir_config + "/r2gg.date"
     f = open(date_file, "r")
