@@ -30,7 +30,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
-    cursor_out = connection_out.cursor(name="cursor_out")
+    cursor_out = connection_out.cursor()
     # Création de la edge_table pgrouting
     create_table = """
         DROP TABLE IF EXISTS {0};

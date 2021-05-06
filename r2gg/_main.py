@@ -65,6 +65,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     # Lancement du script SQL de conversion source --> pivot
     with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
         cur = connection.cursor(name="convert_cursor")
+        curUnnamed = connection.cursor()
         logger.info("Executing SQL conversion script")
         instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
 
@@ -74,17 +75,31 @@ def sql_convert(config, resource, db_configs, connection, logger):
                 continue
             logger.debug("SQL:\n{}\n".format(instruction) )
             st_instruction = time.time()
-            cur.execute(instruction,
-                {
-                  'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                  'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
-                  'dbname': source_db_config.get('database'),
-                  'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
-                }
-            )
-            et_instruction = time.time()
-            logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
-            connection.commit()
+            try:
+                cur.execute(instruction,
+                    {
+                    'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
+                    'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
+                    'dbname': source_db_config.get('database'),
+                    'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                    }
+                )
+                et_instruction = time.time()
+                logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
+                connection.commit()
+            except psycopg2.errors.SyntaxError:
+                curUnnamed.execute(instruction,
+                    {
+                    'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
+                    'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
+                    'dbname': source_db_config.get('database'),
+                    'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                    }
+                )
+                et_instruction = time.time()
+                logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
+                connection.commit()
+
     connection.close()
 
     et_sql_conversion = time.time()
