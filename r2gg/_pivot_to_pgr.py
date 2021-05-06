@@ -24,13 +24,13 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger: logging.Logger
     """
 
-    cursor_in = connection_work.cursor(cursor_factory=DictCursor)
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     schema = resource["topology"]["storage"]["base"]["schema"]
     ways_table_name = schema + '.ways'
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
-    cursor_out = connection_out.cursor()
+    cursor_out = connection_out.cursor(name="cursor_out")
     # Création de la edge_table pgrouting
     create_table = """
         DROP TABLE IF EXISTS {0};
