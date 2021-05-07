@@ -88,6 +88,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
                 logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
                 connection.commit()
             except psycopg2.errors.SyntaxError:
+                connection.rollback()
                 curUnnamed.execute(instruction,
                     {
                     'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
