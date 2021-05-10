@@ -146,10 +146,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
+    cursor_in.close()
     logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     create_nodes = """
         DROP TABLE IF EXISTS {0}_vertices_pgr;
         CREATE TABLE {0}_vertices_pgr(
@@ -205,10 +207,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
 
     et_execute = time.time()
+    cursor_in.close()
     logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     attribute_columns = [
             'id',
             'geom as the_geom',
@@ -319,6 +323,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
+    cursor_in.close();
     logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     spacial_indices_query = """
@@ -358,7 +363,6 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     connection_out.set_isolation_level(old_isolation_level)
     connection_out.commit()
 
-    cursor_in.close()
     cursor_out.close()
 
     # Nettoyage du graphe
