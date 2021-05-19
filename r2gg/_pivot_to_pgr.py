@@ -174,7 +174,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
+    # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     index = 0
     batchsize = 10000
@@ -274,14 +274,13 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
+    # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     batchsize = 10000
     percent = 0
     rows = cursor_in.fetchmany(batchsize)
     while rows:
         percent += 1000000 / cursor_in.rowcount
-        print('{}%'.format(percent), end='\r')
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in rows:
