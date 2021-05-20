@@ -668,7 +668,11 @@
               ]
             },
             {
-              "id": "costValue"
+              "id": "costValue",
+              "values": {
+                "min": 100,
+                "max": 20000
+              }
             },
             {
               "id": "profile",

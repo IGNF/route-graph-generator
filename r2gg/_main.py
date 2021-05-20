@@ -49,7 +49,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     ymax = bbox[3]
 
     # Date de l'extraction pour la noter dans la configuration de la ressource
-    extraction_date = datetime.now() 
+    extraction_date = datetime.now()
     # Ecriture dans un fichier temporaire de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = work_dir_config + "/r2gg.date"
@@ -77,14 +77,15 @@ def sql_convert(config, resource, db_configs, connection, logger):
             st_instruction = time.time()
             cur.execute(instruction,
                 {
-                  'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                  'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
-                  'dbname': source_db_config.get('database'),
-                  'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
+                'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
+                'dbname': source_db_config.get('database'),
+                'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
                 }
             )
             et_instruction = time.time()
             logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
+
     connection.close()
 
     et_sql_conversion = time.time()
@@ -228,7 +229,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     filename = config["outputs"]["configuration"]["storage"]["file"]
     logger.info("Writing resource file: " + filename)
 
-    # Récupération de la date d'extraction 
+    # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = work_dir_config + "/r2gg.date"
     f = open(date_file, "r")

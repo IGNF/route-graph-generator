@@ -323,7 +323,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-fxx-pgr"
+                "bdtopo-pgr"
               ]
             },
             {
@@ -719,13 +719,13 @@
             {
               "id": "resource",
               "values": [
-                "bduni-fxx-pgr"
+                "bdtopo-pgr"
               ]
             },
             {
               "id": "point",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
@@ -738,7 +738,11 @@
               ]
             },
             {
-              "id": "costValue"
+              "id": "costValue",
+              "values": {
+                "min": 100,
+                "max": 50000
+              }
             },
             {
               "id": "profile",

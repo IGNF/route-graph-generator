@@ -24,7 +24,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger: logging.Logger
     """
 
-    cursor_in = connection_work.cursor(cursor_factory=DictCursor)
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     schema = resource["topology"]["storage"]["base"]["schema"]
     ways_table_name = schema + '.ways'
     # Récupération des coûts à calculer
@@ -146,10 +146,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
+    cursor_in.close()
     logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     create_nodes = """
         DROP TABLE IF EXISTS {0}_vertices_pgr;
         CREATE TABLE {0}_vertices_pgr(
@@ -172,7 +174,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
+    # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     index = 0
     batchsize = 10000
@@ -205,10 +207,12 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
 
 
     et_execute = time.time()
+    cursor_in.close()
     logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
+    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     attribute_columns = [
             'id',
             'geom as the_geom',
@@ -270,14 +274,13 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     single_value_str = single_value_str[:-1]
 
     # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
+    # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     batchsize = 10000
     percent = 0
     rows = cursor_in.fetchmany(batchsize)
     while rows:
         percent += 1000000 / cursor_in.rowcount
-        print('{}%'.format(percent), end='\r')
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
         for row in rows:
@@ -319,6 +322,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
         rows = cursor_in.fetchmany(batchsize)
 
     et_execute = time.time()
+    cursor_in.close();
     logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     spacial_indices_query = """
@@ -358,7 +362,6 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     connection_out.set_isolation_level(old_isolation_level)
     connection_out.commit()
 
-    cursor_in.close()
     cursor_out.close()
 
     # Nettoyage du graphe
