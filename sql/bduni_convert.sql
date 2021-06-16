@@ -13,7 +13,6 @@ CREATE USER MAPPING FOR {user}
 
 GRANT USAGE ON FOREIGN SERVER bduni_server TO {user};
 
-
 DROP FOREIGN TABLE IF EXISTS troncon_de_route CASCADE;
 DROP FOREIGN TABLE IF EXISTS route_numerotee_ou_nommee CASCADE;
 DROP FOREIGN TABLE IF EXISTS non_communication CASCADE;
@@ -157,7 +156,10 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.nature as nature,
       NULLIF(t.importance,'')::int as importance,
       t.sens_de_circulation as sens_de_circulation,
-      t.vitesse_moyenne_vl as vitesse_moyenne_vl,
+      (CASE
+      WHEN t.vitesse_moyenne_vl=1 THEN 0
+      ELSE t.vitesse_moyenne_vl::integer
+      END) as vitesse_moyenne_vl,
 
       -- Pour l'attribut name
       t.nom_1_gauche as nom_1_gauche,
