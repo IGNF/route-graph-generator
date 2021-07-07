@@ -59,9 +59,9 @@ RUN wget http://www.lua.org/ftp/lua-5.2.4.tar.gz && tar zxf lua-5.2.4.tar.gz && 
 # https://github.com/Project-OSRM/osrm-backend/blob/master/CMakeLists.txt
 # https://developers.redhat.com/blog/2015/02/05/gcc5-and-the-c11-abi/
 WORKDIR /home/docker/osrm
-RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.24.0.zip && unzip v5.24.0.zip -d ./osrm-backend && \
-    cd /home/docker/osrm/osrm-backend/osrm-backend-5.24.0/ && \
-    mkdir build && cd /home/docker/osrm/osrm-backend/osrm-backend-5.24.0/build && \
+RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.25.0.zip && unzip v5.25.0.zip -d ./osrm-backend && \
+    cd /home/docker/osrm/osrm-backend/osrm-backend-5.25.0/ && \
+    mkdir build && cd /home/docker/osrm/osrm-backend/osrm-backend-5.25.0/build && \
     export CC=/opt/gcc-6/home/docker/gcc/objdir/bin/gcc && export CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" && \ 
     cmake3 .. -DCMAKE_BUILD_TYPE=Release -DENABLE_MASON=OFF -DCMAKE_CXX_COMPILER=/opt/gcc-6/home/docker/gcc/objdir/bin/g++ -DENABLE_NODE_BINDINGS=OFF && \ 
     make -j4 && make install
@@ -76,11 +76,14 @@ COPY setup.py /usr/lib/python3.6/site-packages/r2gg
 
 RUN cd /usr/lib/python3.6/site-packages/r2gg && pip3 install -e .
 
-RUN mkdir /home/docker/data/
-COPY docker/centos7/config/* ./
-COPY docker/centos7/config/costs_calculation_sample.json /home/docker/data/costs_calculation_sample.json
-COPY docker/centos7/config/output_base.json /home/docker/data/output_base.json
+### Opérations pour le fonctionnement de l'image
+#### Récupérations des scripts SQL du dépôt
+WORKDIR /home/docker/sql
 COPY sql/bduni_convert.sql ./bduni_convert.sql
+#### Récupération des autres fichiers de configuration 
+WORKDIR /home/docker/config
+COPY docker/config/* ./
+COPY docker/scripts/* ./
 
 ENV LANG en_US.utf8
 

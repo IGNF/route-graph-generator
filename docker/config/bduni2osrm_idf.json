@@ -1,9 +1,9 @@
 {
   "generation": {
     "general": {
-      "id": "bdtopo2osrm",
+      "id": "bduni2osrm",
       "logs": {
-        "configFile": "sample_log_config.json"
+        "configFile": "/home/docker/config/sample_log_config.json"
       },
       "parallelization": {
         "threads": 4
@@ -15,7 +15,7 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json"
       },
       {
         "id": "base_bduni",
@@ -28,7 +28,7 @@
       "baseId": "base_pivot"
     },
     "resource": {
-      "id": "bduni-fxx-osrm",
+      "id": "bduni-idf-osrm",
       "type": "osrm",
       "description": "Données BDUNI v2.",
       "topology": {
@@ -36,16 +36,16 @@
         "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/home/docker/data/bduni-fxx.osm"
+          "file": "/home/docker/data/bduni-idf.osm"
         },
         "projection": "EPSG:4326",
-        "bbox": "-90,-180,90,180",
+        "bbox": "1.7,48.4,3.3,49.1",
         "mapping": {
           "source": {
             "baseId": "base_bduni"
           },
           "storage": {
-            "file": "bduni_convert.sql"
+            "file": "/home/docker/sql/bduni_convert.sql"
           }
         },
         "defaultAttributes": [
@@ -54,88 +54,44 @@
       },
       "sources": [
         {
-          "id": "bduni-fxx-car-fastest",
+          "id": "bduni-idf-car-fastest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-fxx-car-fastest/bduni-fxx-car-fastest.osrm"
+            "file": "/home/docker/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
+                "file": "/home/docker/config/bduniv2_avec_sens_vitesse_fixe.lua"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation_sample.json"
                 }
               }
             }
           }
         },
         {
-          "id": "bduni-fxx-car-shortest",
+          "id": "bduni-idf-car-shortest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-fxx-car-shortest/bduni-fxx-car-shortest.osrm"
+            "file": "/home/docker/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "/home/docker/data/bduniv2_distance.lua"
+                "file": "/home/docker/config/bduniv2_distance.lua"
               },
               "configuration": {
                 "name": "cost_m_car",
                 "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bduni-fxx-pedestrian-fastest",
-          "type": "osrm",
-          "storage": {
-            "file": "/home/docker/data/bduni-fxx-pedestrian-fastest/bduni-fxx-pedestrian-fastest.osrm"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
-              },
-              "configuration": {
-                "name": "cost_s_pedestrian",
-                "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bduni-fxx-pedestrian-shortest",
-          "type": "osrm",
-          "storage": {
-            "file": "/home/docker/data/bduni-fxx-pedestrian-shortest/bduni-fxx-pedestrian-shortest.osrm"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/data/bduniv2_distance.lua"
-              },
-              "configuration": {
-                "name": "cost_m_pedestrian",
-                "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation_sample.json"
                 }
               }
             }
@@ -149,7 +105,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-fxx-osrm"
+                "bduni-idf-osrm"
               ]
             },
             {
@@ -268,7 +224,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/data/resources/bduni_fxx_osrm.resource"
+          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
         }
       },
       "dirs": {
