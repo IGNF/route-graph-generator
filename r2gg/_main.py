@@ -52,8 +52,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
     extraction_date = datetime.now()
     # Ecriture dans un fichier temporaire de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
-    date_file = work_dir_config + "/r2gg.date"
-    date_time = extraction_date.strftime("%m/%d/%Y")
+    date_file = os.path.join(work_dir_config, "r2gg.date")
+    date_time = extraction_date.strftime("%Y-%m-%d")
     logger.info("extraction date to save in " + date_file + ": " + date_time)
 
     f = open(date_file, "w")
@@ -231,7 +231,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
 
     # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
-    date_file = work_dir_config + "/r2gg.date"
+    date_file = os.path.join(work_dir_config, "r2gg.date")
     f = open(date_file, "r")
     extraction_date = f.read()
     logger.info("extraction date to add in resource (from "+ date_file +"): " + extraction_date)
