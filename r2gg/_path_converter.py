@@ -6,7 +6,7 @@ def convert_paths(config, resource, output_dirs):
     Avec effets de bords : modifie la ressource passée en argument
 
     Retourne 2 tableaux de même taille, le premier correspond aux fichiers initiaux (input) et le
-    second aux fichiers de sortie, afin de pouvoir réaliser la copie avec la focntion _file_copier.copy_files()
+    second aux fichiers de sortie, afin de pouvoir réaliser la copie avec la fonction _file_copier.copy_files()
 
     Parameters
     ----------
@@ -26,6 +26,10 @@ def convert_paths(config, resource, output_dirs):
     """
     in_paths = []
     out_paths = []
+
+    in_paths.append(resource["topology"]["mapping"]["storage"]["file"])
+    resource["topology"]["mapping"]["storage"]["file"] = _convert_path(resource["topology"]["mapping"]["storage"]["file"], output_dirs["dataDir"])
+    out_paths.append(resource["topology"]["mapping"]["storage"]["file"])
 
     resource_type = resource["type"]
     if resource_type == "pgr":

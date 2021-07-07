@@ -14,7 +14,7 @@ from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_exexution import subprocess_exexution
 from r2gg._path_converter import convert_paths
-from r2gg._file_copier import copy_files
+from r2gg._file_copier import copy_files_locally,copy_files_with_ssh
 
 def sql_convert(config, resource, db_configs, connection, logger):
     """
@@ -216,7 +216,7 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
 
 def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = False):
     """
-    Fonction pour l'écriture du fhcier de ressource
+    Fonction pour l'écriture du fichier de ressource
 
     Parameters
     ----------
@@ -255,4 +255,6 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
         resource_file.write(json_string)
 
     if copy_files_out:
-        copy_files(in_paths, out_paths, config["ssh_config"])
+        copy_files_with_ssh(in_paths, out_paths, config["ssh_config"])
+    else:
+        copy_files_locally(in_paths, out_paths)
