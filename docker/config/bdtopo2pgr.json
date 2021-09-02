@@ -29,7 +29,7 @@
       }
     ],
     "workingSpace": {
-      "directory": "/var/tmp/",
+      "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
     "resource": {
@@ -1050,7 +1050,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/data/resources/bdtopo_pgr.resource"
+          "file": "/home/docker/data/resources/bdtopo-pgr.resource"
         }
       },
       "dirs": {
