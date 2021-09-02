@@ -42,3 +42,7 @@ r2gg:pivot2osrm config.json
 Version du code 1.0.3-DEVELOP
 
 NB: penser à mettre à jour la version dans le script `__init__.py`
+
+## Licence 
+
+Route-graph-generator est diffusé sous la licence GPL v3. 
