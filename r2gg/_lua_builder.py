@@ -64,6 +64,9 @@ def _build_setup(turn_res, cost_type = 'duration'):
     setup_string += "    return {\n"
     setup_string += "        properties = {\n"
     setup_string += "            use_turn_restrictions = " + str(turn_res).lower() + ",\n"
+    # Demi-tour aux wapoints si pas de turn restriction (cf #37043)
+    if (not turn_res):
+        setup_string += "            continue_straight_at_waypoint = false,\n"
     setup_string += "            weight_name = \'" + cost_type + "\',\n"
     setup_string += "        },\n"
     setup_string += "        classes = { \"toll\", \"bridge\", \"tunnel\" },\n"
