@@ -14,9 +14,8 @@ CREATE USER MAPPING FOR {user}
 GRANT USAGE ON FOREIGN SERVER bduni_server TO {user};
 
 DROP FOREIGN TABLE IF EXISTS troncon_de_route CASCADE;
-DROP FOREIGN TABLE IF EXISTS route_numerotee_ou_nommee CASCADE;
 DROP FOREIGN TABLE IF EXISTS non_communication CASCADE;
-IMPORT FOREIGN SCHEMA public LIMIT TO (troncon_de_route, route_numerotee_ou_nommee, non_communication)
+IMPORT FOREIGN SCHEMA public LIMIT TO (troncon_de_route, non_communication)
 FROM SERVER bduni_server
 INTO public;
 
@@ -203,9 +202,6 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       SELECT * FROM troncon_de_route
       -- SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
     ) t
-      -- LEFT JOIN route_numerotee_ou_nommee n
-      --   -- gestion du lien multiple
-      --   ON t.lien_vers_route_nommee = n.cleabs
   ) s
     WHERE NOT detruit AND etat LIKE 'En service'
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
