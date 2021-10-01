@@ -109,8 +109,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     logger: logging.Logger
     """
 
-    if (resource['type'] != 'pgr'):
-        raise ValueError("Wrong resource type, should be 'pgr'")
+    if (resource['type'] not in ['pgr', 'smartpgr']):
+        raise ValueError("Wrong resource type, should be 'pgr' or 'smartpgr'")
     logger.info("Conversion from pivot to PGR")
     st_pivot_to_pgr = time.time()
 
@@ -125,7 +125,8 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     logger.info("Connecting to output database")
     connection_out = psycopg2.connect(connect_args)
 
-    cost_calculation_files_paths = {source["cost"]["compute"]["storage"]["file"] for source in resource["sources"]}
+    cost_calculation_files_paths = {source["cost"]["compute"]["storage"]["file"] for source in resource["sources"] if "cost" in source}
+
 
     for cost_calculation_file_path in cost_calculation_files_paths:
         pivot_to_pgr(resource, cost_calculation_file_path, connection, connection_out, logger)

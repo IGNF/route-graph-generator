@@ -18,7 +18,7 @@ def pivot2osrm():
 if __name__ == '__main__':
     config, resource, db_configs, connection, logger = configure()
     sql_convert(config, resource, db_configs, connection, logger)
-    if (resource['type'] == 'pgr'):
+    if (resource['type'] in ['pgr', 'smartpgr']):
         config, resource, db_configs, connection, logger = configure()
         pgr_convert(config, resource, db_configs, connection, logger)
     elif (resource['type'] == 'osrm'):

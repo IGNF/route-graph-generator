@@ -28,7 +28,7 @@ def convert_paths(config, resource, output_dirs):
     out_paths = []
 
     resource_type = resource["type"]
-    if resource_type == "pgr":
+    if resource_type in ["pgr", "smartpgr"]:
         in_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
         resource["topology"]["storage"]["base"]["dbConfig"] = _convert_path(resource["topology"]["storage"]["base"]["dbConfig"], output_dirs["dbConfigDir"])
         out_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
@@ -39,6 +39,8 @@ def convert_paths(config, resource, output_dirs):
         out_paths.append(resource["topology"]["storage"]["file"])
 
     for source in resource["sources"]:
+        if source["type"] == "smartrouting":
+            continue
         if source["type"] == "pgr":
             in_paths.append(source["storage"]["dbConfig"])
             source["storage"]["dbConfig"] = _convert_path(source["storage"]["dbConfig"], output_dirs["dbConfigDir"])
