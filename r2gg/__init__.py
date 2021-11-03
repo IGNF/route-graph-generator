@@ -1,7 +1,7 @@
 from r2gg._configure import configure
 from r2gg._main import sql_convert, pgr_convert, osrm_convert
 
-__version__ = "1.0.3-DEVELOP"
+__version__ = "1.0.3"
 
 def populate_pivot():
     config, resource, db_configs, connection, logger = configure()
@@ -18,7 +18,7 @@ def pivot2osrm():
 if __name__ == '__main__':
     config, resource, db_configs, connection, logger = configure()
     sql_convert(config, resource, db_configs, connection, logger)
-    if (resource['type'] == 'pgr'):
+    if (resource['type'] in ['pgr', 'smartpgr']):
         config, resource, db_configs, connection, logger = configure()
         pgr_convert(config, resource, db_configs, connection, logger)
     elif (resource['type'] == 'osrm'):
