@@ -1,6 +1,6 @@
 import subprocess
 
-def subprocess_exexution(args, logger):
+def subprocess_execution(args, logger):
     """
     Exécute un sous-processus (commande système)
 

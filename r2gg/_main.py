@@ -12,7 +12,7 @@ from r2gg._lua_builder import build_lua
 from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
-from r2gg._subprocess_exexution import subprocess_exexution
+from r2gg._subprocess_execution import subprocess_execution
 from r2gg._path_converter import convert_paths
 from r2gg._file_copier import copy_files_locally,copy_files_with_ssh
 
@@ -138,23 +138,18 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     _write_resource_file(config, resource, logger)
 
 
-def osrm_convert(config, resource, db_configs, connection, logger, build_lua_from_cost_config = True):
+def osm_convert(resource, connection, logger):
     """
-    Fonction de conversion depuis la bdd pivot vers les fichiers osm et osrm
+    Fonction de conversion depuis la bdd pivot vers un fichier osm
 
     Parameters
     ----------
-    config: dict
-        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
-    db_configs: dict
-        dictionnaire correspondant aux configurations des bdd
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
     """
-
     if (resource['type'] != 'osrm'):
         raise ValueError("Wrong resource type, should be 'osrm'")
     logger.info("Conversion from pivot to OSRM")
@@ -162,6 +157,22 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
     logger.info("Conversion from pivot to OSM")
     pivot_to_osm(resource, connection, logger)
     connection.close()
+
+def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
+    """
+    Fonction de conversion depuis le fichier osm vers les fichiers osrm
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    logger: logging.Logger
+    """
+
+    if (resource['type'] != 'osrm'):
+        raise ValueError("Wrong resource type, should be 'osrm'")
 
     logger.info("Conversion from OSM to OSRM")
     # osm2osrm
@@ -200,16 +211,16 @@ def osrm_convert(config, resource, db_configs, connection, logger, build_lua_fro
         osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
         rm_args = ["rm", tmp_osm_file]
 
-        subprocess_exexution(mkdir_args, logger)
-        subprocess_exexution(copy_args, logger)
+        subprocess_execution(mkdir_args, logger)
+        subprocess_execution(copy_args, logger)
         start_command = time.time()
-        subprocess_exexution(osrm_extract_args, logger)
+        subprocess_execution(osrm_extract_args, logger)
         end_command = time.time()
         logger.info("OSRM extract ended. Elapsed time : %s seconds." %(end_command - start_command))
-        subprocess_exexution(osrm_contract_args, logger)
+        subprocess_execution(osrm_contract_args, logger)
         final_command = time.time()
         logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
-        subprocess_exexution(rm_args, logger)
+        subprocess_execution(rm_args, logger)
         i += 1
 
     _write_resource_file(config, resource, logger)
