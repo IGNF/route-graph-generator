@@ -262,6 +262,40 @@
               ]
             }
           ]
+        },
+        {
+          "id": "nearest",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bdtopo-osrm"
+              ]
+            },
+            {
+              "id": "coordinates",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "number",
+              "defaultValueContent": 1,
+              "values": {
+                "min": 1,
+                "max": 10
+              }
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154"
+              ]
+            }
+          ]
         }
       ]
     },
