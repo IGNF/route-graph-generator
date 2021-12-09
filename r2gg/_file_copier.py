@@ -1,8 +1,9 @@
 from paramiko import SSHClient
 from scp import SCPClient
 from collections import defaultdict
+from shutil import copyfile, SameFileError
 
-def copy_files(in_paths, out_paths, ssh_config):
+def copy_files_with_ssh(in_paths, out_paths, ssh_config):
     """
     Copie les fichiers depuis l'hôte avec les chemins définis dans 'in_paths' vers une machine distante
     dans les chemins définis dans 'out_paths' via la connection ssh définie dans ssh_config
@@ -36,3 +37,22 @@ def copy_files(in_paths, out_paths, ssh_config):
             scp.put(in_path, out_path)
 
     ssh.close()
+
+def copy_files_locally(in_paths, out_paths):
+    """
+    Copie les fichiers avec les chemins définis dans 'in_paths' et 'out_paths'
+
+    Parameters
+    ----------
+    in_paths: list
+        chemins sur la machine locale
+    out_paths: list
+        chemins sur la machine distante
+    """
+    for in_path, out_path in zip(in_paths, out_paths):
+        try:
+            copyfile(in_path, out_path)
+        except SameFileError:
+            print("The file " + in_path + " is already there")
+        except FileNotFoundError:
+            print("The file " + in_path + " was not found")

@@ -6,7 +6,7 @@ def convert_paths(config, resource, output_dirs):
     Avec effets de bords : modifie la ressource passée en argument
 
     Retourne 2 tableaux de même taille, le premier correspond aux fichiers initiaux (input) et le
-    second aux fichiers de sortie, afin de pouvoir réaliser la copie avec la focntion _file_copier.copy_files()
+    second aux fichiers de sortie, afin de pouvoir réaliser la copie avec la fonction _file_copier.copy_files()
 
     Parameters
     ----------
@@ -27,8 +27,12 @@ def convert_paths(config, resource, output_dirs):
     in_paths = []
     out_paths = []
 
+    in_paths.append(resource["topology"]["mapping"]["storage"]["file"])
+    resource["topology"]["mapping"]["storage"]["file"] = _convert_path(resource["topology"]["mapping"]["storage"]["file"], output_dirs["dataDir"])
+    out_paths.append(resource["topology"]["mapping"]["storage"]["file"])
+
     resource_type = resource["type"]
-    if resource_type == "pgr":
+    if resource_type in ["pgr", "smartpgr"]:
         in_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
         resource["topology"]["storage"]["base"]["dbConfig"] = _convert_path(resource["topology"]["storage"]["base"]["dbConfig"], output_dirs["dbConfigDir"])
         out_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
@@ -39,6 +43,8 @@ def convert_paths(config, resource, output_dirs):
         out_paths.append(resource["topology"]["storage"]["file"])
 
     for source in resource["sources"]:
+        if source["type"] == "smartrouting":
+            continue
         if source["type"] == "pgr":
             in_paths.append(source["storage"]["dbConfig"])
             source["storage"]["dbConfig"] = _convert_path(source["storage"]["dbConfig"], output_dirs["dbConfigDir"])

@@ -1,9 +1,9 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2osrm",
+      "id": "bdtopo2osrm",
       "logs": {
-        "configFile": "sample_log_config.json"
+        "configFile": "/home/docker/config/sample_log_config.json"
       },
       "parallelization": {
         "threads": 4
@@ -15,7 +15,7 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json"
       },
       {
         "id": "base_bduni",
@@ -24,11 +24,11 @@
       }
     ],
     "workingSpace": {
-      "directory": "/var/tmp/",
+      "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
     "resource": {
-      "id": "bduni-idf-osrm",
+      "id": "bdtopo-osrm",
       "type": "osrm",
       "description": "Données BDUNI v2.",
       "topology": {
@@ -36,16 +36,16 @@
         "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/home/docker/data/bduni-idf.osm"
+          "file": "/home/docker/data/bdtopo.osm"
         },
         "projection": "EPSG:4326",
-        "bbox": "1.7,48.4,3.3,49.1",
+        "bbox": "-90,-180,90,180",
         "mapping": {
           "source": {
             "baseId": "base_bduni"
           },
           "storage": {
-            "file": "bduni_convert.sql"
+            "file": "/home/docker/sql/bduni_convert.sql"
           }
         },
         "defaultAttributes": [
@@ -54,44 +54,88 @@
       },
       "sources": [
         {
-          "id": "bduni-idf-car-fastest",
+          "id": "bdtopo-car-fastest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+            "file": "/home/docker/data/bdtopo-car-fastest/bdtopo-car-fastest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "/home/docker/data/bduniv2_avec_sens_vitesse_fixe.lua"
+                "file": "/home/docker/config/bdtopo-car-fastest.lua"
               },
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
           }
         },
         {
-          "id": "bduni-idf-car-shortest",
+          "id": "bdtopo-car-shortest",
           "type": "osrm",
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+            "file": "/home/docker/data/bdtopo-car-shortest/bdtopo-car-shortest.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "/home/docker/data/bduniv2_distance.lua"
+                "file": "/home/docker/config/bdtopo-car-shortest.lua"
               },
               "configuration": {
                 "name": "cost_m_car",
                 "storage": {
-                  "file": "/home/docker/data/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-pedestrian-fastest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-pedestrian-fastest/bdtopo-pedestrian-fastest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-pedestrian-fastest.lua"
+              },
+              "configuration": {
+                "name": "cost_s_pedestrian",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-pedestrian-shortest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-pedestrian-shortest/bdtopo-pedestrian-shortest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-pedestrian-shortest.lua"
+              },
+              "configuration": {
+                "name": "cost_m_pedestrian",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
@@ -105,7 +149,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-osrm"
+                "bdtopo-osrm"
               ]
             },
             {
@@ -218,13 +262,47 @@
               ]
             }
           ]
+        },
+        {
+          "id": "nearest",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bdtopo-osrm"
+              ]
+            },
+            {
+              "id": "coordinates",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "number",
+              "defaultValueContent": 1,
+              "values": {
+                "min": 1,
+                "max": 10
+              }
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154"
+              ]
+            }
+          ]
         }
       ]
     },
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
+          "file": "/home/docker/data/resources/bdtopo-osrm.resource"
         }
       },
       "dirs": {

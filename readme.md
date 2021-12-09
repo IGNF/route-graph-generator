@@ -27,18 +27,23 @@ Ces trois processus se lancent à l'aide de trois commandes différentes, prenan
 
 Pour extraire les données vers la base pivot
 ```
-r2gg:populate_pivot config.json
+r2gg-populate_pivot config.json
 ```
 Pour convertir les données au fromat pgRouting (le trype de ressource dans config.json doit être `pgr`)
 ```
-r2gg:pivot2pgrouting config.json
+r2gg-pivot2pgrouting config.json
 ```
-Pour convertir les données au fromat osrm (le trype de ressource dans config.json doit être `osrm`)
+Pour convertir les données au format osrm (le trype de ressource dans config.json doit être `osrm`)
 ```
-r2gg:pivot2osrm config.json
+r2gg-pivot2osm config.json
+r2gg-osm2osrm config.json
 ```
-## Version 
+## Version
 
-Version du code 1.0.3
+Version du code 1.1.0-DEVELOP
 
-NB: penser à mettre à jour la version dans le script `__init__.py`
+NB: penser à mettre à jour la version dans le script `__init__.py` et dans le `setup.py`
+
+## Licence
+
+Route-graph-generator est diffusé sous la licence GPL v3.

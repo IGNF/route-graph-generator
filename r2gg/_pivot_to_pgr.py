@@ -368,7 +368,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("Cleaning isolated clusters of less than 10 edges...")
     cursor_isolated = connection_out.cursor()
 
-    profile_names = set([ source['cost']['profile'] for source in resource["sources"] ])
+    profile_names = set([ source['cost']['profile'] for source in resource["sources"] if "cost" in source])
     st_execute = time.time()
 
     for profile_name in profile_names:
