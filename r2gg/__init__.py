@@ -1,7 +1,7 @@
 from r2gg._configure import configure
 from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert
 
-__version__ = "1.1.0-DEVELOP"
+__version__ = "1.1.1-DEVELOP"
 
 def populate_pivot():
     config, resource, db_configs, connection, logger = configure()

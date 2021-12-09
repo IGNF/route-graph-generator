@@ -40,7 +40,7 @@ r2gg-osm2osrm config.json
 ```
 ## Version
 
-Version du code 1.1.0-DEVELOP
+Version du code 1.1.1-DEVELOP
 
 NB: penser à mettre à jour la version dans le script `__init__.py` et dans le `setup.py`
 
