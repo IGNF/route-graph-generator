@@ -1,19 +1,32 @@
 #!/usr/bin/env sh
 
 
-# ## S'il n'y a rien, on fait une génération à partir de données OSM sur la Corse en utilisant un fichier de configuration déjà présent dans l'image docker
-# if [ $R2GG_GENERATION_CONF = "" ]; then
-  
-# ## S'il y a une configuration, alors on donne cette configuration à r2gg qui se chargera de l'analyser et d'agir en conséquence 
-# else
+## S'il n'y a rien, on fait une génération à partir de données OSM sur la Corse en utilisant un fichier de configuration déjà présent dans l'image docker
+if [ ! $R2GG_ARG ]
+then
 
-# fi
+  mkdir -v /home/docker/data/data-osm-latest
+  cd /home/docker/data/data-osm-latest
+  wget -O data-osm-latest.osm.pbf download.geofabrik.de/europe/france/corse-latest.osm.pbf
+  osrm-extract data-osm-latest.osm.pbf -p /usr/share/osrm/profiles/car.lua 
+  osrm-contract data-osm-latest.osrm
+  cp -v /home/docker/config/data-osm.resource /home/docker/data/resources/
 
-# # On lance la génération 
-r2gg:populate_pivot $R2GG_ARG
+## S'il y a une configuration, alors on donne cette configuration à r2gg qui se chargera de l'analyser et d'agir en conséquence 
+else
 
-if [ $GENERATION_TYPE = "osrm" ]; then
-  r2gg:pivot2osrm $R2GG_ARG
-elif [ $GENERATION_TYPE = "pgr" ]; then
-  r2gg:pivot2pgrouting $R2GG_ARG
+  # On lance une génération à partir du fichier de configuration
+  r2gg-populate_pivot $R2GG_ARG
+
+  if [ $GENERATION_TYPE = "osrm" ]
+  then
+    r2gg-pivot2osm $R2GG_ARG
+    r2gg-osm2osrm $R2GG_ARG
+  elif [ $GENERATION_TYPE = "pgr" ]
+  then
+    r2gg-pivot2pgrouting $R2GG_ARG
+  fi
+
 fi
+
+

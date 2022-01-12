@@ -1,3 +1,8 @@
+# 1.1.1
+
+FEATURES : 
+- génération à partir de données OSM dans l'image docker si aucun argument n'est fourni
+
 # 1.1.0
 
 FEATURES :

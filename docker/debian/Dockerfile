@@ -37,6 +37,9 @@ COPY r2gg ./
 COPY setup.py ../
 RUN cd ../ && pip install -e .
 
+### Installation de wget pour l'image 
+RUN apt install wget 
+
 ### Opérations pour le fonctionnement de l'image
 #### Récupérations des scripts SQL du dépôt
 WORKDIR /home/docker/sql
