@@ -28,4 +28,5 @@ def getQueryByTableAndBoundingBox(table, bbox, columns=['*'], whereClauses=None)
 
     sql  = 'SELECT %s FROM %s ' %(','.join(columns), table)
     sql += 'WHERE ' + ' AND '.join(whereClauses)
+    sql += ' ORDER BY id ASC'
     return sql
