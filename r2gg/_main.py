@@ -138,12 +138,14 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     _write_resource_file(config, resource, logger)
 
 
-def osm_convert(resource, connection, logger):
+def osm_convert(config, resource, connection, logger):
     """
     Fonction de conversion depuis la bdd pivot vers un fichier osm
 
     Parameters
     ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     connection: psycopg2.connection
@@ -155,7 +157,7 @@ def osm_convert(resource, connection, logger):
     logger.info("Conversion from pivot to OSRM")
 
     logger.info("Conversion from pivot to OSM")
-    pivot_to_osm(resource, connection, logger)
+    pivot_to_osm(config, resource, connection, logger)
     connection.close()
 
 def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):

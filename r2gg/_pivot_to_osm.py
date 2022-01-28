@@ -8,17 +8,25 @@ from psycopg2.extras import DictCursor
 from r2gg._osm_building import writeNode, writeWay, writeWayNds, writeRes, writeWayTags
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_osm(resource, connection, logger):
+def pivot_to_osm(config, resource, connection, logger):
     """
     Fonction de conversion depuis la bdd pivot vers le fichier osm
 
     Parameters
     ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
     """
+    # Récupération de la date d'extraction
+    work_dir_config = config['workingSpace']['directory']
+    date_file = os.path.join(work_dir_config, "r2gg.date")
+    f = open(date_file, "r")
+    extraction_date = f.read()
+    f.close()
 
     cursor = connection.cursor(cursor_factory=DictCursor)
 
@@ -55,7 +63,7 @@ def pivot_to_osm(resource, connection, logger):
                 st_execute = time.time()
                 i = 1
                 while row:
-                    nodeEl = writeNode(row)
+                    nodeEl = writeNode(row, extraction_date)
                     xf.write(nodeEl, pretty_print=True)
                     row = cursor.fetchone()
                     if (i % ceil(cursor.rowcount/10) == 0):
@@ -76,11 +84,11 @@ def pivot_to_osm(resource, connection, logger):
                 st_execute = time.time()
                 i = 1
                 while row:
-                    wayEl = writeWay(row)
+                    wayEl = writeWay(row, extraction_date)
                     for node in row['internodes']:
                         vertexSequence = vertexSequence + 1
                         node['id'] = vertexSequence
-                        nodeEl = writeNode(node)
+                        nodeEl = writeNode(node, extraction_date)
                         xf.write(nodeEl, pretty_print=True)
                     wayEl = writeWayNds(wayEl, row, row['internodes'])
                     wayEl = writeWayTags(wayEl, row)
@@ -108,7 +116,7 @@ def pivot_to_osm(resource, connection, logger):
                         row = cursor.fetchone()
                         i += 1
                         continue
-                    ResEl = writeRes(row,i)
+                    ResEl = writeRes(row, i, extraction_date)
                     xf.write(ResEl, pretty_print=True)
                     row = cursor.fetchone()
                     if (i % ceil(cursor.rowcount/10) == 0):
