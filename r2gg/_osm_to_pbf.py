@@ -1,4 +1,5 @@
 import osmium
+import time
 
 class _PBFWriter(osmium.SimpleHandler):
     def __init__(self, writer):
@@ -25,7 +26,9 @@ def osm_to_pbf(in_path, out_path, logger):
     """
 
     logger.info("Writing pbf file: {} from osm file {}".format(out_path, in_path))
+    start_time = time.time()
     writer = osmium.SimpleWriter(out_path)
     handler = _PBFWriter(writer)
     handler.apply_file(in_path)
-    logger.info("PBF writing done")
+    end_time = time.time()
+    logger.info("PBF writing done. Elapsed time : %s seconds." %(end_time - start_time))

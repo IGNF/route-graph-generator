@@ -179,6 +179,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     logger.info("Conversion from OSM to OSRM")
     # osm2osrm
     osm_file = resource['topology']['storage']['file']
+
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
 

@@ -7,10 +7,12 @@ from psycopg2.extras import DictCursor
 
 from r2gg._osm_building import writeNode, writeWay, writeWayNds, writeRes, writeWayTags
 from r2gg._sql_building import getQueryByTableAndBoundingBox
+from r2gg._osm_to_pbf import osm_to_pbf
+
 
 def pivot_to_osm(config, resource, connection, logger):
     """
-    Fonction de conversion depuis la bdd pivot vers le fichier osm
+    Fonction de conversion depuis la bdd pivot vers le fichier osm puis pbf le cas échéant
 
     Parameters
     ----------
@@ -44,6 +46,12 @@ def pivot_to_osm(config, resource, connection, logger):
     start_time = time.time()
 
     filename = resource['topology']['storage']['file']
+    # Gestion de si le fichier de topolgie attendu est en pbf
+    output_is_pbf = False
+    if filename.split(".")[-1] == "pbf":
+        output_is_pbf = True
+        filename = filename[:-4]
+
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
     try:
         with etree.xmlfile(filename, encoding='utf-8', close=True) as xf:
@@ -131,3 +139,7 @@ def pivot_to_osm(config, resource, connection, logger):
     cursor.close()
     end_time = time.time()
     logger.info("Conversion from pivot to OSM ended. Elapsed time : %s seconds." %(end_time - start_time))
+
+    # osm2pbf le cas échéant
+    if output_is_pbf:
+        osm_to_pbf(filename, resource['topology']['storage']['file'], logger)
