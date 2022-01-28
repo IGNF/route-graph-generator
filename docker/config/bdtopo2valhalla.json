@@ -1,0 +1,321 @@
+{
+  "generation": {
+    "general": {
+      "id": "bdtopo2valhalla",
+      "logs": {
+        "configFile": "/home/docker/config/sample_log_config.json"
+      },
+      "parallelization": {
+        "threads": 4
+      },
+      "overwrite": true,
+      "operation": "creation"
+    },
+    "bases": [
+      {
+        "id": "base_pivot",
+        "type": "bdd",
+        "configFile": "/home/docker/config/db_config_pivot.json"
+      },
+      {
+        "id": "base_bduni",
+        "type": "bdd",
+        "configFile": "/run/secrets/db_config"
+      }
+    ],
+    "workingSpace": {
+      "directory": "/home/docker/data/generation/",
+      "baseId": "base_pivot"
+    },
+    "resource": {
+      "id": "bdtopo-valhalla",
+      "type": "valhalla",
+      "description": "Données BDUNI v2.",
+      "topology": {
+        "id": "osm-bduni",
+        "type":"osm",
+        "description": "Données issues de la BDUNI de l'IGN.",
+        "storage": {
+          "file": "/home/docker/data/bdtopo.osm"
+        },
+        "projection": "EPSG:4326",
+        "bbox": "-90,-180,90,180",
+        "mapping": {
+          "source": {
+            "baseId": "base_bduni"
+          },
+          "storage": {
+            "file": "/home/docker/sql/bduni_convert.sql"
+          }
+        },
+        "defaultAttributes": [
+          "name"
+        ]
+      },
+      "sources": [
+        {
+          "id": "bdtopo-auto-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-car-fastest/bdtopo-car-fastest.osrm"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-car-fastest.lua"
+              },
+              "configuration": {
+                "name": "cost_s_car",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-auto-shorter-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-car-shortest/bdtopo-car-shortest.osrm"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-car-shortest.lua"
+              },
+              "configuration": {
+                "name": "cost_m_car",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-pedestrian-fastest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-pedestrian-fastest/bdtopo-pedestrian-fastest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-pedestrian-fastest.lua"
+              },
+              "configuration": {
+                "name": "cost_s_pedestrian",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-pedestrian-shortest",
+          "type": "osrm",
+          "storage": {
+            "file": "/home/docker/data/bdtopo-pedestrian-shortest/bdtopo-pedestrian-shortest.osrm"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/bdtopo-pedestrian-shortest.lua"
+              },
+              "configuration": {
+                "name": "cost_m_pedestrian",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "availableOperations":[
+        {
+          "id": "route",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bdtopo-osrm"
+              ]
+            },
+            {
+              "id": "start",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "end",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car",
+                "pedestrian"
+              ]
+            },
+            {
+              "id": "optimization",
+              "defaultValueContent": "fastest",
+              "values": [
+                "fastest",
+                "shortest"
+              ]
+            },
+            {
+              "id": "intermediates",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "getSteps",
+              "defaultValueContent": "true"
+            },
+            {
+              "id": "waysAttributes",
+              "values": [
+                "name"
+              ]
+            },
+            {
+              "id": "geometryFormat",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
+            },
+            {
+              "id": "bbox",
+              "defaultValueContent": "true"
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154"
+              ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "minute",
+              "values": [
+                "hour",
+                "minute",
+                "second",
+                "standard"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
+              ]
+            },
+            {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "name-osrm",
+                  "key": "wayType",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "field": "toll"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "tunnel"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "bridge"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "nearest",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bdtopo-osrm"
+              ]
+            },
+            {
+              "id": "coordinates",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "number",
+              "defaultValueContent": 1,
+              "values": {
+                "min": 1,
+                "max": 10
+              }
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "/home/docker/data/resources/bdtopo-osrm.resource"
+        }
+      },
+      "dirs": {
+        "dataDir": "/home/docker/data/",
+        "profileDir": "/home/docker/data/",
+        "resourceDir": "/home/docker/data/resources"
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
+      }
+    }
+  }
+}
