@@ -15,6 +15,8 @@ from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
 from r2gg._path_converter import convert_paths
 from r2gg._file_copier import copy_files_locally,copy_files_with_ssh
+from r2gg._valhalla_lua_builder import build_valhalla_lua
+
 
 def sql_convert(config, resource, db_configs, connection, logger):
     """
@@ -171,6 +173,8 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     logger: logging.Logger
+    build_lua_from_cost_config : bool
+        contruire le lua à partir de le configuration des coûts. Défaut : True
     """
 
     if (resource['type'] != 'osrm'):
@@ -225,6 +229,72 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
         logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
         subprocess_execution(rm_args, logger)
         i += 1
+
+    _write_resource_file(config, resource, logger)
+
+
+def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True):
+    """
+    Fonction de conversion depuis le fichier .osm.pbf vers les fichiers valhalla
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    logger: logging.Logger
+    build_lua_from_cost_config : bool
+        contruire le lua à partir de le configuration des coûts. Défaut : True
+    """
+
+    if (resource['type'] != 'valhalla'):
+        raise ValueError("Wrong resource type, should be 'valhalla'")
+
+    logger.info("Conversion from OSM PBF to VALHALLA")
+    # osm2valhalla
+    osm_file = resource['topology']['storage']['file']
+    if osm_file.split(".")[-1] != "pbf":
+        raise ValueError("Wrong topology type, should be a .pbf file")
+
+    logger.info("Generating graphs for each set of tiles")
+
+    # Gestion du cas (fictif pour l'instant) où l'on a plusieurs sets de tiles valhalla
+    distinct_tile_dirs = []
+    distinct_sources = []
+    for source in resource["sources"]:
+        if source["storage"]["dir"] not in distinct_tile_dirs:
+            distinct_tile_dirs.append(source["storage"]["dir"])
+            distinct_sources.append(source)
+
+    for source in distinct_sources:
+        lua_file = source["cost"]["compute"]["storage"]["file"]
+
+        if build_lua_from_cost_config:
+            logger.info("Building lua profile")
+            config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
+            costs_config = config_from_path(config_file)
+
+            with open(lua_file, "w") as lua_f:
+                lua_f.write(build_valhalla_lua(costs_config))
+            logger.info("Finished lua building")
+
+
+        # Définition et exécution des commandes shell à exécuter
+        mkdir_args = ["mkdir", "-p", source["storage"]]
+        subprocess_execution(mkdir_args, logger)
+
+
+        # osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
+        # osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
+
+        # start_command = time.time()
+        # subprocess_execution(osrm_extract_args, logger)
+        # end_command = time.time()
+        # logger.info("OSRM extract ended. Elapsed time : %s seconds." %(end_command - start_command))
+        # subprocess_execution(osrm_contract_args, logger)
+        # final_command = time.time()
+        # logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
 
     _write_resource_file(config, resource, logger)
 

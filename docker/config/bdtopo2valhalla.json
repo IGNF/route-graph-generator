@@ -32,11 +32,11 @@
       "type": "valhalla",
       "description": "Données BDUNI v2.",
       "topology": {
-        "id": "osm-bduni",
+        "id": "osm-pbf-bduni",
         "type":"osm",
         "description": "Données issues de la BDUNI de l'IGN.",
         "storage": {
-          "file": "/home/docker/data/bdtopo.osm"
+          "file": "/home/docker/data/bdtopo.osm.pbf"
         },
         "projection": "EPSG:4326",
         "bbox": "-90,-180,90,180",
@@ -57,17 +57,17 @@
           "id": "bdtopo-auto-valhalla",
           "type": "valhalla",
           "storage": {
-            "file": "/home/docker/data/bdtopo-car-fastest/bdtopo-car-fastest.osrm"
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "/home/docker/config/bdtopo-car-fastest.lua"
+                "file": "/home/docker/config/graph_bdtopo.lua"
               },
               "configuration": {
-                "name": "cost_s_car",
+                "costing": "auto",
                 "storage": {
                   "file": "/home/docker/config/costs_calculation.json"
                 }
@@ -79,17 +79,17 @@
           "id": "bdtopo-auto-shorter-valhalla",
           "type": "valhalla",
           "storage": {
-            "file": "/home/docker/data/bdtopo-car-shortest/bdtopo-car-shortest.osrm"
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "/home/docker/config/bdtopo-car-shortest.lua"
+                "file": "/home/docker/config/graph_bdtopo.lua"
               },
               "configuration": {
-                "name": "cost_m_car",
+                "costing": "auto_shorter",
                 "storage": {
                   "file": "/home/docker/config/costs_calculation.json"
                 }
@@ -98,42 +98,20 @@
           }
         },
         {
-          "id": "bdtopo-pedestrian-fastest",
-          "type": "osrm",
+          "id": "bdtopo-pedestrian-valhalla",
+          "type": "valhalla",
           "storage": {
-            "file": "/home/docker/data/bdtopo-pedestrian-fastest/bdtopo-pedestrian-fastest.osrm"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/bdtopo-pedestrian-fastest.lua"
-              },
-              "configuration": {
-                "name": "cost_s_pedestrian",
-                "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-pedestrian-shortest",
-          "type": "osrm",
-          "storage": {
-            "file": "/home/docker/data/bdtopo-pedestrian-shortest/bdtopo-pedestrian-shortest.osrm"
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
           },
           "cost": {
             "profile": "pedestrian",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "/home/docker/config/bdtopo-pedestrian-shortest.lua"
+                "file": "/home/docker/config/graph_bdtopo.lua"
               },
               "configuration": {
-                "name": "cost_m_pedestrian",
+                "costing": "pedestrian",
                 "storage": {
                   "file": "/home/docker/config/costs_calculation.json"
                 }
@@ -149,20 +127,20 @@
             {
               "id": "resource",
               "values": [
-                "bdtopo-osrm"
+                "bdtopo-valhalla"
               ]
             },
             {
               "id": "start",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
@@ -185,7 +163,7 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
@@ -241,21 +219,13 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name-osrm",
+                  "keyType": "name-valhalla",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
                       "value": "autoroute",
                       "field": "toll"
-                    },
-                    {
-                      "value": "tunnel",
-                      "field": "tunnel"
-                    },
-                    {
-                      "value": "pont",
-                      "field": "bridge"
                     }
                   ]
                 }
@@ -264,35 +234,88 @@
           ]
         },
         {
-          "id": "nearest",
+          "id": "isochrone",
           "parameters": [
             {
               "id": "resource",
               "values": [
-                "bdtopo-osrm"
+                "bdtopo-pgr"
               ]
             },
             {
-              "id": "coordinates",
+              "id": "point",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-180,-90,180,90",
                 "projection": "EPSG:4326"
               }
             },
             {
-              "id": "number",
-              "defaultValueContent": 1,
+              "id": "costType",
+              "defaultValueContent": "time",
+              "values": [
+                "time",
+                "distance"
+              ]
+            },
+            {
+              "id": "costValue",
               "values": {
-                "min": 1,
-                "max": 10
+                "min": 100,
+                "max": 50000
               }
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car",
+                "pedestrian"
+              ]
+            },
+            {
+              "id": "direction",
+              "defaultValueContent": "departure",
+              "values": [
+                "departure",
+                "arrival"
+              ]
             },
             {
               "id": "projection",
               "defaultValueContent": "EPSG:4326",
               "values": [
                 "EPSG:4326",
-                "EPSG:2154"
+                "EPSG:2154",
+                "EPSG:4559",
+                "EPSG:2972",
+                "EPSG:2975",
+                "EPSG:4471",
+                "EPSG:3857"
+              ]
+            },
+            {
+              "id": "geometryFormat",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "second",
+              "values": [
+                "hour",
+                "minute",
+                "second"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
               ]
             }
           ]
@@ -302,7 +325,7 @@
     "outputs": {
       "configuration": {
         "storage": {
-          "file": "/home/docker/data/resources/bdtopo-osrm.resource"
+          "file": "/home/docker/data/resources/bdtopo-valhalla.resource"
         }
       },
       "dirs": {

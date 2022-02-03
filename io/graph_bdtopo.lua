@@ -1,29 +1,3 @@
-def build_valhalla_lua(costs_config):
-    """
-    Fonction qui crée un fichier .lua de graphe Valhalla à partir d'un dictionnaire de
-    définition des coûts (costs_config)
-
-    Parameters
-    ----------
-    costs_config: dict
-        Dictionnaire de configuration des coûts correspondant au schéma JSON de
-        configuration des coûts
-
-    Returns
-    -------
-    str
-        chaîne de caractères correspondant à un fichier .lua de graphe Valhalla
-    """
-
-    # Récupération du nom du champ de vitesse pour les voitures
-    auto_speed_name = "vitesse_moyenne_vl"
-    for variable in costs_config["variables"]:
-        if variable["name"] == "vitesse_voiture":
-            auto_speed_name = variable["column_name"]
-
-    # TODO: ajouter plus de variables issues de costs_config (quand cost_profile sera ajouté à la configuration des coûts)
-
-    result = """
 way_type = {
 ["no_pedestrian"] =  {["auto_forward"] = "true", ["pedestrian_forward"] = "false"},
 ["regular"] =        {["auto_forward"] = "true", ["pedestrian_forward"] = "true"},
@@ -174,8 +148,9 @@ end
 --returns 1 if you should filter this way 0 otherwise
 function filter_tags_generic(kv)
 
+  --figure out what basic type of road it is
   local forward = way_type["regular"]
-  if (tonumber(kv["{0}"]) <= 0) then
+  if (tonumber(kv["vitesse_moyenne_vl"]) <= 0) then
     forward = way_type["no_car"]
   elseif (kv["nature"] == "Type autoroutier" or kv["nature"] == "Bretelle") then
     forward = way_type["no_pedestrian"]
@@ -192,6 +167,7 @@ function filter_tags_generic(kv)
     end
   end
 
+  --check the oneway-ness and traversability against the direction of the geom
   kv["pedestrian_backward"] = kv["pedestrian_forward"]
 
   if (kv["direction"] ~= "0") then
@@ -252,24 +228,24 @@ function filter_tags_generic(kv)
   kv["alt_name"] = kv["alt_name"]
   kv["official_name"] = kv["official_name"]
 
-  kv["max_speed"] = kv["{0}"]
+  kv["max_speed"] = kv["vitesse_moyenne_vl"]
 
-  kv["advisory_speed"] = normalize_speed(kv["{0}"])
-  kv["average_speed"] = normalize_speed(kv["{0}"])
+  kv["advisory_speed"] = normalize_speed(kv["vitesse_moyenne_vl"])
+  kv["average_speed"] = normalize_speed(kv["vitesse_moyenne_vl"])
   if (tonumber(kv["direction"]) <= 0) then
-    kv["backward_speed"] = normalize_speed(kv["{0}"])
+    kv["backward_speed"] = normalize_speed(kv["vitesse_moyenne_vl"])
   else
     kv["backward_speed"] = normalize_speed("0")
   end
   if (tonumber(kv["direction"]) >= 0) then
-    kv["forward_speed"] = normalize_speed(kv["{0}"])
+    kv["forward_speed"] = normalize_speed(kv["vitesse_moyenne_vl"])
   else
     kv["forward_speed"] = normalize_speed("0")
   end
 
-  kv["default_speed"] = normalize_speed(kv["{0}"])
+  kv["default_speed"] = normalize_speed(kv["vitesse_moyenne_vl"])
 
-  if tonumber(kv["{0}"]) <= 0 then
+  if tonumber(kv["vitesse_moyenne_vl"]) <= 0 then
     kv["auto_backward"] = "false"
     kv["auto_forward"] = "false"
   end
@@ -328,6 +304,7 @@ function filter_tags_generic(kv)
   kv["turn:lanes:forward"] = kv["turn:lanes:forward"]
   kv["turn:lanes:backward"] = kv["turn:lanes:backward"]
 
+  --truck goodies
   if (kv["restriction_de_hauteur"] ~= "None") then
     kv["maxheight"] = kv["restriction_de_hauteur"]
   end
@@ -348,8 +325,9 @@ function filter_tags_generic(kv)
     kv["maxaxleload"] = kv["restriction_de_poids_par_essieu"]
   end
 
+  --TODO: hazmat really should have subcategories
   kv["hazmat"] = nil
-  kv["maxspeed:hgv"] = normalize_speed(kv["{0}"])
+  kv["maxspeed:hgv"] = normalize_speed(kv["vitesse_moyenne_vl"])
 
   if (kv["hgv:national_network"] or kv["hgv:state_network"] or kv["hgv"] == "local" or kv["hgv"] == "designated") then
     kv["truck_route"] = "true"
@@ -382,6 +360,8 @@ end
 
 function nodes_proc (kv, nokeys)
 
+  --if tag exists use it, otherwise access allowed for all modes unless access = false or kv["hov"] == "designated" or kv["vehicle"] == "no")
+  --if access=private use allowed modes, but consider private_access tag as true.
   local auto = 1
   local truck = 8
   local bus = 64
@@ -394,30 +374,38 @@ function nodes_proc (kv, nokeys)
   local moped = 512
   local motorcycle = 1024
 
+  --check for gates, bollards, and sump_busters
   local gate = false
   local bollard = false
   local sump_buster = false
 
+  --store the gate and bollard info
   kv["gate"] = tostring(gate)
   kv["bollard"] = tostring(bollard)
   kv["sump_buster"] = tostring(sump_buster)
 
   kv["private"] = "false"
 
+  --store a mask denoting access
   kv["access_mask"] = bit.bor(auto, emergency, truck, bike, foot, wheelchair, bus, hov, moped, motorcycle, taxi)
 
+  --if no information about access is given.
   kv["tagged_access"] = 0
 
   return 0, kv
 end
 
 function ways_proc (kv, nokeys)
+  --if there were no tags passed in, ie keyvalues is empty
   if nokeys == 0 then
     return 1, kv, 0, 0
   end
 
+  --does it at least have some interesting tags
   filter = filter_tags_generic(kv)
 
+  --let the caller know if its a keeper or not and give back the  modified tags
+  --also tell it whether or not its a polygon or road
   return filter, kv, 0, 0
 end
 
@@ -442,6 +430,7 @@ function rels_proc (kv, nokeys)
                            restriction[kv["restriction:hazmat"]] or restriction[kv["restriction:motorcycle"]] or
 			   restriction[kv["restriction:foot"]]
 
+     --restrictions with type win over just restriction key.  people enter both.
      if restrict_type ~= nil then
        restrict = restrict_type
      end
@@ -496,6 +485,7 @@ function rels_proc (kv, nokeys)
        kv["restriction"] = nil
 
        return 0, kv
+  --has a restiction but type is not restriction...ignore
      elseif restrict ~= nil then
        return 1, kv
      else
@@ -510,13 +500,15 @@ function rels_proc (kv, nokeys)
 end
 
 function rel_members_proc (keyvalues, keyvaluemembers, roles, membercount)
-  membersuperseeded = \{\}
+  --because we filter all rels we never call this function
+  --because we do rel processing later we simply say that no ways are used
+  --in the given relation, what would be nice is if we could push tags
+  --back to the ways via keyvaluemembers, we could then avoid doing
+  --post processing to get the shielding and directional highway info
+  membersuperseeded = {}
   for i = 1, membercount do
     membersuperseeded[i] = 0
   end
 
   return 1, keyvalues, membersuperseeded, 0, 0, 0
 end
-    """.format(auto_speed_name)
-
-    return result
