@@ -57,7 +57,9 @@
           "id": "bdtopo-auto-valhalla",
           "type": "valhalla",
           "storage": {
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
           },
           "cost": {
             "profile": "car",
@@ -79,7 +81,9 @@
           "id": "bdtopo-auto-shorter-valhalla",
           "type": "valhalla",
           "storage": {
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
           },
           "cost": {
             "profile": "car",
@@ -101,7 +105,9 @@
           "id": "bdtopo-pedestrian-valhalla",
           "type": "valhalla",
           "storage": {
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/"
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
           },
           "cost": {
             "profile": "pedestrian",

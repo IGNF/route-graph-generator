@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 import os
+import json
 import time
 from datetime import datetime
 
@@ -281,20 +282,30 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
 
 
         # Définition et exécution des commandes shell à exécuter
-        mkdir_args = ["mkdir", "-p", source["storage"]]
+        mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
         subprocess_execution(mkdir_args, logger)
 
+        start_command = time.time()
+        valhalla_build_config_args = ["valhalla_build_config",
+            "--mjolnir-tile-dir",  source["storage"]["dir"],
+            "--mjolnir-tile-extract", source["storage"]["tar"]]
+        subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
 
-        # osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
-        # osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
+        # Ajout du graph custom dans la config valhalla
+        with open(source["storage"]["config"], "r+") as valhalla_config:
+            config_dict = json.loads(valhalla_config)
+            config_dict["mjolnir"]["graph_lua_name"] = source["cost"]["compute"]["storage"]["file"]
+            valhalla_config.write(json.dumps(config_dict))
 
-        # start_command = time.time()
-        # subprocess_execution(osrm_extract_args, logger)
-        # end_command = time.time()
-        # logger.info("OSRM extract ended. Elapsed time : %s seconds." %(end_command - start_command))
-        # subprocess_execution(osrm_contract_args, logger)
-        # final_command = time.time()
-        # logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
+        valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
+        subprocess_execution(valhalla_build_tiles_args, logger)
+
+        valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v"]
+        subprocess_execution(valhalla_build_extract_args, logger)
+
+
+        final_command = time.time()
+        logger.info("Valhalla tiles built. Elapsed time : %s seconds." %(final_command - start_command))
 
     _write_resource_file(config, resource, logger)
 

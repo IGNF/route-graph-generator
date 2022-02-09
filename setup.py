@@ -8,7 +8,8 @@ setup (
                 'r2gg-populate_pivot=r2gg:populate_pivot',
                 'r2gg-pivot2pgrouting=r2gg:pivot2pgrouting',
                 'r2gg-pivot2osm=r2gg:pivot2osm',
-                'r2gg-osm2osrm=r2gg:osm2osrm'
+                'r2gg-osm2osrm=r2gg:osm2osrm',
+                'r2gg-osm2vlhalla=r2gg:osm2valhalla'
             ]
     }
 )
