@@ -55,13 +55,10 @@ def convert_paths(config, resource, output_dirs):
             out_paths.append(source["storage"]["file"])
         elif source["type"] == "valhalla":
             in_paths.append(source["storage"]["tar"])
-            source["storage"]["tar"] = _convert_path(source["storage"]["tar"], output_dirs["dataDir"], source["id"])
+            source["storage"]["tar"] = _convert_path(source["storage"]["tar"], output_dirs["dataDir"])
             out_paths.append(source["storage"]["tar"])
-            in_paths.append(source["storage"]["dir"])
-            source["storage"]["dir"] = _convert_path(source["storage"]["dir"], output_dirs["dataDir"], source["id"])
-            out_paths.append(source["storage"]["dir"])
             in_paths.append(source["storage"]["config"])
-            source["storage"]["config"] = _convert_path(source["storage"]["config"], output_dirs["dataDir"], source["id"])
+            source["storage"]["config"] = _convert_path(source["storage"]["config"], output_dirs["dataDir"])
             out_paths.append(source["storage"]["config"])
 
         in_paths.append(source["cost"]["compute"]["storage"]["file"])

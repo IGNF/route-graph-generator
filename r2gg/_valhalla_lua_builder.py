@@ -24,13 +24,13 @@ def build_valhalla_lua(costs_config):
     # TODO: ajouter plus de variables issues de costs_config (quand cost_profile sera ajouté à la configuration des coûts)
 
     result = """
-way_type = {
-["no_pedestrian"] =  {["auto_forward"] = "true", ["pedestrian_forward"] = "false"},
-["regular"] =        {["auto_forward"] = "true", ["pedestrian_forward"] = "true"},
-["no_car"] =         {["auto_forward"] = "false", ["pedestrian_forward"] = "true"}
-}
+way_type = {{
+["no_pedestrian"] =  {{["auto_forward"] = "true", ["pedestrian_forward"] = "false"}},
+["regular"] =        {{["auto_forward"] = "true", ["pedestrian_forward"] = "true"}},
+["no_car"] =         {{["auto_forward"] = "false", ["pedestrian_forward"] = "true"}}
+}}
 
-restriction = {
+restriction = {{
 ["no_left_turn"] = 0,
 ["no_right_turn"] = 1,
 ["no_straight_on"] = 2,
@@ -41,7 +41,7 @@ restriction = {
 ["no_entry"] = 7,
 ["no_exit"] = 8,
 ["no_turn"] = 9
-}
+}}
 
 function round(val, n)
   if (n) then
@@ -510,7 +510,7 @@ function rels_proc (kv, nokeys)
 end
 
 function rel_members_proc (keyvalues, keyvaluemembers, roles, membercount)
-  membersuperseeded = \{\}
+  membersuperseeded = {{}}
   for i = 1, membercount do
     membersuperseeded[i] = 0
   end

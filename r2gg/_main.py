@@ -290,11 +290,14 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
             "--mjolnir-tile-dir",  source["storage"]["dir"],
             "--mjolnir-tile-extract", source["storage"]["tar"]]
         subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
-
+        # Nécessaire le temps que le fichier s'écrive...
+        time.sleep(0.1)
         # Ajout du graph custom dans la config valhalla
-        with open(source["storage"]["config"], "r+") as valhalla_config:
-            config_dict = json.loads(valhalla_config)
+        with open(source["storage"]["config"], "r") as valhalla_config:
+            config_dict = json.load(valhalla_config)
             config_dict["mjolnir"]["graph_lua_name"] = source["cost"]["compute"]["storage"]["file"]
+
+        with open(source["storage"]["config"], "w") as valhalla_config:
             valhalla_config.write(json.dumps(config_dict))
 
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
@@ -302,7 +305,6 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
 
         valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v"]
         subprocess_execution(valhalla_build_extract_args, logger)
-
 
         final_command = time.time()
         logger.info("Valhalla tiles built. Elapsed time : %s seconds." %(final_command - start_command))
@@ -342,6 +344,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     resource["topology"]["storage"].pop("baseId", None)
     for source in resource["sources"]:
         source["storage"].pop("dbConfig", None)
+        source["storage"].pop("dir", None)
 
     resource["resourceVersion"] = extraction_date
 

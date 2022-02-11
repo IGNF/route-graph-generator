@@ -29,9 +29,9 @@ def subprocess_execution(args, logger, outfile = None):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
+            process_output, _ =  process.communicate()
+            logger.info(process_output.decode("utf-8"))
 
-        process_output, _ =  process.communicate()
-        logger.info(process_output.decode("utf-8"))
 
     except (OSError, subprocess.CalledProcessError) as exception:
         logger.info('Exception occured: ' + str(exception))
