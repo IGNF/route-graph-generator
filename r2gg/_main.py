@@ -155,7 +155,7 @@ def osm_convert(config, resource, connection, logger):
         connection à la bdd de travail
     logger: logging.Logger
     """
-    if (resource['type'] != 'osrm'):
+    if (resource['type'] not in ['osrm', 'valhalla']):
         raise ValueError("Wrong resource type, should be 'osrm'")
     logger.info("Conversion from pivot to OSRM")
 
