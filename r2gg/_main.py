@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 import os
+import json
 import time
 from datetime import datetime
 
@@ -15,6 +16,8 @@ from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
 from r2gg._path_converter import convert_paths
 from r2gg._file_copier import copy_files_locally,copy_files_with_ssh
+from r2gg._valhalla_lua_builder import build_valhalla_lua
+
 
 def sql_convert(config, resource, db_configs, connection, logger):
     """
@@ -138,24 +141,26 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     _write_resource_file(config, resource, logger)
 
 
-def osm_convert(resource, connection, logger):
+def osm_convert(config, resource, connection, logger):
     """
     Fonction de conversion depuis la bdd pivot vers un fichier osm
 
     Parameters
     ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
     """
-    if (resource['type'] != 'osrm'):
+    if (resource['type'] not in ['osrm', 'valhalla']):
         raise ValueError("Wrong resource type, should be 'osrm'")
     logger.info("Conversion from pivot to OSRM")
 
     logger.info("Conversion from pivot to OSM")
-    pivot_to_osm(resource, connection, logger)
+    pivot_to_osm(config, resource, connection, logger)
     connection.close()
 
 def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
@@ -169,6 +174,8 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     logger: logging.Logger
+    build_lua_from_cost_config : bool
+        contruire le lua à partir de le configuration des coûts. Défaut : True
     """
 
     if (resource['type'] != 'osrm'):
@@ -177,6 +184,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     logger.info("Conversion from OSM to OSRM")
     # osm2osrm
     osm_file = resource['topology']['storage']['file']
+
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
 
@@ -226,6 +234,84 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     _write_resource_file(config, resource, logger)
 
 
+def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True):
+    """
+    Fonction de conversion depuis le fichier .osm.pbf vers les fichiers valhalla
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    resource: dict
+        dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    logger: logging.Logger
+    build_lua_from_cost_config : bool
+        contruire le lua à partir de le configuration des coûts. Défaut : True
+    """
+
+    if (resource['type'] != 'valhalla'):
+        raise ValueError("Wrong resource type, should be 'valhalla'")
+
+    logger.info("Conversion from OSM PBF to VALHALLA")
+    # osm2valhalla
+    osm_file = resource['topology']['storage']['file']
+    if osm_file.split(".")[-1] != "pbf":
+        raise ValueError("Wrong topology type, should be a .pbf file")
+
+    logger.info("Generating graphs for each set of tiles")
+
+    # Gestion du cas (fictif pour l'instant) où l'on a plusieurs sets de tiles valhalla
+    distinct_tile_dirs = []
+    distinct_sources = []
+    for source in resource["sources"]:
+        if source["storage"]["dir"] not in distinct_tile_dirs:
+            distinct_tile_dirs.append(source["storage"]["dir"])
+            distinct_sources.append(source)
+
+    for source in distinct_sources:
+        lua_file = source["cost"]["compute"]["storage"]["file"]
+
+        if build_lua_from_cost_config:
+            logger.info("Building lua profile")
+            config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
+            costs_config = config_from_path(config_file)
+
+            with open(lua_file, "w") as lua_f:
+                lua_f.write(build_valhalla_lua(costs_config))
+            logger.info("Finished lua building")
+
+
+        # Définition et exécution des commandes shell à exécuter
+        mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
+        subprocess_execution(mkdir_args, logger)
+
+        start_command = time.time()
+        valhalla_build_config_args = ["valhalla_build_config",
+            "--mjolnir-tile-dir",  source["storage"]["dir"],
+            "--mjolnir-tile-extract", source["storage"]["tar"]]
+        subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
+        # Nécessaire le temps que le fichier s'écrive...
+        time.sleep(0.1)
+        # Ajout du graph custom dans la config valhalla
+        with open(source["storage"]["config"], "r") as valhalla_config:
+            config_dict = json.load(valhalla_config)
+            config_dict["mjolnir"]["graph_lua_name"] = source["cost"]["compute"]["storage"]["file"]
+
+        with open(source["storage"]["config"], "w") as valhalla_config:
+            valhalla_config.write(json.dumps(config_dict))
+
+        valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
+        subprocess_execution(valhalla_build_tiles_args, logger)
+
+        valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v"]
+        subprocess_execution(valhalla_build_extract_args, logger)
+
+        final_command = time.time()
+        logger.info("Valhalla tiles built. Elapsed time : %s seconds." %(final_command - start_command))
+
+    _write_resource_file(config, resource, logger)
+
+
 def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = False):
     """
     Fonction pour l'écriture du fichier de ressource
@@ -258,6 +344,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     resource["topology"]["storage"].pop("baseId", None)
     for source in resource["sources"]:
         source["storage"].pop("dbConfig", None)
+        source["storage"].pop("dir", None)
 
     resource["resourceVersion"] = extraction_date
 

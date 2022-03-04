@@ -56,3 +56,5 @@ def copy_files_locally(in_paths, out_paths):
             print("The file " + in_path + " is already there")
         except FileNotFoundError:
             print("The file " + in_path + " was not found")
+        except IsADirectoryError:
+            print(in_path + " is a directory (probably valhalla tile dir). Ignored")

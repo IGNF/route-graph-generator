@@ -1,5 +1,5 @@
 from r2gg._configure import configure
-from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert
+from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valhalla_convert
 
 __version__ = "1.1.2"
 
@@ -12,12 +12,16 @@ def pivot2pgrouting():
     pgr_convert(config, resource, db_configs, connection, logger)
 
 def pivot2osm():
-    _, resource, _, connection, logger = configure()
-    osm_convert(resource, connection, logger)
+    config, resource, _, connection, logger = configure()
+    osm_convert(config, resource, connection, logger)
 
 def osm2osrm():
     config, resource, _, _, logger = configure()
     osrm_convert(config, resource, logger)
+
+def osm2valhalla():
+    config, resource, _, _, logger = configure()
+    valhalla_convert(config, resource, logger)
 
 
 if __name__ == '__main__':
@@ -28,7 +32,11 @@ if __name__ == '__main__':
         pgr_convert(config, resource, db_configs, connection, logger)
     elif (resource['type'] == 'osrm'):
         config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, db_configs, connection, logger)
-        osrm_convert(config, resource, db_configs, connection, logger)
+        osm_convert(config, resource, connection, logger)
+        osrm_convert(config, resource, logger)
+    elif (resource['type'] == 'valhalla'):
+        config, resource, db_configs, connection, logger = configure()
+        osm_convert(config, resource, connection, logger)
+        valhalla_convert(config, resource, logger)
     else:
         raise ValueError("Wrong resource type, should be 'pgr' or osrm'")
