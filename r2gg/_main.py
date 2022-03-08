@@ -157,7 +157,6 @@ def osm_convert(config, resource, connection, logger):
     """
     if (resource['type'] not in ['osrm', 'valhalla']):
         raise ValueError("Wrong resource type, should be 'osrm'")
-    logger.info("Conversion from pivot to OSRM")
 
     logger.info("Conversion from pivot to OSM")
     pivot_to_osm(config, resource, connection, logger)
