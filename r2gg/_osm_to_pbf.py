@@ -33,5 +33,6 @@ def osm_to_pbf(in_path, out_path, logger):
     writer = osmium.SimpleWriter(out_path)
     handler = _PBFWriter(writer)
     handler.apply_file(in_path)
+    os.remove(in_path)
     end_time = time.time()
     logger.info("PBF writing done. Elapsed time : %s seconds." %(end_time - start_time))
