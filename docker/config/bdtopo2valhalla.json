@@ -287,6 +287,26 @@
               ]
             },
             {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "name-pgr",
+                  "key": "wayType",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "field": "acces_vehicule_leger",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv3$A péage$niv3$"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
               "id": "projection",
               "defaultValueContent": "EPSG:4326",
               "values": [
