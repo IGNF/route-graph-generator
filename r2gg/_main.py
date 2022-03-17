@@ -187,6 +187,11 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
 
+    # Gestion de si le fichier de topolgie attendu est en pbf
+    extension = ".osm"
+    if osm_file.split(".")[-1] == "pbf":
+        extension = ".osm.pbf"
+
     i = 0
     for source in resource["sources"]:
         logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
@@ -209,11 +214,11 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
         osrm_file = source["storage"]["file"]
         cost_dir = os.path.dirname(osrm_file)
         profile_name = osrm_file.split("/")[-1].split(".")[0]
-        tmp_osm_file = "{}/{}.osm".format(cost_dir, profile_name)
+        tmp_osm_file = "{}/{}{}}".format(cost_dir, profile_name, extension)
 
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
-        copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + ".osm", tmp_osm_file]
+        copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + extension, tmp_osm_file]
         osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
         osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
         rm_args = ["rm", tmp_osm_file]
