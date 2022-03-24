@@ -344,7 +344,7 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
     if convert_file_paths and config["outputs"].get("dirs", None) is not None:
         in_paths, out_paths = convert_paths(config, resource, config["outputs"]["dirs"])
 
-    resource.pop("mapping", None)
+    resource["topology"].pop("mapping", None)
     resource["topology"]["storage"].pop("baseId", None)
     for source in resource["sources"]:
         source["storage"].pop("dbConfig", None)
