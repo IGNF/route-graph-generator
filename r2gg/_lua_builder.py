@@ -1,3 +1,5 @@
+from _output_costs_from_costs_config import compute_operations_string
+
 def build_lua(costs_config, output_cost_name):
     """
     Fonction qui crée un fichier .lua de profil OSRM à partir d'un dictionnaire de
@@ -156,6 +158,12 @@ def _build_process_way(costs_config, output_cost):
     process_way_string += "    result.forward_speed  = {}\n".format(output_cost["speed_value"])
     process_way_string += "    result.backward_speed = {}\n".format(output_cost["speed_value"])
     process_way_string += "\n"
+
+    # durée
+    if output_cost["cost_type"] == 'duration':
+        process_way_string += "\n    -- durée\n"
+        process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output_cost["operations"]))
+        process_way_string += "\n"
 
     # gestion du sens direct
     process_way_string += "    -- gestion du sens direct\n"

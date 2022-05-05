@@ -130,7 +130,6 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     cost_calculation_files_paths = {source["cost"]["compute"]["storage"]["file"] for source in resource["sources"] if "cost" in source}
 
-
     for cost_calculation_file_path in cost_calculation_files_paths:
         pivot_to_pgr(resource, cost_calculation_file_path, connection, connection_out, logger)
 
