@@ -27,10 +27,6 @@ def convert_paths(config, resource, output_dirs):
     in_paths = []
     out_paths = []
 
-    in_paths.append(resource["topology"]["mapping"]["storage"]["file"])
-    resource["topology"]["mapping"]["storage"]["file"] = _convert_path(resource["topology"]["mapping"]["storage"]["file"], output_dirs["dataDir"])
-    out_paths.append(resource["topology"]["mapping"]["storage"]["file"])
-
     resource_type = resource["type"]
     if resource_type in ["pgr", "smartpgr"]:
         in_paths.append(resource["topology"]["storage"]["base"]["dbConfig"])
@@ -53,6 +49,13 @@ def convert_paths(config, resource, output_dirs):
             in_paths.append(source["storage"]["file"])
             source["storage"]["file"] = _convert_path(source["storage"]["file"], output_dirs["dataDir"], source["id"])
             out_paths.append(source["storage"]["file"])
+        elif source["type"] == "valhalla":
+            in_paths.append(source["storage"]["tar"])
+            source["storage"]["tar"] = _convert_path(source["storage"]["tar"], output_dirs["dataDir"])
+            out_paths.append(source["storage"]["tar"])
+            in_paths.append(source["storage"]["config"])
+            source["storage"]["config"] = _convert_path(source["storage"]["config"], output_dirs["dataDir"])
+            out_paths.append(source["storage"]["config"])
 
         in_paths.append(source["cost"]["compute"]["storage"]["file"])
         source["cost"]["compute"]["storage"]["file"] = _convert_path(source["cost"]["compute"]["storage"]["file"], output_dirs["profileDir"])
