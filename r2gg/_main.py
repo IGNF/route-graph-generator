@@ -299,6 +299,8 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
         with open(source["storage"]["config"], "r") as valhalla_config:
             config_dict = json.load(valhalla_config)
             config_dict["mjolnir"]["graph_lua_name"] = source["cost"]["compute"]["storage"]["file"]
+            # Ajout de l'autorisation à exclure les ponts/tunnels/péages
+            config_dict["service_limits"]["allow_hard_exclusions"] = True
 
         with open(source["storage"]["config"], "w") as valhalla_config:
             valhalla_config.write(json.dumps(config_dict))

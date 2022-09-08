@@ -121,7 +121,7 @@ def compute_operations_string(operations):
         elif operation[0] == "divide":
             operation_str += "/"
 
-    operation_str += operation[1]
+        operation_str += str(operation[1])
 
     return operation_str
 
