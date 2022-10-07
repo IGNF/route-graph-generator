@@ -133,8 +133,17 @@ def _build_process_way(costs_config, output_cost):
     # récupération des attributs utiles
     get_variables_strings = []
     for variable in costs_config["variables"]:
-        var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
-        get_variables_strings.append(var_str)
+        if variable["mapping"] == "value":
+            var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
+            get_variables_strings.append(var_str)
+        else:
+            temp_var_str = "    local {}_tmp = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
+            get_variables_strings.append(temp_var_str)
+            for key, value in variable["mapping"]:
+                cond_str = "    if {}_tmp == \"{}\" then\n".format(variable["name"], key)
+                var_str = "        local {} = tonumber(\"{}\") \"{}\"\n".format(variable["name"], value)
+                get_variables_strings.append(cond_str)
+                get_variables_strings.append(var_str)
 
     # Récupération des attributs nécéssaires à la gestion des péages, ponts et tunnels.
     get_variables_strings.append("    local acces_vehicule_leger = way:get_value_by_key(\"acces_vehicule_leger\")\n")
