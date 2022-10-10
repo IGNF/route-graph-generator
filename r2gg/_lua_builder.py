@@ -134,14 +134,17 @@ def _build_process_way(costs_config, output_cost):
     get_variables_strings = []
     for variable in costs_config["variables"]:
         if variable["mapping"] == "value":
-            var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
+            var_str = "    local {0} = tonumber(way:get_value_by_key(\"{1}\")) or way:get_value_by_key(\"{1}\")\n".format(variable["name"], variable["column_name"])
             get_variables_strings.append(var_str)
         else:
-            temp_var_str = "    local {}_tmp = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
+            temp_var_str  = "    local {0}_tmp = tonumber(way:get_value_by_key(\"{1}\")) or way:get_value_by_key(\"{1}\")\n".format(variable["name"], variable["column_name"])
+            local_var_str = "    local {}\n".format(variable["name"])
             get_variables_strings.append(temp_var_str)
-            for key, value in variable["mapping"]:
+            get_variables_strings.append(local_var_str)
+            for key, value in variable["mapping"].items():
                 cond_str = "    if {}_tmp == \"{}\" then\n".format(variable["name"], key)
-                var_str = "        local {} = tonumber(\"{}\") \"{}\"\n".format(variable["name"], value)
+                var_str  = "        local {0} = tonumber(\"{1}\") or \"{1}\"\n".format(variable["name"], value)
+                var_str += "    end\n"
                 get_variables_strings.append(cond_str)
                 get_variables_strings.append(var_str)
 
