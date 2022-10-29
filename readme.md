@@ -29,11 +29,11 @@ Pour extraire les données vers la base pivot
 ```
 r2gg-populate_pivot config.json
 ```
-Pour convertir les données au fromat pgRouting (le trype de ressource dans config.json doit être `pgr`)
+Pour convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`)
 ```
 r2gg-pivot2pgrouting config.json
 ```
-Pour convertir les données au format osrm (le trype de ressource dans config.json doit être `osrm`)
+Pour convertir les données au format osrm (le type de ressource dans config.json doit être `osrm`)
 ```
 r2gg-pivot2osm config.json
 r2gg-osm2osrm config.json
