@@ -22,7 +22,7 @@ Des exemples de tous ces fichiers sont présents dans le dépôt dans le dossier
 La documentation de ces fichiers de configuration est consultable [ici](io).
 
 ### Exécution
-Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers un base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`.
+Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers une base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`.
 Ces trois processus se lancent à l'aide de trois commandes différentes, prenant toutes le même fichier de configuration.
 
 Pour extraire les données vers la base pivot
