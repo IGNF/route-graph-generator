@@ -6,7 +6,7 @@ Il y a deux formats de sortie : OSRM et pgRouting
 La conversion se fait via les fonctions de la bibliothèque r2gg développée dans ce but. Une documentation plus détaillée de r2gg est consultable [ici](r2gg).
 
 ## Prérequis
-Les prérequis au fonctionnement des scipts de génération sont décrits dans le [readme](docker) de l'image docker.
+Les prérequis au fonctionnement des scripts de génération sont décrits dans le [readme](docker) de l'image docker.
 
 ## Installation
 Pour installer les commandes de génération de données, lancer la commande suivante à la racine du projet :
