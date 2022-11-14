@@ -24,6 +24,8 @@ pgrouting=# CREATE EXTENSION PostGIS;
 pgrouting=# CREATE EXTENSION pgRouting;
 ```
 
+Les procédures du projet [pgrouting-procedures](https://github.com/IGNF/pgrouting-procedures) doivent également être installées sur la base de données de destination, sur le bon schema
+
 ## Installation
 
 Pour installer les commandes de génération de données, lancer la commande suivante à la racine du projet :
