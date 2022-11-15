@@ -325,27 +325,6 @@
             "resourceDir":
               type: string
               required: true
-        # Configuration ssh
-        "sshConfig":
-          type: object
-          required: false
-          properties:
-            # Hôte
-            "host":
-              type: string
-              required: true
-            # Port de l'hôte
-            "port":
-              type: integer
-              required: true
-            # Nom de l'utilisateur
-            "username":
-              type: string
-              required: true
-            # Mot de passe de l'utilisateur
-            "password":
-              type: string
-              required: true
 components:
   schemas:
     # storage d'un document: fichier ou ceph

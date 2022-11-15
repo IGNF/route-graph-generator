@@ -15,7 +15,7 @@ from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
 from r2gg._path_converter import convert_paths
-from r2gg._file_copier import copy_files_locally,copy_files_with_ssh
+from r2gg._file_copier import copy_files_locally
 from r2gg._valhalla_lua_builder import build_valhalla_lua
 
 
@@ -317,7 +317,7 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
     _write_resource_file(config, resource, logger)
 
 
-def _write_resource_file(config, resource, logger, convert_file_paths = True, copy_files_out = False):
+def _write_resource_file(config, resource, logger, convert_file_paths = True):
     """
     Fonction pour l'écriture du fichier de ressource
 
@@ -358,7 +358,4 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True, co
         json_string = json.dumps(final_resource, indent=2)
         resource_file.write(json_string)
 
-    if copy_files_out:
-        copy_files_with_ssh(in_paths, out_paths, config["ssh_config"])
-    else:
-        copy_files_locally(in_paths, out_paths)
+    copy_files_locally(in_paths, out_paths)

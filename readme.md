@@ -2,7 +2,7 @@
 
 ## Présentation 
 
-Route Graph Generator (r2gg) est un script Python qui permet la génération de graphes pour des moteurs de calcul d'itinéraire. Il a été développé pour générer les données directement utilisable par [Road2](). 
+Route Graph Generator (r2gg) est un script Python qui permet la génération de graphes pour des moteurs de calcul d'itinéraire. Il a été développé pour générer les données directement utilisable par [Road2](https://github.com/IGNF/road2). 
 
 Actuellement, il y a deux formats de sortie : OSRM et pgRouting. 
 
@@ -17,8 +17,7 @@ Les prérequis pour faire fonctionner l'ensemble des scripts de génération son
 	+ psycopg2 (2.8.5)
 	+ sqlparse (0.2.4)
 	+ lxml (4.3.1)
-    + paramiko (2.7.2)
-    + scp (0.13.2)
+	+ osmium (3.2.0)
 - [osrm-backend](https://github.com/Project-OSRM/osrm-backend) (5.25.0)
 
 Il est conseillé d'installer les bibliothèques python via pip.
@@ -59,9 +58,7 @@ r2gg-osm2osrm config.json
 
 ## Version
 
-Version du code 1.1.1
-
-NB: penser à mettre à jour la version dans le script `__init__.py` et dans le `setup.py`
+Elle est indiquée dans le `__init__.py` et dans le `setup.py`.
 
 ## Licence
 

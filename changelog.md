@@ -1,3 +1,8 @@
+# 1.1.3
+
+CHANGE :
+- suppression de la partie ssh
+
 # 1.1.2
 
 FEATURES

@@ -12,7 +12,7 @@ RUN yum install -y \
 RUN yum install -y cmake3 
   # && yum install -y python36 python36-setuptools && easy_install-3.6 pip
 
-RUN python3 -m pip install -U pip && pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'paramiko==2.7.2' 'scp==0.13.2'
+RUN python3 -m pip install -U pip && pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'osmium==3.2.0'
 
 ### Pour la conversion osm vers osrm
 # Dépendances
