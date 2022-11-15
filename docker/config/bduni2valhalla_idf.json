@@ -1,0 +1,318 @@
+{
+  "generation": {
+    "general": {
+      "id": "bduni2valhalla_idf",
+      "logs": {
+        "configFile": "/home/docker/config/sample_log_config.json"
+      },
+      "parallelization": {
+        "threads": 4
+      },
+      "overwrite": true,
+      "operation": "creation"
+    },
+    "bases": [
+      {
+        "id": "base_pivot",
+        "type": "bdd",
+        "configFile": "/home/docker/config/db_config_pivot.json"
+      },
+      {
+        "id": "base_bduni",
+        "type": "bdd",
+        "configFile": "/run/secrets/db_config"
+      }
+    ],
+    "workingSpace": {
+      "directory": "/home/docker/data/generation/",
+      "baseId": "base_pivot"
+    },
+    "resource": {
+      "id": "bduni-valhalla-idf",
+      "type": "valhalla",
+      "description": "Données BDUNI v2 sur l'Île-de-France.",
+      "topology": {
+        "id": "osm-pbf-bduni",
+        "type":"osm",
+        "description": "Données issues de la BDUNI de l'IGN.",
+        "storage": {
+          "file": "/home/docker/data/bdtopo.osm.pbf"
+        },
+        "projection": "EPSG:4326",
+        "bbox": "1.7,48.4,3.3,49.1",
+        "mapping": {
+          "source": {
+            "baseId": "base_bduni"
+          },
+          "storage": {
+            "file": "/home/docker/sql/bduni_convert.sql"
+          }
+        },
+        "defaultAttributes": [
+          "name"
+        ]
+      },
+      "sources": [
+        {
+          "id": "bdtopo-auto-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "/home/docker/config/graph_bdtopo.lua"
+              },
+              "configuration": {
+                "costing": "auto",
+                "storage": {
+                  "file": "/home/docker/config/costs_calculation.json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "availableOperations":[
+        {
+          "id": "route",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bduni-valhalla-idf"
+              ]
+            },
+            {
+              "id": "start",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "end",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car"
+              ]
+            },
+            {
+              "id": "optimization",
+              "defaultValueContent": "fastest",
+              "values": [
+                "fastest"
+              ]
+            },
+            {
+              "id": "intermediates",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "getSteps",
+              "defaultValueContent": "true"
+            },
+            {
+              "id": "waysAttributes",
+              "values": [
+                "name"
+              ]
+            },
+            {
+              "id": "geometryFormat",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
+            },
+            {
+              "id": "bbox",
+              "defaultValueContent": "true"
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154"
+              ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "minute",
+              "values": [
+                "hour",
+                "minute",
+                "second",
+                "standard"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
+              ]
+            },
+            {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "name-valhalla",
+                  "key": "wayType",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "field": "toll"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "isochrone",
+          "parameters": [
+            {
+              "id": "resource",
+              "values": [
+                "bduni-valhalla-idf"
+              ]
+            },
+            {
+              "id": "point",
+              "values": {
+                "bbox": "1.7,48.4,3.3,49.1",
+                "projection": "EPSG:4326"
+              }
+            },
+            {
+              "id": "costType",
+              "defaultValueContent": "time",
+              "values": [
+                "time"
+              ]
+            },
+            {
+              "id": "costValue",
+              "values": {
+                "min": 100,
+                "max": 50000
+              }
+            },
+            {
+              "id": "profile",
+              "defaultValueContent": "car",
+              "values": [
+                "car"
+              ]
+            },
+            {
+              "id": "direction",
+              "defaultValueContent": "departure",
+              "values": [
+                "departure",
+                "arrival"
+              ]
+            },
+            {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "name-pgr",
+                  "key": "wayType",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "field": "acces_vehicule_leger",
+                      "condition": {
+                        "type": "equal",
+                        "value": "$niv3$A péage$niv3$"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "projection",
+              "defaultValueContent": "EPSG:4326",
+              "values": [
+                "EPSG:4326",
+                "EPSG:2154",
+                "EPSG:4559",
+                "EPSG:2972",
+                "EPSG:2975",
+                "EPSG:4471",
+                "EPSG:3857"
+              ]
+            },
+            {
+              "id": "geometryFormat",
+              "defaultValueContent": "geojson",
+              "values": [
+                "geojson",
+                "polyline"
+              ]
+            },
+            {
+              "id": "timeUnit",
+              "defaultValueContent": "second",
+              "values": [
+                "hour",
+                "minute",
+                "second"
+              ]
+            },
+            {
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "/home/docker/data/resources/bduni-valhalla-idf.resource"
+        }
+      },
+      "dirs": {
+        "dataDir": "/home/docker/data/",
+        "profileDir": "/home/docker/data/",
+        "resourceDir": "/home/docker/data/resources"
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
+      }
+    }
+  }
+}

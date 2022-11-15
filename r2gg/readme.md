@@ -10,10 +10,10 @@ Elles ont en effet besoin d'un fichier de configuration (décrit [ici](../io)) p
 Cette fonction permet d'extraire les données vers la base pivot
 
 ### `pivot2pgrouting()`
-Permet de convertir les données au fromat pgRouting (le trype de ressource dans config.json doit être `pgr`)
+Permet de convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`)
 
 ### `pivot2osrm()`
-Permet de convertir les données au fromat osrm (le trype de ressource dans config.json doit être `osrm`)
+Permet de convertir les données au fromat osrm (le type de ressource dans config.json doit être `osrm`)
 
 
 ## Fonctions privées
