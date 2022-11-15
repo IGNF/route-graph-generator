@@ -1,7 +1,6 @@
 from lxml import etree
-from xml.dom import minidom
 
-def writeNode(node):
+def writeNode(node, extraction_date):
     """
     Fonction qui écrit un noeud en xml à partir d'un dict (potentiellement une ligne de bdd)
 
@@ -10,6 +9,8 @@ def writeNode(node):
     node: dict
         Dictionnaire des attributs du noeud.
         pour l'instant ne contient que la clé "id"
+    extraction_date: str
+        date de l'extraction des données au format YYYY-MM-DD
 
     Returns
     -------
@@ -21,10 +22,12 @@ def writeNode(node):
 
     nodeEl.set('lon', '%s' % node['lon'])
     nodeEl.set('lat', '%s' % node['lat'])
+    nodeEl.set('version', '1')
+    nodeEl.set('timestamp', '%sT13:37:00Z' % extraction_date)
 
     return nodeEl
 
-def writeWay(way):
+def writeWay(way, extraction_date):
     """
     Fonction qui écrit une arrête vierge en xml à partir d'un dict
     (potentiellement une ligne de bdd)
@@ -33,6 +36,8 @@ def writeWay(way):
     ----------
     way: dict
         Dictionnaire des attributs de l'arrête.
+    extraction_date: str
+        date de l'extraction des données au format YYYY-MM-DD
 
     Returns
     -------
@@ -41,6 +46,8 @@ def writeWay(way):
     """
 
     wayEl = etree.Element("way", id="%s" %way['id'])
+    wayEl.set('version', '1')
+    wayEl.set('timestamp', '%sT13:37:00Z' % extraction_date)
 
     return wayEl
 
@@ -76,7 +83,7 @@ def writeWayNds(wayEl, way, internodes):
     return wayEl
 
 # Ecriture des restrictions
-def writeRes(res, i):
+def writeRes(res, i, extraction_date):
     """
     Fonction qui écrit une restriction (non communication) en xml à partir d'un dict
 
@@ -86,6 +93,8 @@ def writeRes(res, i):
         Dictionnaire des attributs de la restriction.
     i: int
         identifiant de la retriction
+    extraction_date: str
+        date de l'extraction des données au format YYYY-MM-DD
 
     Returns
     -------
@@ -94,6 +103,8 @@ def writeRes(res, i):
     """
 
     resEl = etree.Element("relation", id="%s" %i)
+    resEl.set('version', '1')
+    resEl.set('timestamp', '%sT13:37:00Z' % extraction_date)
 
     _from = etree.SubElement(resEl, 'member')
     _from.set('type', 'way')

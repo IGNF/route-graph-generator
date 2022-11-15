@@ -1,3 +1,5 @@
+from r2gg._output_costs_from_costs_config import compute_operations_string
+
 def build_lua(costs_config, output_cost_name):
     """
     Fonction qui crée un fichier .lua de profil OSRM à partir d'un dictionnaire de
@@ -131,8 +133,20 @@ def _build_process_way(costs_config, output_cost):
     # récupération des attributs utiles
     get_variables_strings = []
     for variable in costs_config["variables"]:
-        var_str = "    local {} = tonumber(way:get_value_by_key(\"{}\")) or way:get_value_by_key(\"{}\")\n".format(variable["name"], variable["column_name"], variable["column_name"])
-        get_variables_strings.append(var_str)
+        if variable["mapping"] == "value":
+            var_str = "    local {0} = tonumber(way:get_value_by_key(\"{1}\")) or way:get_value_by_key(\"{1}\")\n".format(variable["name"], variable["column_name"])
+            get_variables_strings.append(var_str)
+        else:
+            temp_var_str  = "    local {0}_tmp = tonumber(way:get_value_by_key(\"{1}\")) or way:get_value_by_key(\"{1}\")\n".format(variable["name"], variable["column_name"])
+            local_var_str = "    local {}\n".format(variable["name"])
+            get_variables_strings.append(temp_var_str)
+            get_variables_strings.append(local_var_str)
+            for key, value in variable["mapping"].items():
+                cond_str = "    if {}_tmp == \"{}\" then\n".format(variable["name"], key)
+                var_str  = "        local {0} = tonumber(\"{1}\") or \"{1}\"\n".format(variable["name"], value)
+                var_str += "    end\n"
+                get_variables_strings.append(cond_str)
+                get_variables_strings.append(var_str)
 
     # Récupération des attributs nécéssaires à la gestion des péages, ponts et tunnels.
     get_variables_strings.append("    local acces_vehicule_leger = way:get_value_by_key(\"acces_vehicule_leger\")\n")
@@ -156,6 +170,12 @@ def _build_process_way(costs_config, output_cost):
     process_way_string += "    result.forward_speed  = {}\n".format(output_cost["speed_value"])
     process_way_string += "    result.backward_speed = {}\n".format(output_cost["speed_value"])
     process_way_string += "\n"
+
+    # durée
+    if output_cost["cost_type"] == 'duration':
+        process_way_string += "\n    -- durée\n"
+        process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output_cost["operations"]))
+        process_way_string += "\n"
 
     # gestion du sens direct
     process_way_string += "    -- gestion du sens direct\n"
