@@ -10,21 +10,30 @@ La conversion se fait via les fonctions de la bibliothèque r2gg développée da
 
 ## Prérequis
 
-Les prérequis pour faire fonctionner l'ensemble des scripts de génération sont les suivants (avec entre parenthèses les versions utilisées lors du développement) :
+Les prérequis au fonctionnement des scripts de génération sont décrits dans le [readme](docker) de l'image docker.
 
-- Python 3 (3.6.5)
-- Les bibliothèques Python suivantes :
-	+ psycopg2 (2.8.5)
-	+ sqlparse (0.2.4)
-	+ lxml (4.3.1)
-	+ osmium (3.2.0)
-- [osrm-backend](https://github.com/Project-OSRM/osrm-backend) (5.25.0)
+Les extensions SQL `postgres_fdw` et `PostGIS` doivent être installées sur la base de données `pivot` :
 
-Il est conseillé d'installer les bibliothèques python via pip.
+```sql
+pivot=# CREATE EXTENSION postgres_fdw;
+pivot=# CREATE EXTENSION PostGIS;
+```
+
+Dans le cas d'une convertion vers une base de données pgRouting, les extensions SQL `postgres_fdw`, `PostGIS` et `pgRouting` doivent être installées sur la base de données de destination, `pgrouting` par exemple :
+
+```sql
+pgrouting=# CREATE EXTENSION postgres_fdw;
+pgrouting=# CREATE EXTENSION PostGIS;
+pgrouting=# CREATE EXTENSION pgRouting;
+```
+
+Les procédures du projet [pgrouting-procedures](https://github.com/IGNF/pgrouting-procedures) doivent également être installées sur la base de données de destination, sur le bon schema
+
 
 ## Installation
 
 Pour installer les commandes de génération de données, lancer la commande suivante à la racine du projet :
+
 ```
 pip3 install --user -e .
 ```
@@ -39,18 +48,24 @@ La documentation de ces fichiers de configuration est consultable [ici](io).
 
 ### Exécution
 
-Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers un base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`.
+Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers une base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`.
+
 Ces trois processus se lancent à l'aide de trois commandes différentes, prenant toutes le même fichier de configuration.
 
 Pour extraire les données vers la base pivot
+
 ```
 r2gg-populate_pivot config.json
 ```
-Pour convertir les données au fromat pgRouting (le trype de ressource dans config.json doit être `pgr`)
+
+Pour convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`)
+
 ```
 r2gg-pivot2pgrouting config.json
 ```
-Pour convertir les données au format osrm (le trype de ressource dans config.json doit être `osrm`)
+
+Pour convertir les données au format osrm (le type de ressource dans config.json doit être `osrm`)
+
 ```
 r2gg-pivot2osm config.json
 r2gg-osm2osrm config.json
