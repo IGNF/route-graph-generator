@@ -971,12 +971,6 @@
         "dbConfigDir": "/home/docker/data",
         "profileDir": "/home/docker/data",
         "resourceDir": "/home/docker/data/resources"
-      },
-      "sshConfig":{
-        "host": "127.0.0.1",
-        "port": 22,
-        "username": "toto",
-        "password": "mdp1"
       }
     }
   }

@@ -42,7 +42,7 @@ mkdir build && cmake -B build -DCMAKE_BUILD_TYPE=Release && make -C build && mak
 
 ### Installation des dépendances pour R2GG
 #### Dépendances Python
-RUN pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'paramiko==2.7.2' 'scp==0.13.2'
+RUN pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'osmium==3.2.0'
 ### Installation de R2GG
 WORKDIR /usr/lib/python3.6/site-packages/r2gg/r2gg
 COPY r2gg ./
