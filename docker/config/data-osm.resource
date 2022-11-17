@@ -2,35 +2,10 @@
   "resource": {
   "id": "data-osm",
   "type": "osrm",
-  "description": "Exemple d'une ressource créée à partir des données OSM.",
+  "description": "Exemple d'une ressource utilisant des données OSM au format OSRM.",
   "resourceVersion": "yyyy-mm-dd",
-  "topology": {
-    "id": "data-osm",
-    "type": "osm",
-    "description": "Données OSM.",
-    "storage": {
-      "file": "/home/docker/data/data-osm-latest/data-osm-latest.osm.pbf"
-    },
-    "projection": "EPSG:4326",
-    "bbox": "-90,-180,90,180"
-  },
   "sources": [
-    {
-      "id": "data-osm-car-fastest",
-      "type": "osrm",
-      "storage": {
-        "file": "/home/docker/data/data-osm-latest/data-osm-latest.osrm"
-      },
-      "cost": {
-        "profile": "car",
-        "optimization": "fastest",
-        "compute": {
-          "storage": {
-            "file": "/usr/share/osrm/profiles/car.lua"
-          }
-        }
-      }
-    }
+    "data-osm-car-fastest"
   ],
   "availableOperations":[
     {
@@ -45,14 +20,14 @@
         {
           "id": "start",
           "values": {
-            "bbox": "-90,-180,90,180",
+            "bbox": "-180,-90,180,90",
             "projection": "EPSG:4326"
           }
         },
         {
           "id": "end",
           "values": {
-            "bbox": "-90,-180,90,180",
+            "bbox": "-180,-90,180,90",
             "projection": "EPSG:4326"
           }
         },
@@ -73,7 +48,7 @@
         {
           "id": "intermediates",
           "values": {
-            "bbox": "-90,-180,90,180",
+            "bbox": "-180,-90,180,90",
             "projection": "EPSG:4326"
           }
         },
@@ -163,7 +138,7 @@
         {
           "id": "coordinates",
           "values": {
-            "bbox": "-90,-180,90,180",
+            "bbox": "-180,-90,180,90",
             "projection": "EPSG:4326"
           }
         },

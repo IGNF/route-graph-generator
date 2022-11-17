@@ -53,7 +53,7 @@
           "type": "valhalla",
           "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
           "projection": "EPSG:4326",
-          "bbox": "-90,-180,90,180",
+          "bbox": "-180,-90,180,90",
           "mapping": {
             "source": {
               "baseId": "base_bduni"

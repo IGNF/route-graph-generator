@@ -11,6 +11,7 @@ then
   osrm-extract data-osm-latest.osm.pbf -p /usr/share/osrm/profiles/car.lua
   osrm-contract data-osm-latest.osrm
   cp -v /home/docker/config/data-osm.resource /home/docker/data/resources/
+  cp -v /home/docker/config/data-osm.source /home/docker/data/sources/
 
 ## S'il y a une configuration, alors on donne cette configuration à r2gg qui se chargera de l'analyser et d'agir en conséquence
 else
