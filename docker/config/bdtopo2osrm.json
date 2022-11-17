@@ -15,47 +15,54 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       }
     ],
     "workingSpace": {
       "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
+    "outputs": {
+      "configurations": {
+        "resource": {
+          "storage": {
+            "directory": "/home/docker/data/resources/"
+          }
+        },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
+    },
     "resource": {
       "id": "bdtopo-osrm",
       "type": "osrm",
       "description": "Données BDUNI v2.",
-      "topology": {
-        "id": "osm-bduni",
-        "type":"osm",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "file": "/home/docker/data/bdtopo.osm"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "-90,-180,90,180",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
-          "storage": {
-            "file": "/home/docker/sql/bduni_convert.sql"
-          }
-        },
-        "defaultAttributes": [
-          "name"
-        ]
-      },
       "sources": [
         {
           "id": "bdtopo-car-fastest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "-90,-180,90,180",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
             "file": "/home/docker/data/bdtopo-car-fastest/bdtopo-car-fastest.osrm"
           },
@@ -78,6 +85,18 @@
         {
           "id": "bdtopo-car-shortest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "-90,-180,90,180",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
             "file": "/home/docker/data/bdtopo-car-shortest/bdtopo-car-shortest.osrm"
           },
@@ -100,6 +119,18 @@
         {
           "id": "bdtopo-pedestrian-fastest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "-90,-180,90,180",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
             "file": "/home/docker/data/bdtopo-pedestrian-fastest/bdtopo-pedestrian-fastest.osrm"
           },
@@ -122,6 +153,18 @@
         {
           "id": "bdtopo-pedestrian-shortest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "-90,-180,90,180",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
             "file": "/home/docker/data/bdtopo-pedestrian-shortest/bdtopo-pedestrian-shortest.osrm"
           },
@@ -155,14 +198,14 @@
             {
               "id": "start",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-90,-180,90,180",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-90,-180,90,180",
                 "projection": "EPSG:4326"
               }
             },
@@ -185,7 +228,7 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-90,-180,90,180",
                 "projection": "EPSG:4326"
               }
             },
@@ -275,7 +318,7 @@
             {
               "id": "coordinates",
               "values": {
-                "bbox": "1.7,48.4,3.3,49.1",
+                "bbox": "-90,-180,90,180",
                 "projection": "EPSG:4326"
               }
             },
@@ -298,18 +341,6 @@
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/docker/data/resources/bdtopo-osrm.resource"
-        }
-      },
-      "dirs": {
-        "dataDir": "/home/docker/data/",
-        "profileDir": "/home/docker/data/",
-        "resourceDir": "/home/docker/data/resources"
-      }
     }
   }
 }

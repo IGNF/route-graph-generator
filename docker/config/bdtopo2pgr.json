@@ -15,35 +15,63 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       },
       {
         "id": "base_sortie",
         "type": "bdd",
-        "configFile": "/home/docker/config/output_base.json"
+        "configFile": "/home/docker/config/output_base.json",
+        "schema": "public"
       }
     ],
     "workingSpace": {
       "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
+    "outputs": {
+      "configurations": {
+        "resource": {
+          "storage": {
+            "directory": "/home/docker/data/resources/"
+          }
+        },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
+    },
     "resource": {
       "id": "bdtopo-pgr",
       "type": "pgr",
       "description": "Données BDUNI v2.",
-      "topology": {
-        "id": "base-bduni",
-        "type": "db",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "base": {
-            "dbConfig": "/home/docker/config/output_base.json",
-            "schema": "public",
+      "sources": [
+        {
+          "id": "bduni-pgr",
+          "description":"Graphe BDuni au format PGRouting France entière", 
+          "type": "pgr",
+          "projection": "EPSG:4326",
+          "bbox": "-180,-90,180,90",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
+            }
+          },
+          "storage": {
+            "base": {
+              "baseId": "base_sortie"
+            },
             "attributes": [
               {
                 "key": "name",
@@ -202,118 +230,80 @@
               }
             ]
           },
-          "baseId": "base_sortie"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "-90,-180,90,180",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
-          "storage": {
-            "file": "/home/docker/sql/bduni_convert.sql"
-          }
-        },
-        "defaultAttributes": [
-          "nom_1_gauche", "nom_1_droite", "cpx_numero", "cpx_toponyme_route_nommee"
-        ]
-      },
-      "sources": [
-        {
-          "id": "bdtopo-car-fastest-pgr",
-          "type": "pgr",
-          "storage": {
-            "dbConfig": "/home/docker/config/output_base.json",
-            "costColumn": "cost_s_car",
-            "rcostColumn": "reverse_cost_s_car"
-          },
-          "cost": {
-            "profile": "car",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/costs_calculation_sample.json"
-              },
-              "configuration": {
-                "name": "cost_s_car",
+          "costs": [
+            {
+              "profile": "car",
+              "optimization": "fastest",
+              "costType": "time",
+              "costColumn": "cost_s_car",                      
+              "rcostColumn": "reverse_cost_s_car",
+              "compute": {
                 "storage": {
                   "file": "/home/docker/config/costs_calculation_sample.json"
+                },
+                "configuration": {
+                  "name": "cost_s_car",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
                 }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-car-shortest-pgr",
-          "type": "pgr",
-          "storage": {
-            "dbConfig": "/home/docker/config/output_base.json",
-            "costColumn": "cost_m_car",
-            "rcostColumn": "reverse_cost_m_car"
-          },
-          "cost": {
-            "profile": "car",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/costs_calculation_sample.json"
-              },
-              "configuration": {
-                "name": "cost_m_car",
+              }           
+            },
+            {
+              "profile": "car",                               
+              "optimization": "shortest",  
+              "costType": "distance",                    
+              "costColumn": "cost_m_car",                  
+              "rcostColumn": "reverse_cost_m_car",
+              "compute": {
                 "storage": {
                   "file": "/home/docker/config/costs_calculation_sample.json"
+                },
+                "configuration": {
+                  "name": "cost_m_car",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
                 }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-pedestrian-fastest-pgr",
-          "type": "pgr",
-          "storage": {
-            "dbConfig": "/home/docker/config/output_base.json",
-            "costColumn": "cost_s_pedestrian",
-            "rcostColumn": "reverse_cost_s_pedestrian"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/costs_calculation_sample.json"
-              },
-              "configuration": {
-                "name": "cost_s_pedestrian",
+              }            
+            },
+            {
+              "profile": "pedestrian",                               
+              "optimization": "fastest",  
+              "costType": "time",                    
+              "costColumn": "cost_s_pedestrian",                  
+              "rcostColumn": "reverse_cost_s_pedestrian",
+              "compute": {
                 "storage": {
                   "file": "/home/docker/config/costs_calculation_sample.json"
+                },
+                "configuration": {
+                  "name": "cost_s_pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
                 }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-pedestrian-shortest-pgr",
-          "type": "pgr",
-          "storage": {
-            "dbConfig": "/home/docker/config/output_base.json",
-            "costColumn": "cost_m_pedestrian",
-            "rcostColumn": "reverse_cost_m_pedestrian"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/costs_calculation_sample.json"
-              },
-              "configuration": {
-                "name": "cost_m_pedestrian",
+              }            
+            },
+            {
+              "profile": "pedestrian",                               
+              "optimization": "shortest",  
+              "costType": "distance",                    
+              "costColumn": "cost_m_pedestrian",                  
+              "rcostColumn": "reverse_cost_m_pedestrian",
+              "compute": {
                 "storage": {
                   "file": "/home/docker/config/costs_calculation_sample.json"
+                },
+                "configuration": {
+                  "name": "cost_m_pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
                 }
-              }
+              }            
             }
-          }
+          ]
         }
       ],
       "availableOperations":[
@@ -1046,19 +1036,6 @@
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/docker/data/resources/bdtopo-pgr.resource"
-        }
-      },
-      "dirs": {
-        "dataDir":"/home/docker/data",
-        "dbConfigDir": "/home/docker/data",
-        "profileDir": "/home/docker/data",
-        "resourceDir": "/home/docker/data/resources"
-      }
     }
   }
 }
