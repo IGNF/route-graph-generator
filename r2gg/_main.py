@@ -37,19 +37,6 @@ def sql_convert(config, resource, db_configs, connection, logger):
     """
 
     logger.info("Conversion from BDD to pivot")
-    # Configuration de la bdd source
-    source_db_config = db_configs[ resource['topology']['mapping']['source']['baseId'] ]
-
-    # Configuration de la bdd de travail
-    work_db_config = db_configs[ config['workingSpace']['baseId'] ]
-
-    # Récupération de la bbox
-    bbox = [float(coord) for coord in resource["topology"]["bbox"].split(",")]
-    assert len(bbox) == 4, "bondingBox invalide"
-    xmin = bbox[0]
-    ymin = bbox[1]
-    xmax = bbox[2]
-    ymax = bbox[3]
 
     # Date de l'extraction pour la noter dans la configuration de la ressource
     extraction_date = datetime.now()
@@ -63,31 +50,69 @@ def sql_convert(config, resource, db_configs, connection, logger):
     f.write(date_time)
     f.close()
 
+    # Mesure du temps de l'ensemble des génération pivot
     st_sql_conversion = time.time()
 
-    # Lancement du script SQL de conversion source --> pivot
-    connection.autocommit = True
-    with open( resource['topology']['mapping']['storage']['file'] ) as sql_script:
-        cur = connection.cursor()
-        logger.info("Executing SQL conversion script")
-        instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
+    used_bases = []
 
-        # Exécution instruction par instruction
-        for instruction in instructions:
-            if instruction == '':
-                continue
-            logger.debug("SQL:\n{}\n".format(instruction) )
-            st_instruction = time.time()
-            cur.execute(instruction,
-                {
-                'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
-                'dbname': source_db_config.get('database'),
-                'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
-                }
-            )
-            et_instruction = time.time()
-            logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
+    # Il y a potentiellement une conversion par source indiquée dans la ressource
+    for source in resource[ 'sources' ]:
+
+        logger.info("Create source: " + source['id'])
+
+        # Les sources smartrouting n'ont pas besoin de génération mais peuvent apparaître dans certaines ressources
+        if source['type'] == 'smartrouting':
+            continue
+
+        # Plusieurs sources peuvent référencer le même mapping mais changer plus tard dans la génération
+        found_base = False
+        for ub in used_bases:
+            if ub == source['mapping']['source']['baseId']:
+                found_base = True
+        if found_base:
+            logger.info("Mapping already done, create next source...")
+            continue
+
+        # Configuration de la bdd source
+        source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
+
+        # Configuration de la bdd de travail utilisée pour ce pivot
+        work_db_config = db_configs[ source['mapping']['storage']['baseId'] ]
+        used_bases.append(source['mapping']['storage']['baseId'])
+
+        # Récupération de la bbox
+        bbox = [float(coord) for coord in source["bbox"].split(",")]
+        assert len(bbox) == 4, "bondingBox invalide"
+        xmin = bbox[0]
+        ymin = bbox[1]
+        xmax = bbox[2]
+        ymax = bbox[3]
+        logger.info("Create source on bbox: " + source["bbox"])
+        
+        # Lancement du script SQL de conversion source --> pivot
+        connection.autocommit = True
+        with open( source['mapping']['storage']['file'] ) as sql_script:
+            cur = connection.cursor()
+            logger.info("Executing SQL conversion script")
+            # todo : prendre en compte le schéma qui est dans la conf de la génération
+            instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
+
+            # Exécution instruction par instruction
+            for instruction in instructions:
+                if instruction == '':
+                    continue
+                logger.debug("SQL:\n{}\n".format(instruction) )
+                st_instruction = time.time()
+                cur.execute(instruction,
+                    {
+                    'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
+                    'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
+                    'dbname': source_db_config.get('database'),
+                    'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                    }
+                )
+                et_instruction = time.time()
+                logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
 
     connection.close()
 

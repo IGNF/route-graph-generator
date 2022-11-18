@@ -17,7 +17,7 @@ then
 else
 
   # On lance une génération à partir du fichier de configuration
-  r2gg-populate_pivot $R2GG_ARG
+  r2gg-sql2pivot $R2GG_ARG
 
   if [ $GENERATION_TYPE = "osrm" ]
   then

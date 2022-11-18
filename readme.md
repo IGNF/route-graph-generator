@@ -55,7 +55,7 @@ Ces trois processus se lancent à l'aide de trois commandes différentes, prenan
 Pour extraire les données vers la base pivot
 
 ```
-r2gg-populate_pivot config.json
+r2gg-sql2pivot config.json
 ```
 
 Pour convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`)

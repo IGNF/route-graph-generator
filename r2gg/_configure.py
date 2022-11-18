@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 import psycopg2
 
@@ -57,6 +58,9 @@ def configure():
 
     # Initialisation du logger
     logger = logging.getLogger(__name__)
+    logger.info("Log initialized")
+
+    # Todo : Créer une fonction qui vérifie la configuration
 
     # Configuration des bases de données précisées dans la config
     db_configs = { base['id']: config_from_path(base['configFile']) for base in config['bases'] if base['type'] == 'bdd' }
@@ -78,5 +82,9 @@ def configure():
     logger.info("Connecting to work database")
     connection = psycopg2.connect(connect_args)
     connection.set_client_encoding('UTF8')
+
+    # Création de l'espace de travail
+    if not os.path.exists(config['workingSpace']['directory']):
+        os.makedirs(config['workingSpace']['directory'])
 
     return config, resource, db_configs, connection, logger

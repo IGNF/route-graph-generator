@@ -3,7 +3,7 @@ from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valh
 
 __version__ = "1.1.3-DEVELOP"
 
-def populate_pivot():
+def sql2pivot():
     config, resource, db_configs, connection, logger = configure()
     sql_convert(config, resource, db_configs, connection, logger)
 
@@ -39,4 +39,4 @@ if __name__ == '__main__':
         osm_convert(config, resource, connection, logger)
         valhalla_convert(config, resource, logger)
     else:
-        raise ValueError("Wrong resource type, should be 'pgr' or osrm'")
+        raise ValueError("Wrong resource type, should be in ['pgr',osrm','valhalla','smartpgr']")

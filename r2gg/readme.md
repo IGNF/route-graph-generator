@@ -6,8 +6,8 @@ Les fonctions publiques exposées par r2gg permettent de réaliser les trois pro
 `python3 r2gg.fonction config.json`
 Elles ont en effet besoin d'un fichier de configuration (décrit [ici](../io)) pour pouvoir fonctionner.
 
-### `populate_pivot()`
-Cette fonction permet d'extraire les données vers la base pivot
+### `sql2pivot()`
+Cette fonction permet d'extraire des données SQL d'un format quelconque vers la base pivot dans le format pivot
 
 ### `pivot2pgrouting()`
 Permet de convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`)
