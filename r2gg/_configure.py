@@ -61,9 +61,12 @@ def configure():
     logger.info("Log initialized")
 
     # Todo : Créer une fonction qui vérifie la configuration
-
+    db_configs = {}
     # Configuration des bases de données précisées dans la config
-    db_configs = { base['id']: config_from_path(base['configFile']) for base in config['bases'] if base['type'] == 'bdd' }
+    for base in config['bases']:
+        if base['type'] == 'bdd':
+            db_configs[ base['id'] ] = config_from_path(base['configFile'])
+            db_configs[base['id']].update({"schema":base['schema']})
 
     # Récupération de l'objet permettant de générer la ressource
     resource = config['resource']

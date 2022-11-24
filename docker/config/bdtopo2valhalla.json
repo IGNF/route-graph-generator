@@ -287,17 +287,13 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name-pgr",
+                  "keyType": "name-valhalla",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "acces_vehicule_leger",
-                      "condition": {
-                        "type": "equal",
-                        "value": "$niv3$A péage$niv3$"
-                      }
+                      "field": "toll"
                     }
                   ]
                 }

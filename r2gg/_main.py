@@ -14,9 +14,10 @@ from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
-from r2gg._path_converter import convert_paths
-from r2gg._file_copier import copy_files_locally
+from r2gg._path_converter import convert_path
+from r2gg._file_copier import copy_file_locally
 from r2gg._valhalla_lua_builder import build_valhalla_lua
+from r2gg._osm_to_pbf import osm_to_pbf
 
 
 def sql_convert(config, resource, db_configs, connection, logger):
@@ -58,20 +59,23 @@ def sql_convert(config, resource, db_configs, connection, logger):
     # Il y a potentiellement une conversion par source indiquée dans la ressource
     for source in resource[ 'sources' ]:
 
-        logger.info("Create source: " + source['id'])
+        logger.info("Create pivot of source: " + source['id'])
 
         # Les sources smartrouting n'ont pas besoin de génération mais peuvent apparaître dans certaines ressources
         if source['type'] == 'smartrouting':
+            logger.info("Smartrouting source, no need for pivot")
             continue
 
         # Plusieurs sources peuvent référencer le même mapping mais changer plus tard dans la génération
         found_base = False
         for ub in used_bases:
-            if ub == source['mapping']['source']['baseId']:
+            if ub == source['mapping']['storage']['baseId']:
                 found_base = True
         if found_base:
             logger.info("Mapping already done, create next source...")
             continue
+        else:
+            logger.info("Mapping not done")
 
         # Configuration de la bdd source
         source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
@@ -139,30 +143,38 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     if (resource['type'] not in ['pgr', 'smartpgr']):
         raise ValueError("Wrong resource type, should be 'pgr' or 'smartpgr'")
+    
     logger.info("Conversion from pivot to PGR")
     st_pivot_to_pgr = time.time()
 
-    # Configuration et connection à la base de sortie
-    out_db_config = db_configs[ resource['topology']['storage']['baseId'] ]
-    host = out_db_config.get('host')
-    dbname = out_db_config.get('database')
-    user = out_db_config.get('user')
-    password = out_db_config.get('password')
-    port = out_db_config.get('port')
-    connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
-    logger.info("Connecting to output database")
-    connection_out = psycopg2.connect(connect_args)
+    i = 0
+    for source in resource["sources"]:
 
-    cost_calculation_files_paths = {source["cost"]["compute"]["storage"]["file"] for source in resource["sources"] if "cost" in source}
+        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+        logger.info("Source id : " + source["id"])
 
-    for cost_calculation_file_path in cost_calculation_files_paths:
-        pivot_to_pgr(resource, cost_calculation_file_path, connection, connection_out, logger)
+        # Configuration et connection à la base de sortie
+        out_db_config = db_configs[ source['storage']['base']['baseId'] ]
+        host = out_db_config.get('host')
+        dbname = out_db_config.get('database')
+        user = out_db_config.get('user')
+        password = out_db_config.get('password')
+        port = out_db_config.get('port')
+        connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
+        logger.info("Connecting to output database")
+        connection_out = psycopg2.connect(connect_args)
+
+        schema_out = out_db_config.get('schema')
+        
+        cost_calculation_files_paths = {cost["compute"]["configuration"]["storage"]["file"] for cost in source["costs"]}
+
+        for cost_calculation_file_path in cost_calculation_files_paths:
+            pivot_to_pgr(source, cost_calculation_file_path, connection, connection_out, schema_out, logger)
+        connection_out.close()
 
     connection.close()
-    connection_out.close()
     et_pivot_to_pgr = time.time()
     logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(et_pivot_to_pgr - st_pivot_to_pgr))
-    _write_resource_file(config, resource, logger)
 
 
 def osm_convert(config, resource, connection, logger):
@@ -179,11 +191,66 @@ def osm_convert(config, resource, connection, logger):
         connection à la bdd de travail
     logger: logging.Logger
     """
-    if (resource['type'] not in ['osrm', 'valhalla']):
-        raise ValueError("Wrong resource type, should be 'osrm'")
 
-    logger.info("Conversion from pivot to OSM")
-    pivot_to_osm(config, resource, connection, logger)
+    logger.info("Conversion from pivot to OSM format for a resource")
+
+    used_bases = {}
+    work_dir_config = config['workingSpace']['directory']
+
+    # On vérifie le type de la ressource 
+    if (resource['type'] not in ['osrm', 'valhalla']):
+        raise ValueError("Wrong resource type, should be in ['osrm','valhalla']")
+
+    # Les outils de conversion utilisés par Valhalla ne lisent que du osm.pbf
+    convert_osm_to_bpf = False
+    if (resource['type'] == 'valhalla'):
+        convert_osm_to_bpf = True
+
+    # Comme chaque source de la ressource peut potentiellement nécessiter un pivot différent, 
+    # On fait une boucle sur les sources et on adpate en fonction du type 
+    for source in resource['sources']:
+
+        logger.info("Create osm file of source: " + source['id'])
+
+        # Les sources smartrouting n'ont pas besoin de génération mais peuvent apparaître dans certaines ressources
+        if source['type'] == 'smartrouting':
+            logger.info("Smartrouting source, no need for osm file")
+            continue
+
+        # Plusieurs sources peuvent référencer le même mapping mais changer plus tard dans la génération
+        found_base = False
+        found_id = ''
+        for sid,sub in used_bases.items():
+            if sub == source['mapping']['storage']['baseId']:
+                found_base = True
+                found_id = sid
+
+        if found_base:
+
+            if convert_osm_to_bpf:
+                linked_file = os.path.join(work_dir_config, source['id'] + ".osm.pbf")
+                real_file = os.path.join(work_dir_config, found_id + ".osm.pbf")
+            else:
+                linked_file = os.path.join(work_dir_config, source['id'] + ".osm")
+                real_file = os.path.join(work_dir_config, found_id + ".osm")
+
+            logger.info("Mapping already done, creating a linked osm file : " + linked_file + " -> " + real_file)
+            if not os.path.islink(linked_file):
+                os.symlink(real_file, linked_file)
+            else:
+                ex_link = os.readlink(linked_file)
+                ex_link = os.path.join(os.path.dirname(linked_file), ex_link)
+                if ex_link != real_file:
+                    raise ValueError("SymLink is already pointing to another file")
+                else:
+                    logger.info("SymLink already pointing to the good file")
+            
+        else:
+            logger.info("Mapping not already done")
+            pivot_to_osm(config, source, connection, logger, convert_osm_to_bpf)
+        
+        used_bases[ source['id'] ] = source['mapping']['storage']['baseId']
+
     connection.close()
 
 def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
@@ -204,21 +271,18 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     if (resource['type'] != 'osrm'):
         raise ValueError("Wrong resource type, should be 'osrm'")
 
-    logger.info("Conversion from OSM to OSRM")
-    # osm2osrm
-    osm_file = resource['topology']['storage']['file']
+    logger.info("Conversion from OSM to OSRM for a resource")
 
     logger.info("Generating graphs for each cost...")
     cpu_count = multiprocessing.cpu_count()
-
-    # Gestion de si le fichier de topolgie attendu est en pbf
-    extension = ".osm"
-    if osm_file.split(".")[-1] == "pbf":
-        extension = ".osm.pbf"
+    work_dir_config = config['workingSpace']['directory']
 
     i = 0
     for source in resource["sources"]:
+
         logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+
+        logger.info('LUA part')
         lua_file = source["cost"]["compute"]["storage"]["file"]
 
         if build_lua_from_cost_config:
@@ -234,11 +298,25 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
                 lua_f.write(build_lua(costs_config, cost_name))
             logger.info("Finished lua building")
 
+        logger.info('Recherche du fichier OSM')
+
+        osm_file = os.path.join(work_dir_config, source['id'] + ".osm")
+        extension = ".osm"
+        if not os.path.exists(osm_file):
+            osm_pbf_file = os.path.join(work_dir_config, source['id'] + ".osm.pbf")
+            if not os.path.exists(osm_pbf_file):
+                raise ValueError("Can't find osm file")
+            else:
+                osm_file = osm_pbf_file
+                extension = ".osm.pbf"
+
+        logger.info('Fichier OSM trouvé: ' + osm_file)
+
         # Gestion des points "." dans le chemin d'accès avec ".".join()
         osrm_file = source["storage"]["file"]
         cost_dir = os.path.dirname(osrm_file)
         profile_name = osrm_file.split("/")[-1].split(".")[0]
-        tmp_osm_file = "{}/{}{}}".format(cost_dir, profile_name, extension)
+        tmp_osm_file = "{}/{}{}".format(cost_dir, profile_name, extension)
 
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
@@ -259,8 +337,6 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
         subprocess_execution(rm_args, logger)
         i += 1
 
-    _write_resource_file(config, resource, logger)
-
 
 def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True):
     """
@@ -280,34 +356,47 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
     if (resource['type'] != 'valhalla'):
         raise ValueError("Wrong resource type, should be 'valhalla'")
 
-    logger.info("Conversion from OSM PBF to VALHALLA")
-    # osm2valhalla
-    osm_file = resource['topology']['storage']['file']
-    if osm_file.split(".")[-1] != "pbf":
-        raise ValueError("Wrong topology type, should be a .pbf file")
+    logger.info("Conversion from OSM PBF to VALHALLA for a resource")
 
     logger.info("Generating graphs for each set of tiles")
 
-    # Gestion du cas (fictif pour l'instant) où l'on a plusieurs sets de tiles valhalla
-    distinct_tile_dirs = []
-    distinct_sources = []
-    for source in resource["sources"]:
-        if source["storage"]["dir"] not in distinct_tile_dirs:
-            distinct_tile_dirs.append(source["storage"]["dir"])
-            distinct_sources.append(source)
+    work_dir_config = config['workingSpace']['directory']
 
-    for source in distinct_sources:
-        lua_file = source["cost"]["compute"]["storage"]["file"]
+    i = 0
+    for source in resource["sources"]:
+        
+        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+
+        logger.info('Looking for OSM PBF file')
+
+        osm_file = os.path.join(work_dir_config, source['id'] + ".osm.pbf")
+        extension = ".osm.pbf"
+        if not os.path.exists(osm_file):
+            # On gère le cas où une génération a déjà été lancée pour du OSRM donc en .osm et pas forcément pbf
+            osm_tmp_file = os.path.join(work_dir_config, source['id'] + ".osm")
+            if not os.path.exists(osm_tmp_file):
+                raise ValueError("Can't find osm file")
+            else:
+                logger.info("OSM file found, conversion to pbf")
+                osm_to_pbf(osm_tmp_file, osm_file, logger)
+
+        logger.info('OSM PBF file found: ' + osm_file)
+
+        # Todo : modifier toute cette partie LUA
+        # actuellement, on génère un seul LUA pour tous les coûts possibles (car/fastest, car/shortest, pedestrian/shortest)
+        # Mais il serait bien de générer le LUA avec les coûts qui sont dans costs uniquement
+        logger.info('LUA part')
+
+        lua_file = source["costs"][0]["compute"]["storage"]["file"]
 
         if build_lua_from_cost_config:
             logger.info("Building lua profile")
-            config_file = source["cost"]["compute"]["configuration"]["storage"]["file"]
+            config_file = source["costs"][0]["compute"]["configuration"]["storage"]["file"]
             costs_config = config_from_path(config_file)
 
             with open(lua_file, "w") as lua_f:
                 lua_f.write(build_valhalla_lua(costs_config))
             logger.info("Finished lua building")
-
 
         # Définition et exécution des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
@@ -319,11 +408,11 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
             "--mjolnir-tile-extract", source["storage"]["tar"]]
         subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
-        time.sleep(0.1)
+        time.sleep(1)
         # Ajout du graph custom dans la config valhalla
         with open(source["storage"]["config"], "r") as valhalla_config:
             config_dict = json.load(valhalla_config)
-            config_dict["mjolnir"]["graph_lua_name"] = source["cost"]["compute"]["storage"]["file"]
+            config_dict["mjolnir"]["graph_lua_name"] = source["costs"][0]["compute"]["storage"]["file"]
             # Ajout de l'autorisation à exclure les ponts/tunnels/péages
             config_dict["service_limits"]["allow_hard_exclusions"] = True
 
@@ -339,10 +428,8 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
         final_command = time.time()
         logger.info("Valhalla tiles built. Elapsed time : %s seconds." %(final_command - start_command))
 
-    _write_resource_file(config, resource, logger)
 
-
-def _write_resource_file(config, resource, logger, convert_file_paths = True):
+def write_road2_config(config, resource, logger, convert_file_paths = True):
     """
     Fonction pour l'écriture du fichier de ressource
 
@@ -354,8 +441,53 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True):
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     logger: logging.Logger
     """
-    filename = config["outputs"]["configuration"]["storage"]["file"]
-    logger.info("Writing resource file: " + filename)
+
+    logger.info("Writing sources")
+
+    os.makedirs(config["outputs"]["configurations"]["sources"]["storage"]["directory"] or '.', exist_ok=True)
+
+    source_ids = []
+
+    for source in resource["sources"]:
+
+        source_file = os.path.join(config["outputs"]["configurations"]["sources"]["storage"]["directory"], source['id'] + ".source")
+        logger.info("Writing source file : " + source_file)
+
+        # On modifie la source en fonction de son type
+        if source['type'] == 'smartrouting':
+            logger.info("Smartrouting source, no need for modifications")
+        elif source['type'] == 'osrm':
+            source.pop("mapping", None)
+            source["cost"].pop("compute", None)
+        elif source['type'] == "valhalla":
+            source.pop("mapping", None)
+            for cost in source["costs"]:
+                cost.pop("compute")
+        elif source['type'] == "pgr":
+            source.pop("mapping", None)
+            bid_tmp = source["storage"]["base"]["baseId"]
+            for base in config["bases"]:
+                if base["id"] == bid_tmp:
+                    db_file_out = convert_path(base["configFile"], config["outputs"]["configurations"]["databases"]["storage"]["directory"])
+                    copy_file_locally(base["configFile"], db_file_out)
+                    source["storage"]["base"].update({"dbConfig":db_file_out})
+                    source["storage"]["base"].update({"schema":base["schema"]})
+            source["storage"]["base"].pop("baseId", None)
+            for cost in source["costs"]:
+                cost.pop("compute")
+        else:
+            continue
+
+        # Écriture du fichier
+        with open(source_file, "w") as source_file:
+            json_string = json.dumps(source, indent=2)
+            source_file.write(json_string)
+
+        source_ids.append(source['id'])
+    
+    # On passe à la ressource
+    resource_file = os.path.join(config["outputs"]["configurations"]["resource"]["storage"]["directory"], resource['id'] + ".resource")
+    logger.info("Writing resource file: " + resource_file)
 
     # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
@@ -365,22 +497,13 @@ def _write_resource_file(config, resource, logger, convert_file_paths = True):
     logger.info("extraction date to add in resource (from "+ date_file +"): " + extraction_date)
     f.close()
 
-    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
-
-    if convert_file_paths and config["outputs"].get("dirs", None) is not None:
-        in_paths, out_paths = convert_paths(config, resource, config["outputs"]["dirs"])
-
-    resource["topology"].pop("mapping", None)
-    resource["topology"]["storage"].pop("baseId", None)
-    for source in resource["sources"]:
-        source["storage"].pop("dbConfig", None)
-        source["storage"].pop("dir", None)
-
+    # On fait le dossier s'il n'existe pas
+    os.makedirs(config["outputs"]["configurations"]["resource"]["storage"]["directory"] or '.', exist_ok=True)
+    # On modifie l'objet resource
+    resource['sources'] = source_ids
     resource["resourceVersion"] = extraction_date
 
     final_resource = {"resource": resource}
-    with open(filename, "w") as resource_file:
+    with open(resource_file, "w") as resource_file:
         json_string = json.dumps(final_resource, indent=2)
         resource_file.write(json_string)
-
-    copy_files_locally(in_paths, out_paths)

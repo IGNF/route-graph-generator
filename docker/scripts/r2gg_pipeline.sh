@@ -32,6 +32,8 @@ else
     r2gg-osm2valhalla $R2GG_ARG
   fi
 
+  r2gg-road2config $R2GG_ARG
+
 fi
 
 

@@ -9,7 +9,8 @@ setup (
                 'r2gg-pivot2pgrouting=r2gg:pivot2pgrouting',
                 'r2gg-pivot2osm=r2gg:pivot2osm',
                 'r2gg-osm2osrm=r2gg:osm2osrm',
-                'r2gg-osm2valhalla=r2gg:osm2valhalla'
+                'r2gg-osm2valhalla=r2gg:osm2valhalla',
+                'r2gg-road2config=r2gg:road2config'
             ]
     }
 )

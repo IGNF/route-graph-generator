@@ -1,5 +1,5 @@
 from r2gg._configure import configure
-from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valhalla_convert
+from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valhalla_convert, write_road2_config
 
 __version__ = "1.1.3-DEVELOP"
 
@@ -23,6 +23,9 @@ def osm2valhalla():
     config, resource, _, _, logger = configure()
     valhalla_convert(config, resource, logger)
 
+def road2config():
+    config, resource, _, _, logger = configure()
+    write_road2_config(config, resource, logger)
 
 if __name__ == '__main__':
     config, resource, db_configs, connection, logger = configure()
@@ -36,7 +39,8 @@ if __name__ == '__main__':
         osrm_convert(config, resource, logger)
     elif (resource['type'] == 'valhalla'):
         config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, connection, logger)
+        osm_convert(config, resource, connection, logger, True)
         valhalla_convert(config, resource, logger)
     else:
         raise ValueError("Wrong resource type, should be in ['pgr',osrm','valhalla','smartpgr']")
+    write_road2_config(config, resource, logger)

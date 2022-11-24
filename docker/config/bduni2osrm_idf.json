@@ -76,7 +76,7 @@
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
+                  "file": "/home/docker/config/costs_calculation_sample.json"
                 }
               }
             }
@@ -110,75 +110,7 @@
               "configuration": {
                 "name": "cost_m_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bduni-pedestrian-fastest",
-          "type": "osrm",
-          "description": "Graphe BDuni au format OSRM France entière",
-          "projection": "EPSG:4326",
-          "bbox": "1.7,48.4,3.3,49.1",
-          "mapping": {
-            "source": {
-              "baseId": "base_bduni"
-            },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
-            }
-          },
-          "storage": {
-            "file": "/home/docker/data/bduni-pedestrian-fastest-idf/bduni-pedestrian-fastest-idf.osrm"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/bduni-pedestrian-fastest.lua"
-              },
-              "configuration": {
-                "name": "cost_s_pedestrian",
-                "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bduni-pedestrian-shortest",
-          "type": "osrm",
-          "description": "Graphe BDuni au format OSRM France entière",
-          "projection": "EPSG:4326",
-          "bbox": "1.7,48.4,3.3,49.1",
-          "mapping": {
-            "source": {
-              "baseId": "base_bduni"
-            },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
-            }
-          },
-          "storage": {
-            "file": "/home/docker/data/bduni-pedestrian-shortest-idf/bduni-pedestrian-shortest-idf.osrm"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/bduni-pedestrian-shortest.lua"
-              },
-              "configuration": {
-                "name": "cost_m_pedestrian",
-                "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
+                  "file": "/home/docker/config/costs_calculation_sample.json"
                 }
               }
             }
@@ -213,8 +145,7 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car",
-                "pedestrian"
+                "car"
               ]
             },
             {

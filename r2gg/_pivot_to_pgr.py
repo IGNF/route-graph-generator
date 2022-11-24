@@ -8,24 +8,25 @@ from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connection_out, logger):
+def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection_out, schema, logger):
     """
     Fonction de conversion depuis la bdd pivot vers la base pgr
 
     Parameters
     ----------
-    resource: dict
+    source: dict
     cost_calculation_file_path: str
         chemin vers le fichier json de configuration des coûts
     connection_work: psycopg2.connection
         connection à la bdd de travail
     connection_out: psycopg2.connection
         connection à la bdd pgrouting de sortie
+    schema: str
+        nom du schéma dans la base de sortie
     logger: logging.Logger
     """
 
     cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
-    schema = resource["topology"]["storage"]["base"]["schema"]
     ways_table_name = schema + '.ways'
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
@@ -262,7 +263,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     output_columns_names = [column.split(' ')[-1] for column in attribute_columns]
 
     # Ecriture des ways
-    sql_query = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], in_columns)
+    sql_query = getQueryByTableAndBoundingBox('edges', source['bbox'], in_columns)
     logger.info("SQL: {}".format(sql_query))
     st_execute = time.time()
     cursor_in.execute(sql_query)
@@ -368,7 +369,7 @@ def pivot_to_pgr(resource, cost_calculation_file_path, connection_work, connecti
     logger.info("Cleaning isolated clusters of less than 10 edges...")
     cursor_isolated = connection_out.cursor()
 
-    profile_names = set([ source['cost']['profile'] for source in resource["sources"] if "cost" in source])
+    profile_names = set([ cost['profile'] for cost in source["costs"]])
     st_execute = time.time()
 
     for profile_name in profile_names:
