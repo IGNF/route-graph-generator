@@ -1,7 +1,11 @@
-# 1.1.3
+# 1.2.0
 
 CHANGE :
 - suppression de la partie ssh
+- modification des fichiers de configuration des générations
+- renommage de r2gg-populate_pivot en r2gg-sql2pivot
+- Ajout d'une commande pour générer la configuration de Road2 r2gg-road2config
+- Gestion interne différente pour prendre en compte la nouvelle configuration de Road2 (gestion de sources et ressources différente)
 
 # 1.1.2
 

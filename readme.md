@@ -4,7 +4,7 @@
 
 Route Graph Generator (r2gg) est un script Python qui permet la génération de graphes pour des moteurs de calcul d'itinéraire. Il a été développé pour générer les données directement utilisable par [Road2](https://github.com/IGNF/road2). 
 
-Actuellement, il y a deux formats de sortie : OSRM et pgRouting. 
+Actuellement, il y a trois formats de sortie : OSRM, pgRouting et Valhalla. 
 
 La conversion se fait via les fonctions de la bibliothèque r2gg développée dans ce but. Une documentation plus détaillée de r2gg est consultable [ici](r2gg).
 
@@ -44,13 +44,15 @@ pip3 install --user -e .
 
 Pour pouvoir lancer les scripts de génération, il faut définir une configuration (au format JSON) par ressource à générer. Ce fichier de configuration fait références à d'autres fichiers de configuration : pour la gestion des logs, la gestion des connexions aux bases de données, et pour le calcul des coûts.
 Des exemples de tous ces fichiers sont présents dans le dépôt dans le dossier `io`.
-La documentation de ces fichiers de configuration est consultable [ici](io).
+La documentation de ces fichiers de configuration est consultable [ici](io). 
+
+Un exemple de ces fichier est disponible dans la partie [docker](./docker/config/). 
 
 ### Exécution
 
-Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers une base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`.
+Les scripts de génération sont divisés en trois processus distincts : l'extraction des données d'une base de données vers une base de données dite "pivot", et, en fonction de la ressource, la conversion depuis la base "pivot" vers une base pgRouting, ou vers des fichiers `.osrm`, ou encore vers des fichiers `valhalla`.
 
-Ces trois processus se lancent à l'aide de trois commandes différentes, prenant toutes le même fichier de configuration.
+Ces trois processus se lancent à l'aide de commandes différentes, prenant toutes le même fichier de configuration.
 
 Pour extraire les données vers la base pivot
 
@@ -69,6 +71,19 @@ Pour convertir les données au format osrm (le type de ressource dans config.jso
 ```
 r2gg-pivot2osm config.json
 r2gg-osm2osrm config.json
+```
+
+Pour convertir les données au format valhalla (le type de ressource dans config.json doit être `valhalla`)
+
+```
+r2gg-pivot2osm config.json
+r2gg-osm2valhalla config.json
+```
+
+Enfin, si on souhaite générer la configuration pour Road2, il y a une dernière commande
+
+```
+r2gg-road2config config.json
 ```
 
 ## Version
