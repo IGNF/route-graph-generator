@@ -11,12 +11,13 @@ then
   osrm-extract data-osm-latest.osm.pbf -p /usr/share/osrm/profiles/car.lua
   osrm-contract data-osm-latest.osrm
   cp -v /home/docker/config/data-osm.resource /home/docker/data/resources/
+  cp -v /home/docker/config/data-osm.source /home/docker/data/sources/
 
 ## S'il y a une configuration, alors on donne cette configuration à r2gg qui se chargera de l'analyser et d'agir en conséquence
 else
 
   # On lance une génération à partir du fichier de configuration
-  r2gg-populate_pivot $R2GG_ARG
+  r2gg-sql2pivot $R2GG_ARG
 
   if [ $GENERATION_TYPE = "osrm" ]
   then
@@ -30,6 +31,8 @@ else
     r2gg-pivot2osm $R2GG_ARG
     r2gg-osm2valhalla $R2GG_ARG
   fi
+
+  r2gg-road2config $R2GG_ARG
 
 fi
 

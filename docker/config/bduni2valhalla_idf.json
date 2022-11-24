@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2valhalla_idf",
+      "id": "bduni2valhalla-idf",
       "logs": {
         "configFile": "/home/docker/config/sample_log_config.json"
       },
@@ -15,67 +15,112 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       }
     ],
     "workingSpace": {
       "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
-    "resource": {
-      "id": "bduni-valhalla-idf",
-      "type": "valhalla",
-      "description": "Données BDUNI v2 sur l'Île-de-France.",
-      "topology": {
-        "id": "osm-pbf-bduni",
-        "type":"osm",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "file": "/home/docker/data/bdtopo.osm.pbf"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "1.7,48.4,3.3,49.1",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
+    "outputs": {
+      "configurations": {
+        "resource": {
           "storage": {
-            "file": "/home/docker/sql/bduni_convert.sql"
+            "directory": "/home/docker/data/resources/"
           }
         },
-        "defaultAttributes": [
-          "name"
-        ]
-      },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
+    },
+    "resource": {
+      "id": "bduni-idf-valhalla",
+      "type": "valhalla",
+      "description": "Données BDUNI v2.",
       "sources": [
         {
-          "id": "bdtopo-auto-valhalla",
+          "id": "bduni-idf-valhalla",
           "type": "valhalla",
-          "storage": {
-            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla.json"
+          "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
+          "projection": "EPSG:4326",
+          "bbox": "1.7,48.4,3.3,49.1",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
           },
-          "cost": {
-            "profile": "car",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "auto",
+          "storage": {
+            "tar": "/home/docker/data/bduni-idf-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bduni-idf-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla-idf.json"
+          },
+          "costs": [
+            {
+              "profile": "car",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "auto",
+              "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
+                  "file": "/home/docker/config/graph_bduni.lua"
+                },
+                "configuration": {
+                  "costing": "auto",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "car",
+              "optimization": "shortest",
+              "costType": "time",
+              "costing": "auto_shorter",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bduni.lua"
+                },
+                "configuration": {
+                  "costing": "auto_shorter",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "shortest",
+              "costType": "time",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bduni.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation_sample.json"
+                  }
                 }
               }
             }
-          }
+          ]
         }
       ],
       "availableOperations":[
@@ -85,7 +130,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-valhalla-idf"
+                "bduni-idf-valhalla"
               ]
             },
             {
@@ -106,14 +151,16 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car"
+                "car",
+                "pedestrian"
               ]
             },
             {
               "id": "optimization",
               "defaultValueContent": "fastest",
               "values": [
-                "fastest"
+                "fastest",
+                "shortest"
               ]
             },
             {
@@ -195,7 +242,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-valhalla-idf"
+                "bduni-idf-valhalla"
               ]
             },
             {
@@ -209,7 +256,8 @@
               "id": "costType",
               "defaultValueContent": "time",
               "values": [
-                "time"
+                "time",
+                "distance"
               ]
             },
             {
@@ -223,7 +271,8 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car"
+                "car",
+                "pedestrian"
               ]
             },
             {
@@ -238,17 +287,13 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name-pgr",
+                  "keyType": "name-valhalla",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "acces_vehicule_leger",
-                      "condition": {
-                        "type": "equal",
-                        "value": "$niv3$A péage$niv3$"
-                      }
+                      "field": "toll"
                     }
                   ]
                 }
@@ -295,18 +340,6 @@
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/docker/data/resources/bduni-valhalla-idf.resource"
-        }
-      },
-      "dirs": {
-        "dataDir": "/home/docker/data/",
-        "profileDir": "/home/docker/data/",
-        "resourceDir": "/home/docker/data/resources"
-      }
     }
   }
 }

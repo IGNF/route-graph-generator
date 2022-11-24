@@ -15,115 +15,112 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       }
     ],
     "workingSpace": {
       "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
+    "outputs": {
+      "configurations": {
+        "resource": {
+          "storage": {
+            "directory": "/home/docker/data/resources/"
+          }
+        },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
+    },
     "resource": {
       "id": "bdtopo-valhalla",
       "type": "valhalla",
       "description": "Données BDUNI v2.",
-      "topology": {
-        "id": "osm-pbf-bduni",
-        "type":"osm",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "file": "/home/docker/data/bdtopo.osm.pbf"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "-90,-180,90,180",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
-          "storage": {
-            "file": "/home/docker/sql/bduni_convert.sql"
-          }
-        },
-        "defaultAttributes": [
-          "name"
-        ]
-      },
       "sources": [
         {
-          "id": "bdtopo-auto-valhalla",
+          "id": "bduni-valhalla",
           "type": "valhalla",
+          "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
+          "projection": "EPSG:4326",
+          "bbox": "-180,-90,180,90",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
             "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
             "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
             "config": "/home/docker/data/valhalla.json"
           },
-          "cost": {
-            "profile": "car",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "auto",
+          "costs": [
+            {
+              "profile": "car",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "auto",
+              "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "auto",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "car",
+              "optimization": "shortest",
+              "costType": "time",
+              "costing": "auto_shorter",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "auto_shorter",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "shortest",
+              "costType": "time",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
                 }
               }
             }
-          }
-        },
-        {
-          "id": "bdtopo-auto-shorter-valhalla",
-          "type": "valhalla",
-          "storage": {
-            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla.json"
-          },
-          "cost": {
-            "profile": "car",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "auto_shorter",
-                "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-pedestrian-valhalla",
-          "type": "valhalla",
-          "storage": {
-            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla.json"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "/home/docker/config/graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "pedestrian",
-                "storage": {
-                  "file": "/home/docker/config/costs_calculation.json"
-                }
-              }
-            }
-          }
+          ]
         }
       ],
       "availableOperations":[
@@ -245,7 +242,7 @@
             {
               "id": "resource",
               "values": [
-                "bdtopo-pgr"
+                "bdtopo-valhalla"
               ]
             },
             {
@@ -290,17 +287,13 @@
               "id": "constraints",
               "values": [
                 {
-                  "keyType": "name-pgr",
+                  "keyType": "name-valhalla",
                   "key": "wayType",
                   "availableConstraintType": ["banned"],
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "acces_vehicule_leger",
-                      "condition": {
-                        "type": "equal",
-                        "value": "$niv3$A péage$niv3$"
-                      }
+                      "field": "toll"
                     }
                   ]
                 }
@@ -347,18 +340,6 @@
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/docker/data/resources/bdtopo-valhalla.resource"
-        }
-      },
-      "dirs": {
-        "dataDir": "/home/docker/data/",
-        "profileDir": "/home/docker/data/",
-        "resourceDir": "/home/docker/data/resources"
-      }
     }
   }
 }

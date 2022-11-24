@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2osrm",
+      "id": "bduni2osrm-idf",
       "logs": {
         "configFile": "/home/docker/config/sample_log_config.json"
       },
@@ -15,56 +15,63 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       }
     ],
     "workingSpace": {
-      "directory": "/var/tmp/",
+      "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
+    },
+    "outputs": {
+      "configurations": {
+        "resource": {
+          "storage": {
+            "directory": "/home/docker/data/resources/"
+          }
+        },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
     },
     "resource": {
       "id": "bduni-idf-osrm",
       "type": "osrm",
       "description": "Données BDUNI v2.",
-      "topology": {
-        "id": "osm-bduni",
-        "type":"osm",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "file": "/home/docker/data/bduni-idf.osm"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "1.7,48.4,3.3,49.1",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
-          "storage": {
-            "file": "/home/docker/sql/bduni_convert.sql"
-          }
-        },
-        "defaultAttributes": [
-          "name"
-        ]
-      },
       "sources": [
         {
-          "id": "bduni-idf-car-fastest",
+          "id": "bduni-car-fastest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "1.7,48.4,3.3,49.1",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-fastest/bduni-idf-car-fastest.osrm"
+            "file": "/home/docker/data/bduni-car-fastest-idf/bduni-car-fastest-idf.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "fastest",
             "compute": {
               "storage": {
-                "file": "/home/docker/config/bduniv2_avec_sens_vitesse_fixe.lua"
+                "file": "/home/docker/config/bduni-car-fastest.lua"
               },
               "configuration": {
                 "name": "cost_s_car",
@@ -76,17 +83,29 @@
           }
         },
         {
-          "id": "bduni-idf-car-shortest",
+          "id": "bduni-car-shortest",
           "type": "osrm",
+          "description": "Graphe BDuni au format OSRM France entière",
+          "projection": "EPSG:4326",
+          "bbox": "1.7,48.4,3.3,49.1",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "storage": {
+              "file": "/home/docker/sql/bduni_convert.sql",
+              "baseId": "base_pivot"
+            }
+          },
           "storage": {
-            "file": "/home/docker/data/bduni-idf-car-shortest/bduni-idf-car-shortest.osrm"
+            "file": "/home/docker/data/bduni-car-shortest-idf/bduni-car-shortest-idf.osrm"
           },
           "cost": {
             "profile": "car",
             "optimization": "shortest",
             "compute": {
               "storage": {
-                "file": "/home/docker/config/bduniv2_distance.lua"
+                "file": "/home/docker/config/bduni-car-shortest.lua"
               },
               "configuration": {
                 "name": "cost_m_car",
@@ -126,8 +145,7 @@
               "id": "profile",
               "defaultValueContent": "car",
               "values": [
-                "car",
-                "pedestrian"
+                "car"
               ]
             },
             {
@@ -231,7 +249,7 @@
             {
               "id": "coordinates",
               "values": {
-                "bbox": "-90,-180,90,180",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -254,18 +272,6 @@
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/docker/data/resources/bduni_idf_osrm.resource"
-        }
-      },
-      "dirs": {
-        "dataDir": "/home/docker/data/",
-        "profileDir": "/home/docker/data/",
-        "resourceDir": "/home/docker/data/resources"
-      }
     }
   }
 }

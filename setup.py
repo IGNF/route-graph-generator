@@ -5,11 +5,12 @@ setup (
     version = '1.1.3-DEVELOP',
     entry_points = {
             'console_scripts': [
-                'r2gg-populate_pivot=r2gg:populate_pivot',
+                'r2gg-sql2pivot=r2gg:sql2pivot',
                 'r2gg-pivot2pgrouting=r2gg:pivot2pgrouting',
                 'r2gg-pivot2osm=r2gg:pivot2osm',
                 'r2gg-osm2osrm=r2gg:osm2osrm',
-                'r2gg-osm2valhalla=r2gg:osm2valhalla'
+                'r2gg-osm2valhalla=r2gg:osm2valhalla',
+                'r2gg-road2config=r2gg:road2config'
             ]
     }
 )

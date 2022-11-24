@@ -10,7 +10,7 @@ from r2gg._sql_building import getQueryByTableAndBoundingBox
 from r2gg._osm_to_pbf import osm_to_pbf
 
 
-def pivot_to_osm(config, resource, connection, logger):
+def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
     """
     Fonction de conversion depuis la bdd pivot vers le fichier osm puis pbf le cas échéant
 
@@ -18,11 +18,14 @@ def pivot_to_osm(config, resource, connection, logger):
     ----------
     config: dict
         dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
-    resource: dict
+    source: dict
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
     """
+
+    logger.info("Convert pivot to OSM format for a source")
+
     # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
     date_file = os.path.join(work_dir_config, "r2gg.date")
@@ -45,22 +48,18 @@ def pivot_to_osm(config, resource, connection, logger):
     logger.info("Starting conversion from pivot to OSM")
     start_time = time.time()
 
-    filename = resource['topology']['storage']['file']
-    # Gestion de si le fichier de topolgie attendu est en pbf
-    output_is_pbf = False
-    if filename.split(".")[-1] == "pbf":
-        output_is_pbf = True
-        filename = filename[:-4]
+    filename = os.path.join(work_dir_config, source['id'] + ".osm")
+    logger.info("OSM file to write : " + filename)
 
     os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
     try:
         with etree.xmlfile(filename, encoding='utf-8', close=True) as xf:
             xf.write_declaration()
-            attribs = {"version": "0.6", "generator": "r2gg 0.0.1"}
+            attribs = {"version": "0.6", "generator": "r2gg"}
             with xf.element("osm", attribs):
 
                 # Ecriture des nodes
-                sql_query = getQueryByTableAndBoundingBox('nodes', resource['topology']['bbox'])
+                sql_query = getQueryByTableAndBoundingBox('nodes', source['bbox'])
                 logger.info("SQL: {}".format(sql_query))
                 st_execute = time.time()
                 cursor.execute(sql_query)
@@ -81,7 +80,7 @@ def pivot_to_osm(config, resource, connection, logger):
                 logger.info("Writing nodes ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
                 # Ecriture des ways
-                sql_query2 = getQueryByTableAndBoundingBox('edges', resource['topology']['bbox'], ['*', 'inter_nodes(geom) as internodes'])
+                sql_query2 = getQueryByTableAndBoundingBox('edges', source['bbox'], ['*', 'inter_nodes(geom) as internodes'])
                 logger.info("SQL: {}".format(sql_query2))
                 st_execute = time.time()
                 cursor.execute(sql_query2)
@@ -140,6 +139,6 @@ def pivot_to_osm(config, resource, connection, logger):
     end_time = time.time()
     logger.info("Conversion from pivot to OSM ended. Elapsed time : %s seconds." %(end_time - start_time))
 
-    # osm2pbf le cas échéant
+    # osm2pbf : Gestion du format osm.pbf
     if output_is_pbf:
-        osm_to_pbf(filename, resource['topology']['storage']['file'], logger)
+        osm_to_pbf(filename, filename+'.pbf', logger)

@@ -1,0 +1,14 @@
+{
+    "id": "data-osm-car-fastest",
+    "type": "osrm",
+    "description":"Données OSM au format OSRM utilisable par Road2", 
+    "projection": "EPSG:4326",
+    "bbox": "-180,-90,180,90",
+    "storage": {
+        "file": "/home/docker/data/data-osm-latest/data-osm-latest.osrm"
+    },
+    "cost": {
+        "profile": "car",
+        "optimization": "fastest"
+    }
+}
