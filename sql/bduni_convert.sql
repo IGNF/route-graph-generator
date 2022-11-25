@@ -161,7 +161,9 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       END) as vitesse_moyenne_vl,
 
       -- Pour l'attribut name
+      -- TODO: nom_collaboratif_gauche
       t.nom_1_gauche as nom_1_gauche,
+      -- TODO: nom_collaboratif_droite
       t.nom_1_droite as nom_1_droite,
       t.cpx_numero as cpx_numero,
       t.cpx_toponyme_route_nommee as cpx_toponyme,
@@ -179,6 +181,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.nombre_de_voies as nombre_de_voies,
       t.insee_commune_gauche as insee_commune_gauche,
       t.insee_commune_droite as insee_commune_droite,
+      -- TODO: remove
       t.bande_cyclable as bande_cyclable,
       t.reserve_aux_bus as reserve_aux_bus,
       t.urbain as urbain,
