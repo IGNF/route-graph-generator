@@ -10,6 +10,8 @@ then
   wget -O data-osm-latest.osm.pbf download.geofabrik.de/europe/france/corse-latest.osm.pbf
   osrm-extract data-osm-latest.osm.pbf -p /usr/share/osrm/profiles/car.lua
   osrm-contract data-osm-latest.osrm
+  mkdir -p /home/docker/data/resources/
+  mkdir -p /home/docker/data/sources/
   cp -v /home/docker/config/data-osm.resource /home/docker/data/resources/
   cp -v /home/docker/config/data-osm.source /home/docker/data/sources/
 
@@ -23,7 +25,7 @@ else
   then
     r2gg-pivot2osm $R2GG_ARG
     r2gg-osm2osrm $R2GG_ARG
-  elif [ $GENERATION_TYPE = "pgr" ]
+  elif [ $GENERATION_TYPE = "pgr" ] || [ $GENERATION_TYPE = "smartpgr" ]
   then
     r2gg-pivot2pgrouting $R2GG_ARG
   elif [ $GENERATION_TYPE = "valhalla" ]

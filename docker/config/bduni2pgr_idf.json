@@ -737,7 +737,7 @@
               "id": "costValue",
               "values": {
                 "min": 100,
-                "max": 50000
+                "max": 20000
               }
             },
             {
