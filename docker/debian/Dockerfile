@@ -9,7 +9,7 @@ RUN apt update && apt install -y wget git g++ cmake libboost-dev libboost-filesy
 
 ### Installation d'OSRM
 WORKDIR /home/osrm/
-RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.25.0.tar.gz && tar -xzf v5.25.0.tar.gz && cd osrm-backend-5.25.0 && \
+RUN wget https://github.com/Project-OSRM/osrm-backend/archive/v5.26.0.tar.gz && tar -xzf v5.26.0.tar.gz && cd osrm-backend-5.26.0 && \
     mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . && cmake --build . --target package
 
 ### Installation de Valhalla
@@ -51,7 +51,7 @@ RUN apt-get update && \
 RUN apt-get install -y git libcurl4-openssl-dev libzmq3-dev libczmq-dev
 
 ### Installation d'OSRM
-COPY --from=build /home/osrm/osrm-backend-5.25.0/build/OSRM-0.1.1-Linux.tar.gz ./
+COPY --from=build /home/osrm/osrm-backend-5.26.0/build/OSRM-0.1.1-Linux.tar.gz ./
 RUN tar -xzvf OSRM-0.1.1-Linux.tar.gz && cd OSRM-0.1.1-Linux && cp -r bin/* /usr/bin/ && cp -r lib/* /usr/lib/ && cp -r include/* /usr/include/ && cp -r share/* /usr/share/
 
 ## Installation prime-server
