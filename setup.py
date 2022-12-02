@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup (
     name = 'r2gg',
-    version = '1.2.1-DEVELOP',
+    version = '1.2.1',
     entry_points = {
             'console_scripts': [
                 'r2gg-sql2pivot=r2gg:sql2pivot',

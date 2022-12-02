@@ -1,7 +1,7 @@
 from r2gg._configure import configure
 from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valhalla_convert, write_road2_config
 
-__version__ = "1.2.1-DEVELOP"
+__version__ = "1.2.1"
 
 def sql2pivot():
     config, resource, db_configs, connection, logger = configure()

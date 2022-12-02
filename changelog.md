@@ -1,3 +1,8 @@
+# 1.2.1
+
+UPDATE
+- Passage à OSRM 5.26.0
+
 # 1.2.0
 
 CHANGE :
