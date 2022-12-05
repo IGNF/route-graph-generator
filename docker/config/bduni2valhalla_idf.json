@@ -89,7 +89,7 @@
             {
               "profile": "car",
               "optimization": "shortest",
-              "costType": "time",
+              "costType": "distance",
               "costing": "auto_shorter",
               "compute": {
                 "storage": {
