@@ -1,3 +1,8 @@
+# 1.2.3
+
+DEPS:
+- Utilisation d'un fork de Valhalla pour avoir plus d'options (en attente de merge sur le projet initial)
+
 # 1.2.1
 
 UPDATE
