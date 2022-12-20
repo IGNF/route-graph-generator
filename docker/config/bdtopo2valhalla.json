@@ -229,7 +229,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "ponts",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
@@ -294,7 +302,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "ponts",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
