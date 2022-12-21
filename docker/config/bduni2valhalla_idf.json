@@ -58,9 +58,8 @@
             "source": {
               "baseId": "base_bduni"
             },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
             }
           },
           "storage": {

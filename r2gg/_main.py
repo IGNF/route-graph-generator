@@ -69,7 +69,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
         # Plusieurs sources peuvent référencer le même mapping mais changer plus tard dans la génération
         found_base = False
         for ub in used_bases:
-            if ub == source['mapping']['storage']['baseId']:
+            if ub == source['mapping']['source']['baseId']:
                 found_base = True
         if found_base:
             logger.info("Mapping already done, create next source...")
@@ -81,8 +81,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
         source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
 
         # Configuration de la bdd de travail utilisée pour ce pivot
-        work_db_config = db_configs[ source['mapping']['storage']['baseId'] ]
-        used_bases.append(source['mapping']['storage']['baseId'])
+        work_db_config = db_configs[ source['mapping']['source']['baseId'] ]
+        used_bases.append(source['mapping']['source']['baseId'])
 
         # Récupération de la bbox
         bbox = [float(coord) for coord in source["bbox"].split(",")]
@@ -92,10 +92,10 @@ def sql_convert(config, resource, db_configs, connection, logger):
         xmax = bbox[2]
         ymax = bbox[3]
         logger.info("Create source on bbox: " + source["bbox"])
-        
+
         # Lancement du script SQL de conversion source --> pivot
         connection.autocommit = True
-        with open( source['mapping']['storage']['file'] ) as sql_script:
+        with open( source['mapping']['conversion']['file'] ) as sql_script:
             cur = connection.cursor()
             logger.info("Executing SQL conversion script")
             # todo : prendre en compte le schéma qui est dans la conf de la génération
@@ -143,7 +143,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
     if (resource['type'] not in ['pgr', 'smartpgr']):
         raise ValueError("Wrong resource type, should be 'pgr' or 'smartpgr'")
-    
+
     logger.info("Conversion from pivot to PGR")
     st_pivot_to_pgr = time.time()
 
@@ -165,7 +165,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
         connection_out = psycopg2.connect(connect_args)
 
         schema_out = out_db_config.get('schema')
-        
+
         cost_calculation_files_paths = {cost["compute"]["configuration"]["storage"]["file"] for cost in source["costs"]}
 
         for cost_calculation_file_path in cost_calculation_files_paths:
@@ -197,7 +197,7 @@ def osm_convert(config, resource, connection, logger):
     used_bases = {}
     work_dir_config = config['workingSpace']['directory']
 
-    # On vérifie le type de la ressource 
+    # On vérifie le type de la ressource
     if (resource['type'] not in ['osrm', 'valhalla']):
         raise ValueError("Wrong resource type, should be in ['osrm','valhalla']")
 
@@ -206,8 +206,8 @@ def osm_convert(config, resource, connection, logger):
     if (resource['type'] == 'valhalla'):
         convert_osm_to_bpf = True
 
-    # Comme chaque source de la ressource peut potentiellement nécessiter un pivot différent, 
-    # On fait une boucle sur les sources et on adpate en fonction du type 
+    # Comme chaque source de la ressource peut potentiellement nécessiter un pivot différent,
+    # On fait une boucle sur les sources et on adpate en fonction du type
     for source in resource['sources']:
 
         logger.info("Create osm file of source: " + source['id'])
@@ -221,7 +221,7 @@ def osm_convert(config, resource, connection, logger):
         found_base = False
         found_id = ''
         for sid,sub in used_bases.items():
-            if sub == source['mapping']['storage']['baseId']:
+            if sub == source['mapping']['source']['baseId']:
                 found_base = True
                 found_id = sid
 
@@ -244,12 +244,12 @@ def osm_convert(config, resource, connection, logger):
                     raise ValueError("SymLink is already pointing to another file")
                 else:
                     logger.info("SymLink already pointing to the good file")
-            
+
         else:
             logger.info("Mapping not already done")
             pivot_to_osm(config, source, connection, logger, convert_osm_to_bpf)
-        
-        used_bases[ source['id'] ] = source['mapping']['storage']['baseId']
+
+        used_bases[ source['id'] ] = source['mapping']['source']['baseId']
 
     connection.close()
 
@@ -364,7 +364,7 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
 
     i = 0
     for source in resource["sources"]:
-        
+
         logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
 
         logger.info('Looking for OSM PBF file')
@@ -484,7 +484,7 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
             source_file.write(json_string)
 
         source_ids.append(source['id'])
-    
+
     # On passe à la ressource
     resource_file = os.path.join(config["outputs"]["configurations"]["resource"]["storage"]["directory"], resource['id'] + ".resource")
     logger.info("Writing resource file: " + resource_file)
