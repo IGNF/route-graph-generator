@@ -113,7 +113,7 @@ Les opérations sont des lites de 2 éléments. Le premier est une chaîne de ca
 ```
 
 ### Exemple
-Un exemple complet est présent dans le dossier [io](./costs_calculation_sample.json).
+Un exemple complet est présent dans le dossier [io](./costs_calculation.json).
 
 ## Configuration des profils (OSRM)
 La configuration des profils OSRM se fait _via_ des fonctions écrites en LUA. Se référer à la [documentation officielle](https://github.com/Project-OSRM/osrm-backend/blob/master/docs/profiles.md). Ces fichiers sont générés à la volée à partir du fichier JSON de configuration des coûts.

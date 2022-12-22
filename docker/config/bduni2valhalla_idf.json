@@ -80,7 +80,7 @@
                 "configuration": {
                   "costing": "auto",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }
@@ -97,7 +97,7 @@
                 "configuration": {
                   "costing": "auto_shorter",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }
@@ -114,7 +114,7 @@
                 "configuration": {
                   "costing": "pedestrian",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }

@@ -75,7 +75,7 @@
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
@@ -108,7 +108,7 @@
               "configuration": {
                 "name": "cost_m_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
