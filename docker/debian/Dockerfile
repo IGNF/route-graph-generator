@@ -27,7 +27,7 @@ RUN git clone --depth 1 --recursive https://github.com/kevinkreiser/prime_server
 
 WORKDIR /home/valhalla/
 RUN pip install conan
-RUN git clone --branch feature-exclude_bridges/tunnels/toll --depth 1 --recursive https://github.com/IGNF/valhalla.git && cd valhalla && \
+RUN git clone --branch 3.2.0-with_hard_exclude --depth 1 --recursive https://github.com/IGNF/valhalla.git && cd valhalla && \
 mkdir build && cmake -B build -DCMAKE_BUILD_TYPE=Release && make -C build && make -C build package
 
 FROM python:3.6.13-slim-buster as r2gg
@@ -62,8 +62,8 @@ COPY --from=build /usr/local/lib/libprime_server.la /usr/lib/libprime_server.la
 COPY --from=build /usr/local/lib/libprime_server.a /usr/lib/libprime_server.a
 
 ### Installation de valhalla
-COPY --from=build /home/valhalla/valhalla/build/valhalla-3.1.4-Linux.tar.gz ./
-RUN tar -xzvf valhalla-3.1.4-Linux.tar.gz && cd valhalla-3.1.4-Linux && cp -r bin/* /usr/bin/ && cp -r lib/* /usr/lib/ && cp -r include/* /usr/include/ && cp -r share/* /usr/share/
+COPY --from=build /home/valhalla/valhalla/build/valhalla-3.2.0-Linux.tar.gz ./
+RUN tar -xzvf valhalla-3.2.0-Linux.tar.gz && cd valhalla-3.2.0-Linux && cp -r bin/* /usr/bin/ && cp -r lib/* /usr/lib/ && cp -r include/* /usr/include/ && cp -r share/* /usr/share/
 
 ### Installation des dépendances pour R2GG
 #### Dépendances Python
