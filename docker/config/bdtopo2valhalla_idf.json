@@ -3,7 +3,7 @@
     "general": {
       "id": "bdtopo2valhalla",
       "logs": {
-        "configFile": "/home/docker/config/sample_log_config.json"
+        "configFile": "./sample_log_config.json"
       },
       "parallelization": {
         "threads": 4
@@ -15,111 +15,115 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "/home/docker/config/db_config_pivot.json",
-        "schema": "public"
+        "configFile": "./db_config_pivot.json"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/run/secrets/db_config",
-        "schema": "public"
+        "configFile": "/home/AZarzelli/route-graph-generator/bduni_config.json"
       }
     ],
     "workingSpace": {
-      "directory": "/home/docker/data/generation/",
+      "directory": "/home/AZarzelli/generation/",
       "baseId": "base_pivot"
-    },
-    "outputs": {
-      "configurations": {
-        "resource": {
-          "storage": {
-            "directory": "/home/docker/data/resources/"
-          }
-        },
-        "sources": {
-          "storage": {
-            "directory": "/home/docker/data/sources/"
-          }
-        }
-      }
     },
     "resource": {
       "id": "bdtopo-valhalla",
       "type": "valhalla",
       "description": "Données BDUNI v2.",
-      "sources": [
-        {
-          "id": "bduni-valhalla",
-          "type": "valhalla",
-          "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
-          "projection": "EPSG:4326",
-          "bbox": "-180,-90,180,90",
-          "mapping": {
-            "source": {
-              "baseId": "base_bduni"
-            },
-            "conversion": {
-              "file": "/home/docker/sql/bduni_convert.sql"
-            }
+      "topology": {
+        "id": "osm-pbf-bduni",
+        "type":"osm",
+        "description": "Données issues de la BDUNI de l'IGN.",
+        "storage": {
+          "file": "/home/AZarzelli/dataR2ggVLHL/bdtopo.osm.pbf"
+        },
+        "projection": "EPSG:4326",
+        "bbox": "1.7,48.4,3.3,49.1",
+        "mapping": {
+          "source": {
+            "baseId": "base_bduni"
           },
           "storage": {
-            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla.json"
+            "file": "../../sql/bduni_convert.sql"
+          }
+        },
+        "defaultAttributes": [
+          "name"
+        ]
+      },
+      "sources": [
+        {
+          "id": "bdtopo-auto-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
+            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
           },
-          "costs": [
-            {
-              "profile": "car",
-              "optimization": "fastest",
-              "costType": "time",
-              "costing": "auto",
-              "compute": {
+          "cost": {
+            "profile": "car",
+            "optimization": "fastest",
+            "compute": {
+              "storage": {
+                "file": "./graph_bdtopo.lua"
+              },
+              "configuration": {
+                "costing": "auto",
                 "storage": {
-                  "file": "/home/docker/config/graph_bdtopo.lua"
-                },
-                "configuration": {
-                  "costing": "auto",
-                  "storage": {
-                    "file": "/home/docker/config/costs_calculation.json"
-                  }
-                }
-              }
-            },
-            {
-              "profile": "car",
-              "optimization": "shortest",
-              "costType": "time",
-              "costing": "auto_shorter",
-              "compute": {
-                "storage": {
-                  "file": "/home/docker/config/graph_bdtopo.lua"
-                },
-                "configuration": {
-                  "costing": "auto_shorter",
-                  "storage": {
-                    "file": "/home/docker/config/costs_calculation.json"
-                  }
-                }
-              }
-            },
-            {
-              "profile": "pedestrian",
-              "optimization": "shortest",
-              "costType": "time",
-              "costing": "pedestrian",
-              "compute": {
-                "storage": {
-                  "file": "/home/docker/config/graph_bdtopo.lua"
-                },
-                "configuration": {
-                  "costing": "pedestrian",
-                  "storage": {
-                    "file": "/home/docker/config/costs_calculation.json"
-                  }
+                  "file": "./costs_calculation.json"
                 }
               }
             }
-          ]
+          }
+        },
+        {
+          "id": "bdtopo-auto-shorter-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
+            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
+          },
+          "cost": {
+            "profile": "car",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "./graph_bdtopo.lua"
+              },
+              "configuration": {
+                "costing": "auto_shorter",
+                "storage": {
+                  "file": "./costs_calculation.json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "bdtopo-pedestrian-valhalla",
+          "type": "valhalla",
+          "storage": {
+            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
+            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
+          },
+          "cost": {
+            "profile": "pedestrian",
+            "optimization": "shortest",
+            "compute": {
+              "storage": {
+                "file": "./graph_bdtopo.lua"
+              },
+              "configuration": {
+                "costing": "pedestrian",
+                "storage": {
+                  "file": "./costs_calculation.json"
+                }
+              }
+            }
+          }
         }
       ],
       "availableOperations":[
@@ -184,8 +188,7 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline",
-                "wkt"
+                "polyline"
               ]
             },
             {
@@ -250,7 +253,7 @@
             {
               "id": "resource",
               "values": [
-                "bdtopo-valhalla"
+                "bdtopo-pgr"
               ]
             },
             {
@@ -292,30 +295,6 @@
               ]
             },
             {
-              "id": "constraints",
-              "values": [
-                {
-                  "keyType": "name-valhalla",
-                  "key": "wayType",
-                  "availableConstraintType": ["banned"],
-                  "availableValues": [
-                    {
-                      "value": "autoroute",
-                      "field": "exclude_tolls"
-                    },
-                    {
-                      "value": "pont",
-                      "field": "exclude_bridges"
-                    },
-                    {
-                      "value": "tunnel",
-                      "field": "exclude_tunnels"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
               "id": "projection",
               "defaultValueContent": "EPSG:4326",
               "values": [
@@ -333,8 +312,7 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline",
-                "wkt"
+                "polyline"
               ]
             },
             {
@@ -347,16 +325,45 @@
               ]
             },
             {
-              "id": "distanceUnit",
-              "defaultValueContent": "meter",
-              "values": [
-                "meter",
-                "kilometer"
+              "keyType": "name-valhalla",
+              "key": "wayType",
+              "availableConstraintType": ["banned"],
+              "availableValues": [
+                {
+                  "value": "autoroute",
+                  "field": "exclude_tolls"
+                },
+                {
+                  "value": "pont",
+                  "field": "exclude_bridges"
+                },
+                {
+                  "value": "tunnel",
+                  "field": "exclude_tunnels"
+                }
               ]
             }
           ]
         }
       ]
+    },
+    "outputs": {
+      "configuration": {
+        "storage": {
+          "file": "/home/AZarzelli/dataR2ggVLHL/resources/bdtopo-valhalla.resource"
+        }
+      },
+      "dirs": {
+        "dataDir": "/home/AZarzelli/dataR2ggVLHL/",
+        "profileDir": "/home/AZarzelli/dataR2ggVLHL/",
+        "resourceDir": "/home/AZarzelli/dataR2ggVLHL/resources"
+      },
+      "sshConfig":{
+        "host": "127.0.0.1",
+        "port": 22,
+        "username": "toto",
+        "password": "mdp1"
+      }
     }
   }
 }
