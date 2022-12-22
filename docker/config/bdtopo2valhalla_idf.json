@@ -54,76 +54,94 @@
       },
       "sources": [
         {
-          "id": "bdtopo-auto-valhalla",
+          "id": "bduni-valhalla",
           "type": "valhalla",
-          "storage": {
-            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
-            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
+          "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
+          "projection": "EPSG:4326",
+          "bbox": "-180,-90,180,90",
+          "mapping": {
+            "source": {
+              "baseId": "base_bduni"
+            },
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
+            }
           },
-          "cost": {
-            "profile": "car",
-            "optimization": "fastest",
-            "compute": {
-              "storage": {
-                "file": "./graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "auto",
+          "storage": {
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
+          },
+          "costs": [
+            {
+              "profile": "car",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "auto",
+              "compute": {
                 "storage": {
-                  "file": "./costs_calculation.json"
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "auto",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "car",
+              "optimization": "shortest",
+              "costType": "distance",
+              "costing": "auto_shorter",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "auto_shorter",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "shortest",
+              "costType": "distance",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
                 }
               }
             }
-          }
-        },
-        {
-          "id": "bdtopo-auto-shorter-valhalla",
-          "type": "valhalla",
-          "storage": {
-            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
-            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
-          },
-          "cost": {
-            "profile": "car",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "./graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "auto_shorter",
-                "storage": {
-                  "file": "./costs_calculation.json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "id": "bdtopo-pedestrian-valhalla",
-          "type": "valhalla",
-          "storage": {
-            "tar": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/AZarzelli/dataR2ggVLHL/bdtopo-valhalla-tiles/",
-            "config": "/home/AZarzelli/dataR2ggVLHL/valhalla.json"
-          },
-          "cost": {
-            "profile": "pedestrian",
-            "optimization": "shortest",
-            "compute": {
-              "storage": {
-                "file": "./graph_bdtopo.lua"
-              },
-              "configuration": {
-                "costing": "pedestrian",
-                "storage": {
-                  "file": "./costs_calculation.json"
-                }
-              }
-            }
-          }
+          ]
         }
       ],
       "availableOperations":[

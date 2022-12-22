@@ -88,7 +88,7 @@
             {
               "profile": "car",
               "optimization": "shortest",
-              "costType": "time",
+              "costType": "distance",
               "costing": "auto_shorter",
               "compute": {
                 "storage": {
@@ -105,6 +105,23 @@
             {
               "profile": "pedestrian",
               "optimization": "shortest",
+              "costType": "distance",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "fastest",
               "costType": "time",
               "costing": "pedestrian",
               "compute": {
