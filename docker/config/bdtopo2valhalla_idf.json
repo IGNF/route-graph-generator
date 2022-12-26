@@ -3,7 +3,7 @@
     "general": {
       "id": "bdtopo2valhalla",
       "logs": {
-        "configFile": "./sample_log_config.json"
+        "configFile": "/home/docker/config/sample_log_config.json"
       },
       "parallelization": {
         "threads": 4
@@ -15,50 +15,45 @@
       {
         "id": "base_pivot",
         "type": "bdd",
-        "configFile": "./db_config_pivot.json"
+        "configFile": "/home/docker/config/db_config_pivot.json",
+        "schema": "public"
       },
       {
         "id": "base_bduni",
         "type": "bdd",
-        "configFile": "/home/AZarzelli/route-graph-generator/bduni_config.json"
+        "configFile": "/run/secrets/db_config",
+        "schema": "public"
       }
     ],
     "workingSpace": {
-      "directory": "/home/AZarzelli/generation/",
+      "directory": "/home/docker/data/generation/",
       "baseId": "base_pivot"
     },
-    "resource": {
-      "id": "bdtopo-valhalla",
-      "type": "valhalla",
-      "description": "Données BDUNI v2.",
-      "topology": {
-        "id": "osm-pbf-bduni",
-        "type":"osm",
-        "description": "Données issues de la BDUNI de l'IGN.",
-        "storage": {
-          "file": "/home/AZarzelli/dataR2ggVLHL/bdtopo.osm.pbf"
-        },
-        "projection": "EPSG:4326",
-        "bbox": "1.7,48.4,3.3,49.1",
-        "mapping": {
-          "source": {
-            "baseId": "base_bduni"
-          },
+    "outputs": {
+      "configurations": {
+        "resource": {
           "storage": {
-            "file": "../../sql/bduni_convert.sql"
+            "directory": "/home/docker/data/resources/"
           }
         },
-        "defaultAttributes": [
-          "name"
-        ]
-      },
+        "sources": {
+          "storage": {
+            "directory": "/home/docker/data/sources/"
+          }
+        }
+      }
+    },
+    "resource": {
+      "id": "bdtopo-idf-valhalla",
+      "type": "valhalla",
+      "description": "Données BDUNI v2.",
       "sources": [
         {
-          "id": "bduni-valhalla",
+          "id": "bdtopo-idf-valhalla",
           "type": "valhalla",
           "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
           "projection": "EPSG:4326",
-          "bbox": "-180,-90,180,90",
+          "bbox": "1.7,48.4,3.3,49.1",
           "mapping": {
             "source": {
               "baseId": "base_bduni"
@@ -151,20 +146,20 @@
             {
               "id": "resource",
               "values": [
-                "bdtopo-valhalla"
+                "bdtopo-idf-valhalla"
               ]
             },
             {
               "id": "start",
               "values": {
-                "bbox": "-180,-90,180,90",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
             {
               "id": "end",
               "values": {
-                "bbox": "-180,-90,180,90",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -187,7 +182,7 @@
             {
               "id": "intermediates",
               "values": {
-                "bbox": "-180,-90,180,90",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -206,7 +201,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
@@ -271,13 +267,13 @@
             {
               "id": "resource",
               "values": [
-                "bdtopo-pgr"
+                "bdtopo-idf-valhalla"
               ]
             },
             {
               "id": "point",
               "values": {
-                "bbox": "-180,-90,180,90",
+                "bbox": "1.7,48.4,3.3,49.1",
                 "projection": "EPSG:4326"
               }
             },
@@ -313,6 +309,30 @@
               ]
             },
             {
+              "id": "constraints",
+              "values": [
+                {
+                  "keyType": "name-valhalla",
+                  "key": "wayType",
+                  "availableConstraintType": ["banned"],
+                  "availableValues": [
+                    {
+                      "value": "autoroute",
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
               "id": "projection",
               "defaultValueContent": "EPSG:4326",
               "values": [
@@ -330,7 +350,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
@@ -343,45 +364,16 @@
               ]
             },
             {
-              "keyType": "name-valhalla",
-              "key": "wayType",
-              "availableConstraintType": ["banned"],
-              "availableValues": [
-                {
-                  "value": "autoroute",
-                  "field": "exclude_tolls"
-                },
-                {
-                  "value": "pont",
-                  "field": "exclude_bridges"
-                },
-                {
-                  "value": "tunnel",
-                  "field": "exclude_tunnels"
-                }
+              "id": "distanceUnit",
+              "defaultValueContent": "meter",
+              "values": [
+                "meter",
+                "kilometer"
               ]
             }
           ]
         }
       ]
-    },
-    "outputs": {
-      "configuration": {
-        "storage": {
-          "file": "/home/AZarzelli/dataR2ggVLHL/resources/bdtopo-valhalla.resource"
-        }
-      },
-      "dirs": {
-        "dataDir": "/home/AZarzelli/dataR2ggVLHL/",
-        "profileDir": "/home/AZarzelli/dataR2ggVLHL/",
-        "resourceDir": "/home/AZarzelli/dataR2ggVLHL/resources"
-      },
-      "sshConfig":{
-        "host": "127.0.0.1",
-        "port": 22,
-        "username": "toto",
-        "password": "mdp1"
-      }
     }
   }
 }
