@@ -81,8 +81,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
         source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
 
         # Configuration de la bdd de travail utilisée pour ce pivot
-        work_db_config = db_configs[ source['mapping']['source']['baseId'] ]
-        used_bases.append(source['mapping']['source']['baseId'])
+        work_db_config = db_configs[ config['workingSpace']['baseId'] ]
+        used_bases.append(config['workingSpace']['baseId'])
 
         # Récupération de la bbox
         bbox = [float(coord) for coord in source["bbox"].split(",")]
