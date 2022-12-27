@@ -252,24 +252,29 @@ function filter_tags_generic(kv)
   kv["alt_name"] = kv["alt_name"]
   kv["official_name"] = kv["official_name"]
 
-  kv["max_speed"] = kv["{0}"]
+  local corrected_speed = kv["{0}"]
+  if (kv["urbain"] == "True") then
+    corrected_speed = tostring(3.6 * kv["length_m"] / ((3.6 / tonumber(corrected_speed)) * kv["length_m"] + 5))
+  end
 
-  kv["advisory_speed"] = normalize_speed(kv["{0}"])
-  kv["average_speed"] = normalize_speed(kv["{0}"])
+  kv["max_speed"] = corrected_speed
+
+  kv["advisory_speed"] = normalize_speed(corrected_speed)
+  kv["average_speed"] = normalize_speed(corrected_speed)
   if (tonumber(kv["direction"]) <= 0) then
-    kv["backward_speed"] = normalize_speed(kv["{0}"])
+    kv["backward_speed"] = normalize_speed(corrected_speed)
   else
     kv["backward_speed"] = normalize_speed("0")
   end
   if (tonumber(kv["direction"]) >= 0) then
-    kv["forward_speed"] = normalize_speed(kv["{0}"])
+    kv["forward_speed"] = normalize_speed(corrected_speed)
   else
     kv["forward_speed"] = normalize_speed("0")
   end
 
-  kv["default_speed"] = normalize_speed(kv["{0}"])
+  kv["default_speed"] = normalize_speed(corrected_speed)
 
-  if tonumber(kv["{0}"]) <= 0 then
+  if tonumber(corrected_speed) <= 0 then
     kv["auto_backward"] = "false"
     kv["auto_forward"] = "false"
   end
@@ -349,7 +354,7 @@ function filter_tags_generic(kv)
   end
 
   kv["hazmat"] = nil
-  kv["maxspeed:hgv"] = normalize_speed(kv["{0}"])
+  kv["maxspeed:hgv"] = normalize_speed(corrected_speed)
 
   if (kv["hgv:national_network"] or kv["hgv:state_network"] or kv["hgv"] == "local" or kv["hgv"] == "designated") then
     kv["truck_route"] = "true"
@@ -510,7 +515,7 @@ function rels_proc (kv, nokeys)
 end
 
 function rel_members_proc (keyvalues, keyvaluemembers, roles, membercount)
-  membersuperseeded = {{}}
+  membersuperseeded = {{0}}
   for i = 1, membercount do
     membersuperseeded[i] = 0
   end
