@@ -63,23 +63,48 @@
           "configFile":
             type: string
             required: true
-    # Information pour pouvoir se connecter, lire et écrire dans un cluster CEPH
-    "ceph":
+          # Schema utilisé dans la base 
+          "schema":
+            type: string
+            required: true
+            # Informations sur les résultats de la génération.
+    "outputs":
       type: object
-      required: false
+      required: true
       properties:
-        # Nom du cluster
-        "clusterName":
-          type: string
+        # La génération doit produire un fichier de ressource utilisable par l'application de calcul d'itinéraire.
+        "configurations":
+          type: object
           required: true
-        # Nom de l'utilisateur
-        "userName":
-          type: string
-          required: true
-        # Fichier de configuration
-        "configFile":
-          type: string
-          required: true
+          properties:
+            # Information sur la ressource 
+            "resource":
+              type: object
+              required: true
+              properties:
+                # Stockage du fichier de configuration.
+                "storage":
+                  type: object
+                  required: true
+                  properties:
+                    # Dossier contenant les configurations
+                    "directory":
+                      type: string
+                      required: true
+            # Information sur les sources 
+            "sources":
+              type: object
+              required: true
+              properties:
+                # Stockage du fichier de configuration.
+                "storage":
+                  type: object
+                  required: true
+                  properties:
+                    # Dossier contenant les configurations
+                    "directory":
+                      type: string
+                      required: true
     # Espace de travail nécessaire à l'application pour travailler. Il faut un endroit sur disque où écrire et une base de données accessible en écriture.
     "workingSpace":
       type: object
@@ -108,60 +133,6 @@
         "description":
           type: string
           required: true
-        # Informations sur la topologie de la ressource
-        "topology":
-          type: object
-          required: true
-          properties:
-            # id de la topologie, utile pour la charger une seule fois dans Road2
-            "id":
-              type: string
-              required: true
-            # Type de la topologie
-            "type":
-              type: string
-              required: true
-            # Description de la topologie
-            "description":
-              type: string
-              required: true
-            # Stockage de la topologie
-            "storage":
-              $ref: "#/components/schemas/storage"
-              required: true
-            # Projection des données sources
-            "projection":
-              type: string
-              required: true
-            # Bbox des données de la topologie, pas nécessairement la même que pour la ressource
-            "bbox":
-              type: string
-              required: true
-            # Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération.
-            "mapping":
-              type: object
-              required: true
-              properties:
-                # Source des données, il s'agit de l'id d'une base de données
-                "source":
-                  type: object
-                  required: true
-                  properties:
-                    # Id de la base de données qui doit être présentes dans les bases de ce fichier
-                    "baseId":
-                      type: string
-                      required: true
-                # Emplacement du script SQL
-                "storage":
-                  $ref: "#/components/schemas/storage"
-                  required: true
-            # Liste des attributs qui seront des attributs par défaut pour la ressource
-                  "defaultAttributes":
-                    type: array
-                    required: false
-                    minItems: 1
-                    items:
-              type: "string"
         # Liste des sources qui vont être générées
         "sources":
           type: array
@@ -178,10 +149,50 @@
               "type":
                 type: string
                 required: true
+              # Description de la source
+              "description":
+                type: string
+                required: true
+              # Projection des données sources
+              "projection":
+                type: string
+                required: true
+              # Bbox des données de la topologie, pas nécessairement la même que pour la ressource
+              "bbox":
+                type: string
+                required: true
+              # Pour faire le lien entre une bdd source et les informations utiles pour générer un graphe, il faut indiquer un fichier SQL qui va lire la base, extraire les données et les formater pour les scripts de génération.
+              "mapping":
+                type: object
+                required: true
+                properties:
+                  # Source des données, il s'agit de l'id d'une base de données
+                  "source":
+                    type: object
+                    required: true
+                    properties:
+                      # Id de la base de données qui doit être présentes dans les bases de ce fichier
+                      "baseId":
+                        type: string
+                        required: true
+                  # Emplacement du script SQL utilisé pour créer la base pivot
+                  "conversion":
+                    type: object
+                    required: true
+                    properties:
+                      # Fichier SQL utilisé pour créer la base pivot
+                      "file":
+                        type: string
+                        required: true
               # Stockage de la source, du .osrm en l'occurence
               "storage":
-                $ref: "#/components/schemas/storage"
-                required: true
+                type: object
+                    required: true
+                    properties:
+                      # Fichier .osrm
+                      "file":
+                        type: string
+                        required: true
               # Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs.
               "cost":
                 type: object
@@ -244,44 +255,14 @@
                   "values":
                     type: string or array or object
                     required: true
-        # Informations sur les résultats de la génération.
-        "outputs":
-          type: object
-          required: true
-          properties:
-            # La génération doit produire un fichier de ressource utilisable par l'application de calcul d'itinéraire.
-            "configuration":
-              type: object
-              required: true
-              properties:
-                # Stockage du fichier de configuration.
-                "storage":
-                  $ref: "#/components/schemas/storage"
-                  required: true
-        # Dossiers utilisés à la fin de la génération pour mettre les données au bons emplacements
-        "dirs":
-          type: object
-          required: false
-          properties:
-            # Dossier final des données
-            "dataDir":
-              type: string
-              required: true
-            # Dossier pour les profiles
-            "profileDir":
-              type: string
-              required: true
-            # Dossier pour les ressources
-            "resourceDir":
-              type: string
-              required: true
+
 components:
   schemas:
-    # storage d'un document: fichier ou ceph
+    # storage d'un document: fichier 
     "storage":
       type: object
       properties:
-          # Fichier
+        # Fichier
         "file":
           type: string
               required: false
