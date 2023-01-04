@@ -143,7 +143,7 @@ def _build_process_way(costs_config, output_cost):
             get_variables_strings.append(local_var_str)
             for key, value in variable["mapping"].items():
                 cond_str = "    if {}_tmp == \"{}\" then\n".format(variable["name"], key)
-                var_str  = "        local {0} = tonumber(\"{1}\") or \"{1}\"\n".format(variable["name"], value)
+                var_str  = "        {0} = tonumber(\"{1}\") or \"{1}\"\n".format(variable["name"], value)
                 var_str += "    end\n"
                 get_variables_strings.append(cond_str)
                 get_variables_strings.append(var_str)

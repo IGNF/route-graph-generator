@@ -79,10 +79,10 @@ def sql_convert(config, resource, db_configs, connection, logger):
 
         # Configuration de la bdd source
         source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
+        used_bases.append(source['mapping']['source']['baseId'])
 
         # Configuration de la bdd de travail utilisée pour ce pivot
         work_db_config = db_configs[ config['workingSpace']['baseId'] ]
-        used_bases.append(config['workingSpace']['baseId'])
 
         # Récupération de la bbox
         bbox = [float(coord) for coord in source["bbox"].split(",")]
@@ -202,9 +202,9 @@ def osm_convert(config, resource, connection, logger):
         raise ValueError("Wrong resource type, should be in ['osrm','valhalla']")
 
     # Les outils de conversion utilisés par Valhalla ne lisent que du osm.pbf
-    convert_osm_to_bpf = False
+    convert_osm_to_pbf = False
     if (resource['type'] == 'valhalla'):
-        convert_osm_to_bpf = True
+        convert_osm_to_pbf = True
 
     # Comme chaque source de la ressource peut potentiellement nécessiter un pivot différent,
     # On fait une boucle sur les sources et on adpate en fonction du type
@@ -227,7 +227,7 @@ def osm_convert(config, resource, connection, logger):
 
         if found_base:
 
-            if convert_osm_to_bpf:
+            if convert_osm_to_pbf:
                 linked_file = os.path.join(work_dir_config, source['id'] + ".osm.pbf")
                 real_file = os.path.join(work_dir_config, found_id + ".osm.pbf")
             else:
@@ -247,7 +247,7 @@ def osm_convert(config, resource, connection, logger):
 
         else:
             logger.info("Mapping not already done")
-            pivot_to_osm(config, source, connection, logger, convert_osm_to_bpf)
+            pivot_to_osm(config, source, connection, logger, convert_osm_to_pbf)
 
         used_bases[ source['id'] ] = source['mapping']['source']['baseId']
 
