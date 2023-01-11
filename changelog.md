@@ -1,3 +1,19 @@
+# 2.0.0
+
+FIX:
+- Mauvaises configurations dans certains fichiers pour la partie docker
+
+CHANGE:
+- Ajout de 5 secondes en milieu urbain pour les données BDuni
+- Modification de la version de notre fork valhalla
+
+ADD:
+- Ajout du fichier licence
+
+UPDATE: 
+- Mise à jour de la documentation des fichiers de génération
+- Mise à jour des fichiers de génération dans la partie docker (wkt, renommage de fichiers, contraintes sur valhalla)
+
 # 1.2.3
 
 DEPS:
