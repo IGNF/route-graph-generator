@@ -3,7 +3,7 @@
 Les scripts SQL doivent permettre la conversion d'une base de données sources vers un format pivot.
 Les spécifications de ce dernier sont les suivantes :
 
-### Table "nodes"
+## Table "nodes"
 
 ```sql
 CREATE TABLE IF NOT EXISTS nodes (
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS nodes (
 );
 ```
 
-### Table "edges"
+## Table "edges"
 
 ```sql
 CREATE TABLE IF NOT EXISTS edges (
