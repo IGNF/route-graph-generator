@@ -1,6 +1,6 @@
 # Scripts SQL
 
-Les scripts SQL doivent permettre la conversion d'une base de données sources vers un format pivot.
+Les {{ '[scripts SQL]({}tree/{}/sql)'.format(repo_url, repo_branch) }} doivent permettre la conversion d'une base de données sources vers un format pivot.
 Les spécifications de ce dernier sont les suivantes :
 
 ## Table "nodes"

@@ -143,7 +143,7 @@ Les opérations sont des lites de 2 éléments. Le premier est une chaîne de ca
 
 ### Exemple
 
-Un exemple complet est présent dans le dossier [docker/config](../../docker/config/costs_calculation.json).
+Un exemple complet est présent dans le dossier {{ '[docker/config]({}blob/{}/docker/config/costs_calculation.json)'.format(repo_url, repo_branch) }}.
 
 ## Configuration des profils (OSRM)
 
@@ -151,4 +151,4 @@ La configuration des profils OSRM se fait _via_ des fonctions écrites en LUA. S
 
 ### Exemple
 
-Un exemple complet est présent dans le dossier [io](../../io/graph_bdtopo.lua).
+Un exemple complet est présent dans le dossier {{ '[io]({}blob/{}/io/graph_bdtopo.lua)'.format(repo_url, repo_branch) }}.

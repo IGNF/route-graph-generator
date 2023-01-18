@@ -1,8 +1,8 @@
 # Utiliser r2gg avec Docker 
 
-Le dossier [docker](../../docker) regroupe les différents fichiers permettant d'utiliser r2gg avec docker. 
+Le dossier {{ '[docker]({}tree/{}/docker)'.format(repo_url, repo_branch) }} regroupe les différents fichiers permettant d'utiliser r2gg avec docker. 
 
 Les sous-dossiers sont ordonnés ainsi pour des raisons pratiques : 
-- [scripts](../../docker/scripts/) : Ce dossier regroupe des scripts utiles dans les différents docker. 
-- [config](../../docker/config/) : Ce dossier regroupe plusieurs fichiers de configurations qui se trouvent être communs aux autres sous-dossiers. 
-- [debian](../../docker/debian/) : Pour utiliser r2gg sur debian 10
+- {{ '[scripts]({}tree/{}/docker/scripts)'.format(repo_url, repo_branch) }} : Ce dossier regroupe des scripts utiles dans les différents docker. 
+- {{ '[config]({}tree/{}/docker/config)'.format(repo_url, repo_branch) }} : Ce dossier regroupe plusieurs fichiers de configurations qui se trouvent être communs aux autres sous-dossiers. 
+- {{ '[debian]({}tree/{}/docker/debian)'.format(repo_url, repo_branch) }} : Pour utiliser r2gg sur debian 10
