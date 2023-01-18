@@ -19,8 +19,6 @@ La conversion se fait via les fonctions de la bibliothèque r2gg développée da
 ```{toctree}
 ---
 caption: Route Graph Generator
-maxdepth: 2
-numbered: true
 ---
 R2GG <usage/r2gg>
 Configuration <usage/configuration>
@@ -29,8 +27,6 @@ Configuration <usage/configuration>
 ```{toctree}
 ---
 caption: Utilisation avec Docker
-maxdepth: 2
-numbered: true
 ---
 Utiliser r2gg avec Docker <docker/readme>
 R2GG sur Debian <docker/debian/readme>
@@ -39,8 +35,6 @@ R2GG sur Debian <docker/debian/readme>
 ```{toctree}
 ---
 caption: SQL
-maxdepth: 2
-numbered: true
 ---
 Scripts SQL <sql/readme>
 ```
@@ -48,8 +42,6 @@ Scripts SQL <sql/readme>
 ```{toctree}
 ---
 caption: Développement
-maxdepth: 2
-numbered: true
 ---
 Documentation <development/documentation>
 Changelog <development/history>
