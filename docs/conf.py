@@ -11,8 +11,18 @@ from os import environ, path
 
 sys.path.insert(0, path.abspath(".."))  # move into project package
 
+# project
+from r2gg import __about__
+
 # -- Build environment -----------------------------------------------------
 on_rtd = environ.get("READTHEDOCS", None) == "True"
+
+# -- Project information -----------------------------------------------------
+author = __about__.__author__
+copyright = __about__.__copyright__
+description = __about__.__summary__
+project = __about__.__title__
+version = release = __about__.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -117,12 +127,13 @@ myst_heading_anchors = 3
 
 # replacement variables
 myst_substitutions = {
-    # "author": author,
+    "author": author,
     "date_update": datetime.now().strftime("%d %B %Y"),
-    # "description": description,
-    # "repo_url": __about__.__uri__,
-    # "title": project,
-    # "version": version,
+    "description": description,
+    "repo_branch": "develop",
+    "repo_url": __about__.__uri__,
+    "title": project,
+    "version": version,
 }
 
 
