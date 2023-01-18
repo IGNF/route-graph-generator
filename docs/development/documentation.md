@@ -7,6 +7,8 @@ Sphinx est utilisé pour la génération de la documentation depuis des pages é
 Pour la génération:
 
 ```bash
+# install base dependencies
+python -m pip install -U -r requirements/base.txt
 # install aditionnal dependencies
 python -m pip install -U -r requirements/documentation.txt
 # build it
