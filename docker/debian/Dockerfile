@@ -65,7 +65,9 @@ COPY --from=build /usr/local/lib/libprime_server.a /usr/lib/libprime_server.a
 COPY --from=build /home/valhalla/valhalla/build/valhalla-3.2.0-Linux.tar.gz ./
 RUN tar -xzvf valhalla-3.2.0-Linux.tar.gz && cd valhalla-3.2.0-Linux && cp -r bin/* /usr/bin/ && cp -r lib/* /usr/lib/ && cp -r include/* /usr/include/ && cp -r share/* /usr/share/
 
-### Installation des dépendances pour R2GG
+### Installation des dépendances pour psycopg2
+RUN apt update && \
+    apt install -y libpq-dev gcc
 #### Dépendances Python
 ### Installation de R2GG
 WORKDIR /user/app
