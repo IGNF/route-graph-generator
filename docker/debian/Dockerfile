@@ -72,6 +72,7 @@ RUN pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'osmium
 WORKDIR /usr/lib/python3.6/site-packages/r2gg/r2gg
 COPY r2gg ./
 COPY setup.py ../
+COPY README.md ../
 RUN cd ../ && pip install -e .
 
 ### Installation de wget pour l'image
