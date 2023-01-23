@@ -67,13 +67,20 @@ RUN tar -xzvf valhalla-3.2.0-Linux.tar.gz && cd valhalla-3.2.0-Linux && cp -r bi
 
 ### Installation des dépendances pour R2GG
 #### Dépendances Python
-RUN pip install 'psycopg2-binary==2.8.5' 'sqlparse==0.2.4' 'lxml==4.3.1' 'osmium==3.2.0'
 ### Installation de R2GG
-WORKDIR /usr/lib/python3.6/site-packages/r2gg/r2gg
-COPY r2gg ./
-COPY setup.py ../
-COPY README.md ../
-RUN cd ../ && pip install -e .
+WORKDIR /user/app
+
+COPY requirements.txt ./
+COPY requirements/base.txt ./requirements/
+
+RUN python -m pip install --no-cache-dir -U pip && \
+    python -m pip install --no-cache-dir -U setuptools wheel
+
+COPY . ./
+
+RUN python -m pip install -U --no-cache-dir -r requirements.txt
+
+RUN python -m pip install -e .
 
 ### Installation de wget pour l'image
 RUN apt-get install -y wget
