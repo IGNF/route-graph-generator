@@ -45,7 +45,7 @@ setup(
     # cli
     entry_points={
         "console_scripts": [
-            f"{__about__.__executable_name__} = r2gg.cli:main"
+            f"{__about__.__executable_name__} = r2gg.cli:main",
             f"{__about__.__executable_name__}-sql2pivot = r2gg.cli:sql2pivot",
             f"{__about__.__executable_name__}-pivot2pgrouting = r2gg.cli:pivot2pgrouting",
             f"{__about__.__executable_name__}-pivot2osm = r2gg.cli:pivot2osm",
