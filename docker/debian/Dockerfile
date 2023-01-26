@@ -1,4 +1,4 @@
-FROM python:3.6.13-slim-buster as build
+FROM python:3.10.9-slim-buster as build
 
 ### Installation des dépendances
 RUN apt update && apt install -y wget git g++ cmake libboost-dev libboost-filesystem-dev libboost-thread-dev \
@@ -30,9 +30,9 @@ RUN pip install conan
 RUN git clone --branch 3.2.0-with_hard_exclude --depth 1 --recursive https://github.com/IGNF/valhalla.git && cd valhalla && \
 mkdir build && cmake -B build -DCMAKE_BUILD_TYPE=Release && make -C build && make -C build package
 
-FROM python:3.6.13-slim-buster as r2gg
+FROM python:3.10.9-slim-buster as r2gg
 
-ENV PYTHON_VERSION "3.6.13"
+ENV PYTHON_VERSION "3.10.9"
 ENV HOME=/home
 
 ### Installation des dépendances pour OSRM
