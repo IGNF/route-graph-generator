@@ -23,6 +23,12 @@ from r2gg import __about__
 HERE = Path(__file__).parent
 
 requirements = []
+with open(HERE / "requirements/base.txt") as f:
+    requirements = [
+        line
+        for line in f.read().splitlines()
+        if not line.startswith(("#", "-")) and len(line)
+    ]
 
 # The text of the README file
 README = (HERE / "README.md").read_text()
@@ -41,6 +47,24 @@ setup(
     keywords=__about__.__keywords__,
     url=__about__.__uri__,
     version=__about__.__version__,
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Intended Audience :: Information Technology",
+        "License :: OSI Approved :: GPLv3",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: GIS",
+    ],
+    # packaging
+    packages=find_packages(
+        exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests", ".venv"]
+    ),
+    include_package_data=True,
+    install_requires=requirements,
 
     # cli
     entry_points={
