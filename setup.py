@@ -60,14 +60,11 @@ setup(
         "Topic :: Scientific/Engineering :: GIS",
     ],
     # packaging
-    py_modules=["r2gg"],
     packages=find_packages(
         exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests", ".venv"]
     ),
     include_package_data=True,
     install_requires=requirements,
-    extras_require={
-    },
 
     # cli
     entry_points={
