@@ -6,11 +6,11 @@ Route Graph Generator (r2gg) est un script Python qui permet la génération de 
 
 Actuellement, il y a trois formats de sortie : OSRM, pgRouting et Valhalla. 
 
-La conversion se fait via les fonctions de la bibliothèque r2gg développée dans ce but. Une documentation plus détaillée de r2gg est consultable [ici](r2gg).
+La conversion se fait via les fonctions de la bibliothèque r2gg développée dans ce but. Une documentation plus détaillée de r2gg est consultable [ici](https://ignf.github.io/route-graph-generator/).
 
 ## Prérequis
 
-Les prérequis au fonctionnement des scripts de génération sont décrits dans le [readme](docker) de l'image docker.
+Les prérequis au fonctionnement des scripts de génération sont décrits dans le [readme](https://ignf.github.io/route-graph-generator/docker/readme.html) de l'image docker.
 
 Les extensions SQL `postgres_fdw` et `PostGIS` doivent être installées sur la base de données `pivot` :
 
@@ -44,9 +44,9 @@ pip3 install --user -e .
 
 Pour pouvoir lancer les scripts de génération, il faut définir une configuration (au format JSON) par ressource à générer. Ce fichier de configuration fait références à d'autres fichiers de configuration : pour la gestion des logs, la gestion des connexions aux bases de données, et pour le calcul des coûts.
 Des exemples de tous ces fichiers sont présents dans le dépôt dans le dossier `io`.
-La documentation de ces fichiers de configuration est consultable [ici](io). 
+La documentation de ces fichiers de configuration est consultable [ici](https://github.com/IGNF/route-graph-generator/tree/develop/io). 
 
-Un exemple de ces fichier est disponible dans la partie [docker](./docker/config/). 
+Un exemple de ces fichiers est disponible dans la partie [docker](https://github.com/IGNF/route-graph-generator/tree/develop/docker/config). 
 
 ### Exécution
 
