@@ -21,9 +21,9 @@ apt-get install -y libgeos-dev libgeos++-dev libluajit-5.1-dev libspatialite-dev
 apt-get install -y libsqlite3-mod-spatialite
 
 WORKDIR /home/prime-server
-RUN apt-get install -y git autoconf automake pkg-config libtool make gcc g++ lcov libcurl4-openssl-dev libzmq3-dev libczmq-dev
+RUN apt-get install -y git cmake autoconf automake pkg-config libtool make gcc g++ lcov libcurl4-openssl-dev libzmq3-dev libczmq-dev
 RUN git clone --depth 1 --recursive https://github.com/kevinkreiser/prime_server.git && cd prime_server && \
-./autogen.sh && ./configure && make && make install
+cmake -B build . && cmake --build build && make -C build install
 
 WORKDIR /home/valhalla/
 RUN pip install conan
