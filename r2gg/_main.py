@@ -98,8 +98,10 @@ def sql_convert(config, resource, db_configs, connection, logger):
         with open( source['mapping']['conversion']['file'] ) as sql_script:
             cur = connection.cursor()
             logger.info("Executing SQL conversion script")
-            # todo : prendre en compte le schéma qui est dans la conf de la génération
-            instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user')))
+            instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user'),
+                                                                   input_schema=source_db_config.get('schema'),
+                                                                   output_schema=work_db_config.get('schema')
+                                                                   ))
 
             # Exécution instruction par instruction
             for instruction in instructions:
