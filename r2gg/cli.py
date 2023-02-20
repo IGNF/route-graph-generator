@@ -27,8 +27,8 @@ def pivot2pgrouting():
     pgr_convert(config, resource, db_configs, connection, logger)
 
 def pivot2osm():
-    config, resource, _, connection, logger = configure()
-    osm_convert(config, resource, connection, logger)
+    config, resource, db_configs, connection, logger = configure()
+    osm_convert(config, resource, db_configs, connection, logger)
 
 def osm2osrm():
     config, resource, _, _, logger = configure()
@@ -52,11 +52,11 @@ def main():
         pgr_convert(config, resource, db_configs, connection, logger)
     elif (resource['type'] == 'osrm'):
         config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, connection, logger)
+        osm_convert(config, resource, db_configs,  connection, logger)
         osrm_convert(config, resource, logger)
     elif (resource['type'] == 'valhalla'):
         config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, connection, logger, True)
+        osm_convert(config, resource, db_configs, connection, logger, True)
         valhalla_convert(config, resource, logger)
     else:
         raise ValueError("Wrong resource type, should be in ['pgr',osrm','valhalla','smartpgr']")

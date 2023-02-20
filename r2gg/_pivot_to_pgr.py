@@ -8,7 +8,7 @@ from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
 
-def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection_out, schema, logger):
+def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection_out, schema, input_schema, logger):
     """
     Fonction de conversion depuis la bdd pivot vers la base pgr
 
@@ -23,6 +23,8 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
         connection à la bdd pgrouting de sortie
     schema: str
         nom du schéma dans la base de sortie
+    input_schema: str
+        nom du schéma dans la base en entrée
     logger: logging.Logger
     """
 
@@ -107,7 +109,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     cursor_out.execute(create_non_comm)
 
     logger.info("Populating turn restrictions")
-    tr_query = "SELECT id_from, id_to FROM non_comm;"
+    tr_query = f"SELECT id_from, id_to FROM {input_schema}.non_comm;"
 
     logger.debug("SQL: {}".format(tr_query))
     st_execute = time.time()
@@ -167,7 +169,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     cursor_out.execute(create_nodes)
 
     logger.info("Populating vertices")
-    nd_query = "SELECT id, geom FROM nodes;"
+    nd_query = f"SELECT id, geom FROM {input_schema}.nodes;"
 
     logger.debug("SQL: {}".format(nd_query))
     st_execute = time.time()
@@ -263,7 +265,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     output_columns_names = [column.split(' ')[-1] for column in attribute_columns]
 
     # Ecriture des ways
-    sql_query = getQueryByTableAndBoundingBox('edges', source['bbox'], in_columns)
+    sql_query = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], in_columns)
     logger.info("SQL: {}".format(sql_query))
     st_execute = time.time()
     cursor_in.execute(sql_query)

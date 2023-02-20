@@ -1,3 +1,4 @@
+from datetime import date
 from math import ceil
 import os
 import time
@@ -10,7 +11,7 @@ from r2gg._sql_building import getQueryByTableAndBoundingBox
 from r2gg._osm_to_pbf import osm_to_pbf
 
 
-def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
+def pivot_to_osm(config, source, db_configs, connection, logger, output_is_pbf = False):
     """
     Fonction de conversion depuis la bdd pivot vers le fichier osm puis pbf le cas échéant
 
@@ -19,6 +20,8 @@ def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
     config: dict
         dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     source: dict
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
@@ -28,20 +31,28 @@ def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
 
     # Récupération de la date d'extraction
     work_dir_config = config['workingSpace']['directory']
+
+    # Get extraction date from file or use current date
     date_file = os.path.join(work_dir_config, "r2gg.date")
-    f = open(date_file, "r")
-    extraction_date = f.read()
-    f.close()
+    if os.path.exists(date_file):
+        f = open(date_file, "r")
+        extraction_date = f.read()
+        f.close()
+    else:
+        extraction_date = date.today().strftime("%Y-%m-%d")
+
+    source_db_config = db_configs[source['mapping']['source']['baseId']]
+    input_schema = source_db_config.get('schema')
 
     cursor = connection.cursor(cursor_factory=DictCursor)
 
-    logger.info("SQL: select last_value from nodes_id_seq")
-    cursor.execute("select last_value from nodes_id_seq")
+    logger.info(f"SQL: select last_value from {input_schema}.nodes_id_seq")
+    cursor.execute(f"select last_value from {input_schema}.nodes_id_seq")
     vertexSequence = cursor.fetchone()[0]
     logger.info(vertexSequence)
 
-    logger.info("SQL: select last_value from edges_id_seq")
-    cursor.execute("select last_value from edges_id_seq")
+    logger.info(f"SQL: select last_value from {input_schema}.edges_id_seq")
+    cursor.execute(f"select last_value from {input_schema}.edges_id_seq")
     edgeSequence = cursor.fetchone()[0]
     logger.info(edgeSequence)
 
@@ -59,7 +70,7 @@ def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
             with xf.element("osm", attribs):
 
                 # Ecriture des nodes
-                sql_query = getQueryByTableAndBoundingBox('nodes', source['bbox'])
+                sql_query = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'])
                 logger.info("SQL: {}".format(sql_query))
                 st_execute = time.time()
                 cursor.execute(sql_query)
@@ -80,7 +91,7 @@ def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
                 logger.info("Writing nodes ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
                 # Ecriture des ways
-                sql_query2 = getQueryByTableAndBoundingBox('edges', source['bbox'], ['*', 'inter_nodes(geom) as internodes'])
+                sql_query2 = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], ['*', f'{input_schema}.inter_nodes(geom) as internodes'])
                 logger.info("SQL: {}".format(sql_query2))
                 st_execute = time.time()
                 cursor.execute(sql_query2)
@@ -108,7 +119,7 @@ def pivot_to_osm(config, source, connection, logger, output_is_pbf = False):
                 logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
                 # Ecriture des restrictions
-                sql_query3 = "select * from non_comm"
+                sql_query3 = f"select * from {input_schema}.non_comm"
                 logger.info("SQL: {}".format(sql_query3))
                 st_execute = time.time()
                 cursor.execute(sql_query3)
