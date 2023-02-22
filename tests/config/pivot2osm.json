@@ -1,0 +1,37 @@
+{
+  "generation": {
+    "general":{
+      "id": "pivot2osm",
+      "logs": {"configFile": "/home/docker/config/sample_log_config.json"},
+      "overwrite": true,
+      "operation": "creation"
+    },
+    "bases": [
+      {
+        "id": "input",
+        "type": "bdd",
+        "configFile": "{src_dir}/tests/config/pivot_base.json",
+        "schema": "public"
+      }
+    ],
+    "workingSpace": {
+      "directory": "/home/docker/data/generation/",
+      "baseId": "input"
+    },
+    "resource": {
+      "id": "pivot-osm",
+      "type": "osrm",
+      "sources": [
+        {
+          "id": "pivot-osm",
+          "type": "osrm",
+          "bbox": "-180,-90,180, 90",
+          "mapping":
+          {
+            "source": {"baseId": "input"}
+          }
+        }
+      ]
+    }
+  }
+}
