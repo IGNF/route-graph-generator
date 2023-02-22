@@ -88,7 +88,7 @@ RUN apt-get install -y wget
 ### Opérations pour le fonctionnement de l'image
 #### Récupérations des scripts SQL du dépôt
 WORKDIR /home/docker/sql
-COPY sql/bduni_convert.sql ./bduni_convert.sql
+COPY sql/*.sql ./
 #### Récupération des autres fichiers de configuration
 WORKDIR /home/docker/config
 COPY docker/config/* ./
