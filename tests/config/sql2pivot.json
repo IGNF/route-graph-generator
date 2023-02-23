@@ -11,13 +11,13 @@
         "id": "bdtopo",
         "type": "bdd",
         "configFile": "{src_dir}/tests/config/bdtopo_base.json",
-        "schema": "public"
+        "schema": "input"
       },
       {
         "id": "pivot",
         "type": "bdd",
         "configFile": "{src_dir}/tests/config/pivot_base.json",
-        "schema": "public"
+        "schema": "pivot_schema"
       }
     ],
     "workingSpace": {

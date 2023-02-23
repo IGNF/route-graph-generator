@@ -24,6 +24,9 @@ DBNAME = os.environ.get("POSTGRES_DB", "ign")
 USER = os.environ.get("POSTGRES_USER", "ign")
 PASS = os.environ.get("POSTGRES_PASSWORD", "ign")
 
+# Schemas are defined in input configuration .json files
+INPUT_SCHEMA = "input"
+
 
 @pytest.fixture
 def init_database() -> None:
@@ -32,12 +35,14 @@ def init_database() -> None:
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     con.cursor().execute("CREATE DATABASE pivot")
+    con.cursor().execute(f"CREATE SCHEMA IF NOT EXISTS {INPUT_SCHEMA}")
     con.commit()
     con.close()
 
     # Insert test data
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
     cur = con.cursor()
+    cur.execute(f"SET search_path TO {INPUT_SCHEMA}")
     with open(str(cur_dir / "dumps" / "troncon_route_marseille10.sql"), mode="r") as sql_script:
         cur.execute(sql_script.read())
     with open(str(cur_dir / "dumps" / "non_communication_marseille10.sql"), mode="r") as sql_script:
@@ -57,8 +62,8 @@ def init_database() -> None:
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     con.cursor().execute("DROP DATABASE pivot")
-    con.cursor().execute("DROP TABLE public.non_communication")
-    con.cursor().execute("DROP TABLE public.troncon_de_route")
+    con.cursor().execute(f"DROP TABLE {INPUT_SCHEMA}.non_communication")
+    con.cursor().execute(f"DROP TABLE {INPUT_SCHEMA}.troncon_de_route")
     con.commit()
     con.close()
 
