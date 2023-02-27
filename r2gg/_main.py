@@ -168,10 +168,13 @@ def pgr_convert(config, resource, db_configs, connection, logger):
 
         schema_out = out_db_config.get('schema')
 
+        source_db_config = db_configs[source['mapping']['source']['baseId']]
+        input_schema = source_db_config.get('schema')
+
         cost_calculation_files_paths = {cost["compute"]["configuration"]["storage"]["file"] for cost in source["costs"]}
 
         for cost_calculation_file_path in cost_calculation_files_paths:
-            pivot_to_pgr(source, cost_calculation_file_path, connection, connection_out, schema_out, logger)
+            pivot_to_pgr(source, cost_calculation_file_path, connection, connection_out, schema_out, input_schema, logger)
         connection_out.close()
 
     connection.close()
@@ -179,7 +182,7 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(et_pivot_to_pgr - st_pivot_to_pgr))
 
 
-def osm_convert(config, resource, connection, logger):
+def osm_convert(config, resource, db_configs, connection, logger):
     """
     Fonction de conversion depuis la bdd pivot vers un fichier osm
 
@@ -189,6 +192,8 @@ def osm_convert(config, resource, connection, logger):
         dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
     connection: psycopg2.connection
         connection à la bdd de travail
     logger: logging.Logger
@@ -209,7 +214,7 @@ def osm_convert(config, resource, connection, logger):
         convert_osm_to_pbf = True
 
     # Comme chaque source de la ressource peut potentiellement nécessiter un pivot différent,
-    # On fait une boucle sur les sources et on adpate en fonction du type
+    # On fait une boucle sur les sources et on adapte en fonction du type
     for source in resource['sources']:
 
         logger.info("Create osm file of source: " + source['id'])
@@ -249,7 +254,7 @@ def osm_convert(config, resource, connection, logger):
 
         else:
             logger.info("Mapping not already done")
-            pivot_to_osm(config, source, connection, logger, convert_osm_to_pbf)
+            pivot_to_osm(config, source, db_configs, connection, logger, convert_osm_to_pbf)
 
         used_bases[ source['id'] ] = source['mapping']['source']['baseId']
 
