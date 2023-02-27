@@ -71,20 +71,23 @@ def configure():
     # Récupération de l'objet permettant de générer la ressource
     resource = config['resource']
 
-    # Configuration de la bdd de travail
-    work_db_config = db_configs[ config['workingSpace']['baseId'] ]
+    if 'workingSpace' in config and 'baseId' in config['workingSpace']:
+        # Configuration de la bdd de travail
+        work_db_config = db_configs[ config['workingSpace']['baseId'] ]
 
-    # Récupération des paramètres de la bdd
-    host = work_db_config.get('host')
-    dbname = work_db_config.get('database')
-    user = work_db_config.get('user')
-    password = work_db_config.get('password')
-    port = work_db_config.get('port')
-    connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
+        # Récupération des paramètres de la bdd
+        host = work_db_config.get('host')
+        dbname = work_db_config.get('database')
+        user = work_db_config.get('user')
+        password = work_db_config.get('password')
+        port = work_db_config.get('port')
+        connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
 
-    logger.info("Connecting to work database")
-    connection = psycopg2.connect(connect_args)
-    connection.set_client_encoding('UTF8')
+        logger.info("Connecting to work database")
+        connection = psycopg2.connect(connect_args)
+        connection.set_client_encoding('UTF8')
+    else:
+        connection = None
 
     # Création de l'espace de travail
     if not os.path.exists(config['workingSpace']['directory']):
