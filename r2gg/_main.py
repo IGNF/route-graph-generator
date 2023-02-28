@@ -120,8 +120,6 @@ def sql_convert(config, resource, db_configs, connection, logger):
                 et_instruction = time.time()
                 logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
 
-    connection.close()
-
     et_sql_conversion = time.time()
 
     logger.info("Conversion from BDD to pivot ended. Elapsed time : %s seconds." %(et_sql_conversion - st_sql_conversion))
@@ -177,7 +175,6 @@ def pgr_convert(config, resource, db_configs, connection, logger):
             pivot_to_pgr(source, cost_calculation_file_path, connection, connection_out, schema_out, input_schema, logger)
         connection_out.close()
 
-    connection.close()
     et_pivot_to_pgr = time.time()
     logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(et_pivot_to_pgr - st_pivot_to_pgr))
 
@@ -257,8 +254,6 @@ def osm_convert(config, resource, db_configs, connection, logger):
             pivot_to_osm(config, source, db_configs, connection, logger, convert_osm_to_pbf)
 
         used_bases[ source['id'] ] = source['mapping']['source']['baseId']
-
-    connection.close()
 
 def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     """

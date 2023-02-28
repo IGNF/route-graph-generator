@@ -71,6 +71,30 @@ def configure():
     # Récupération de l'objet permettant de générer la ressource
     resource = config['resource']
 
+    # Création de l'espace de travail
+    if not os.path.exists(config['workingSpace']['directory']):
+        os.makedirs(config['workingSpace']['directory'])
+
+    return config, resource, db_configs, logger
+
+def connect_working_db(config, db_configs, logger):
+    """
+    Fonction de connexion à la BDD de travail
+
+    Parameters
+    ----------
+    config: dict
+        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
+    db_configs: dict
+        dictionnaire correspondant aux configurations des bdd
+    logger: logging.Logger
+    Returns
+    -------
+    connection: psycopg2.connection
+        connection à la bdd de travail
+
+    """
+
     # Configuration de la bdd de travail
     work_db_config = db_configs[ config['workingSpace']['baseId'] ]
 
@@ -86,8 +110,18 @@ def configure():
     connection = psycopg2.connect(connect_args)
     connection.set_client_encoding('UTF8')
 
-    # Création de l'espace de travail
-    if not os.path.exists(config['workingSpace']['directory']):
-        os.makedirs(config['workingSpace']['directory'])
+    return connection
 
-    return config, resource, db_configs, connection, logger
+def disconnect_working_db(connection, logger):
+    """
+    Fonction de connexion à la BDD de travail
+
+    Parameters
+    ----------
+    connection: psycopg2.connection
+        connection à la bdd de travail
+    logger: logging.Logger
+    """
+
+    connection.close()
+    logger.info("Connection to work database closed")
