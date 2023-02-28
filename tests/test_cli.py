@@ -2,10 +2,11 @@ import argparse
 import json
 import os
 from pathlib import Path
+from urllib import request
 
 # 3rd party
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -13,7 +14,7 @@ from r2gg import cli
 
 import psycopg2 as psycopg
 
-cur_dir = Path(os.path.normpath(os.path.dirname(__file__)))
+cur_dir = Path(__file__).parent.absolute()
 
 # ############################################################################
 # ########## Classes #############
@@ -27,9 +28,11 @@ PASS = os.environ.get("POSTGRES_PASSWORD", "ign")
 # Schemas are defined in input configuration .json files
 INPUT_SCHEMA = "input"
 
+TRONCON_ROUTE_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/troncon_route_marseille10.sql"
+NON_COMMUNICATION_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/non_communication_marseille10.sql"
 
 @pytest.fixture
-def init_database() -> None:
+def init_database(tmp_path) -> None:
     """Init database for test."""
 
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
@@ -43,9 +46,13 @@ def init_database() -> None:
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
     cur = con.cursor()
     cur.execute(f"SET search_path TO {INPUT_SCHEMA}")
-    with open(str(cur_dir / "dumps" / "troncon_route_marseille10.sql"), mode="r") as sql_script:
+
+    request.urlretrieve(TRONCON_ROUTE_URL, tmp_path / "troncon_route_marseille10.sql")
+    request.urlretrieve(NON_COMMUNICATION_URL, tmp_path / "non_communication_marseille10.sql")
+
+    with open(str(tmp_path / "troncon_route_marseille10.sql"), mode="r") as sql_script:
         cur.execute(sql_script.read())
-    with open(str(cur_dir / "dumps" / "non_communication_marseille10.sql"), mode="r") as sql_script:
+    with open(str(tmp_path / "non_communication_marseille10.sql"), mode="r") as sql_script:
         cur.execute(sql_script.read())
 
     con.commit()
