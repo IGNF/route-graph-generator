@@ -27,6 +27,7 @@ PASS = os.environ.get("POSTGRES_PASSWORD", "ign")
 
 # Schemas are defined in input configuration .json files
 INPUT_SCHEMA = "input"
+OUTPUT_SCHEMA = "output"
 
 TRONCON_ROUTE_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/troncon_route_marseille10.sql"
 NON_COMMUNICATION_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/non_communication_marseille10.sql"
@@ -37,8 +38,8 @@ def init_database(tmp_path) -> None:
 
     con = psycopg.connect(host=HOST, dbname=DBNAME, user=USER, password=PASS, port=PORT)
     con.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-    con.cursor().execute("CREATE DATABASE pivot")
     con.cursor().execute(f"CREATE SCHEMA IF NOT EXISTS {INPUT_SCHEMA}")
+    con.cursor().execute(f"CREATE DATABASE pivot")
     con.commit()
     con.close()
 
@@ -60,6 +61,7 @@ def init_database(tmp_path) -> None:
 
     # Add extensions to pivot
     con = psycopg.connect(host=HOST, dbname="pivot", user=USER, password=PASS, port=PORT)
+    con.cursor().execute(f"CREATE SCHEMA IF NOT EXISTS {OUTPUT_SCHEMA}")
     con.cursor().execute("CREATE EXTENSION IF NOT EXISTS postgres_fdw")
     con.cursor().execute("CREATE EXTENSION IF NOT EXISTS Postgis")
     con.commit()

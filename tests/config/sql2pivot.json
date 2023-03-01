@@ -17,7 +17,7 @@
         "id": "pivot",
         "type": "bdd",
         "configFile": "{src_dir}/tests/config/pivot_base.json",
-        "schema": "pivot_schema"
+        "schema": "output"
       }
     ],
     "workingSpace": {
