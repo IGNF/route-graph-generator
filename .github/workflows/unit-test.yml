@@ -1,0 +1,57 @@
+
+name: Unit tests
+
+on:
+  pull_request:
+    paths:
+    - ".github/workflows/unit-test.yml"
+    - "**/*.py"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  POSTGRES_VERSION: "15"
+  POSTGIS_VERSION: "3.0"
+  POSTGRES_DB: ign
+  POSTGRES_USER: ign
+  POSTGRES_PASSWORD: ign
+  POSTGRES_HOST: "172.17.0.1"
+
+jobs:
+  test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    
+    container: 'ghcr.io/ignf/route-graph-generator:develop'
+
+    services:
+      postgis:
+        image: postgis/postgis # unable to handle var in image name. Was: "postgis/postgis:${POSTGRES_VERSION}-${POSTGIS_VERSION}-alpine"
+        env:
+          POSTGRES_DB: ign # mandatory duplicate
+          POSTGRES_USER: ign # mandatory duplicate
+          POSTGRES_PASSWORD: ign # mandatory duplicate
+        ports:
+          # Maps tcp port 5555 on service container to the host
+          - 5555:5432
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install test dependencies
+        run: |
+            pip install -r requirements/testing.txt
+
+      - name: Run test
+        run: |
+          python -m pytest
+
+      - name: Get Coverage
+        uses: orgoro/coverage@v3
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+

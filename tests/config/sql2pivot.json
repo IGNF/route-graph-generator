@@ -1,0 +1,43 @@
+{
+  "generation": {
+    "general":{
+      "id": "sql2pivot",
+      "logs": {"configFile": "/home/docker/config/sample_log_config.json"},
+      "overwrite": true,
+      "operation": "creation"
+    },
+    "bases": [
+      {
+        "id": "bdtopo",
+        "type": "bdd",
+        "configFile": "{src_dir}/tests/config/bdtopo_base.json",
+        "schema": "input"
+      },
+      {
+        "id": "pivot",
+        "type": "bdd",
+        "configFile": "{src_dir}/tests/config/pivot_base.json",
+        "schema": "output"
+      }
+    ],
+    "workingSpace": {
+      "directory": "/home/docker/data/generation/",
+      "baseId": "pivot"
+    },
+    "resource": {
+      "id": "bdtopo_conversion",
+      "sources": [
+        {
+          "id": "output_source",
+          "type": "pgr",
+          "bbox": "-180,-90,180, 90",
+          "mapping":
+          {"source": {"baseId": "bdtopo"},
+            "conversion":
+            {"file": "{src_dir}/sql/bdtopo_v3.3.sql"}
+          }
+        }
+      ]
+    }
+  }
+}
