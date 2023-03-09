@@ -91,9 +91,8 @@ def update_src_dir_json(file_path: Path, output_file_path: Path):
         f.write(content)
 
 
-def test_sql2pivot(init_database):
-    """Test simple run of cli for pivot base creation."""
-
+def sql2pivot():
+    """Simple run of cli for pivot base creation."""
     # Update input json file to indicate current source directory
     update_src_dir_json(cur_dir / "config" / "sql2pivot.json", cur_dir / "config" / "updated_sql2pivot.json")
 
@@ -103,3 +102,31 @@ def test_sql2pivot(init_database):
             config_file_path=str(cur_dir / "config" / "updated_sql2pivot.json"))
         # Run conversion
         cli.sql2pivot()
+
+
+def test_sql2pivot(init_database):
+    """Test simple run of cli for pivot base creation."""
+    sql2pivot()
+
+
+def pivot2osm():
+    """Simple run of cli for osm file creation from pivot database."""
+    # Update input json file to indicate current source directory
+    update_src_dir_json(cur_dir / "config" / "pivot2osm.json", cur_dir / "config" / "updated_pivot2osm.json")
+
+    # mock ArgumentParser for configuration file
+    with patch("argparse.ArgumentParser.parse_args") as parse_arg_mock:
+        parse_arg_mock.return_value = argparse.Namespace(
+            config_file_path=str(cur_dir / "config" / "updated_pivot2osm.json"))
+        # Run conversion
+        cli.pivot2osm()
+
+        assert os.path.exists("/home/docker/data/generation/pivot-osm.osm")
+
+
+def test_pivot2osm(init_database):
+    """Test simple run of cli for osm file creation from pivot database."""
+
+    sql2pivot()
+    pivot2osm()
+
