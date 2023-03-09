@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 2.1.0
+
+FIX:
+- Déconnexion de la base de données de travail après traitement
+
+CHANGES:
+- Pas de connexion à la base de travail si non utilisée
+
+ADD:
+- Ajout de la documentation sur GitHub Pages : https://ignf.github.io/route-graph-generator/
+- Ajout de la publication de l'image docker sur le container GitHub : https://github.com/IGNF/route-graph-generator/pkgs/container/route-graph-generator
+- Première livraison sur PyPi
+- Ajout de tests de bout en bout avec pytest. Pour l'instant sql2pivot et pivot2osm sont testés.
+- Ajout support des schémas d'entrée pour la conversion vers la base pivot
+- Ajout d'un script pour la conversion d'une BDTOPO
+
+UPDATE: 
+- Mise à jour version python en 3.10 dans l'image docker
+- Mise à jour dockerfile pour meilleur gestion des requirements
+- Mise à jour dockerfile pour utiliser la version bullseye de debian
+
 ## 2.0.0
 
 FIX:
