@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "variables",
+    "outputs"
+  ],
+  "properties": {
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "column_name",
+          "mapping"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mapping": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          },
+          "column_name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "speed_value",
+          "direct_conditions",
+          "reverse_conditions",
+          "turn_restrictions",
+          "cost_type",
+          "operations"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cost_type": {
+            "type": "string"
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "string",
+                  "enum" : ["add","substract","multiply","divide"]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "speed_value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "direct_conditions": {
+            "type": "string"
+          },
+          "turn_restrictions": {
+            "type": "boolean"
+          },
+          "reverse_conditions": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
