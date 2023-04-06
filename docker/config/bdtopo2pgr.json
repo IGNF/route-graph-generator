@@ -78,11 +78,6 @@
               "baseId": "base_sortie",
               "attributes": [
                 {
-                  "key": "name",
-                  "column": "way_names",
-                  "default": "false"
-                },
-                {
                   "key": "nom_1_gauche",
                   "column": "nom_1_gauche",
                   "default": "true"
@@ -365,7 +360,6 @@
             {
               "id": "waysAttributes",
               "values": [
-                "name",
                 "nom_1_gauche",
                 "nom_1_droite",
                 "cpx_numero",
