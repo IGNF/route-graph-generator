@@ -464,7 +464,7 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
         elif source['type'] == "valhalla":
             source.pop("mapping", None)
             for cost in source["costs"]:
-                cost.pop("compute")
+                cost.pop("compute", None)
         elif source['type'] == "pgr":
             source.pop("mapping", None)
             bid_tmp = source["storage"]["base"]["baseId"]
@@ -476,7 +476,7 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
                     source["storage"]["base"].update({"schema":base["schema"]})
             source["storage"]["base"].pop("baseId", None)
             for cost in source["costs"]:
-                cost.pop("compute")
+                cost.pop("compute", None)
         else:
             continue
 
