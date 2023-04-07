@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2.2.0
+
+FIX:
+- pas d'exception si certains attributs non nécessaire ne sont pas présent dans le .json pour la création de configuration road2
+- suppression d'attribut 'name' dans la configuration d'exemple
+
+ADD:
+- ajout d'un json-schema pour le fichier cost_calculations
+
 ## 2.1.0
 
 FIX:
