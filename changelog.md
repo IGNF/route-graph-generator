@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.2.1 
+
+CHANGED:
+- reference de la doc à la branche master
+- modification de la ci github pour prendre en compte la branche master
+
 ## 2.2.0
 
 FIX:
