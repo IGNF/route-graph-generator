@@ -24,7 +24,7 @@ jobs:
     name: Run unit tests
     runs-on: ubuntu-latest
     
-    container: 'ghcr.io/ignf/route-graph-generator:master'
+    container: 'ghcr.io/ignf/route-graph-generator:latest'
 
     services:
       postgis:
