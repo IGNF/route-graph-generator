@@ -44,9 +44,9 @@ pip3 install --user -e .
 
 Pour pouvoir lancer les scripts de génération, il faut définir une configuration (au format JSON) par ressource à générer. Ce fichier de configuration fait références à d'autres fichiers de configuration : pour la gestion des logs, la gestion des connexions aux bases de données, et pour le calcul des coûts.
 Des exemples de tous ces fichiers sont présents dans le dépôt dans le dossier `io`.
-La documentation de ces fichiers de configuration est consultable [ici](https://github.com/IGNF/route-graph-generator/tree/develop/io). 
+La documentation de ces fichiers de configuration est consultable [ici](https://github.com/IGNF/route-graph-generator/tree/master/io). 
 
-Un exemple de ces fichiers est disponible dans la partie [docker](https://github.com/IGNF/route-graph-generator/tree/develop/docker/config). 
+Un exemple de ces fichiers est disponible dans la partie [docker](https://github.com/IGNF/route-graph-generator/tree/master/docker/config). 
 
 ### Exécution
 
