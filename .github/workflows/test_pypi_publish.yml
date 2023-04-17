@@ -1,14 +1,15 @@
-name: Publish Python 🐍 distribution 📦 to PyPI
+name: Publish Python 🐍 distributions 📦 to TestPyPI
 
 on: 
-  release:
-    types: [released]
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["develop"]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
 jobs:
- build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI 
+  build-n-publish:
+    name: Build and publish Python 🐍 distributions 📦 to TestPyPI
     runs-on: ubuntu-latest
     
     steps:
@@ -35,8 +36,11 @@ jobs:
           --outdir dist/
           .
 
-      - name: Publish distribution 📦 to PyPI
-        if: startsWith(github.ref, 'refs/tags')
+      - name: Publish distribution 📦 to Test PyPI
+        if: github.event_name != 'pull_request'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_TOKEN }}
+          verbose: true
+          skip_existing: true
+          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
