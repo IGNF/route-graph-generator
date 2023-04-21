@@ -6,8 +6,6 @@ name: Docker GitHub Container Registry
 # documentation.
 
 on:
-  #schedule:
-  #  - cron: '40 18 * * *'
   push:
     branches: [ "master" ]
     # Publish semver tags as releases.
