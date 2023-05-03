@@ -19,6 +19,11 @@
       "name": "sens",
       "column_name": "direction",
       "mapping": "value"
+    },
+    {
+      "name": "urbain",
+      "column_name": "urbain",
+      "mapping" : { "True": 5, "False": 0}
     }
   ],
   "outputs": [
@@ -43,7 +48,8 @@
       "operations": [
         ["add", "length_m"],
         ["divide", "vitesse_voiture"],
-        ["multiply", 3.6]
+        ["multiply", 3.6],
+        ["add", "urbain"]
       ]
     },
     {

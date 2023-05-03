@@ -1,4 +1,4 @@
-# Description d'un fichier de configuration de génération pour des ressources PGR
+# Description d'un fichier de configuration de génération pour des ressources valhalla
 
 # Une génération est un objet qui contient toutes les informations utiles pour que les scripts de génération puissent créer une ressource.
 "generation":
@@ -189,34 +189,18 @@
                 type: object
                     required: true
                     properties:
-                      # BDD
-                      "base":
-                        type: object
+                      # Emplacement des tuiles générées 
+                      "tar":
+                        type: string
                         required: true
-                        properties:
-                          # Id de la base, doit exister dans bases
-                          "baseId":
-                            type: string
-                            required: true
-                          # Attributs, permet de faire le lien entre les attributs requêtables et la BDD
-                          "attributes":
-                            type: array
-                            minItems: 1
-                            items:
-                              type: object
-                              properties:
-                                # Clé pour les requêtes Road2
-                                "key":
-                                  type: string
-                                  required: true
-                                # Nom de la colonne dans la base
-                                "column":
-                                  type: string
-                                  required: true
-                                # Indiquer si cet attribut est présent par défaut dans la réponse de la ressource Road2 générée
-                                "default":
-                                  type: string
-                                  required: true
+                      # Dossier correspondant aux tuiles générées 
+                      "dir":
+                        type: string
+                        required: true
+                      # configuration des tuiles générées
+                      "config":
+                        type: string
+                        required: true
               # Coûts qui seront calculés sur la topologie précisée précedemment. On peut en avoir plusieurs.
               "costs":
                 type: array
@@ -237,12 +221,8 @@
                       "costType":
                         type: string
                         required: true
-                      # Chaque coût correspond à une colonne de coût dans la base
-                      "costColumn":
-                        type: string
-                        required: true
-                      # Chaque coût correspond à une colonne de coût inverse dans la base
-                      "rcostColumn":
+                      # Chaque coût correspond à un costing pour valhalla
+                      "costing":
                         type: string
                         required: true
                       # Fichier permettant de calculer le coût

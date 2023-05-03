@@ -1,6 +1,8 @@
 -- ####################################################
 -- IMPORT DE LA TABLE DES TRONCON DE ROUTE DEPUIS BDUNI
 -- ####################################################
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+CREATE EXTENSION IF NOT EXISTS Postgis;
 
 DROP SERVER IF EXISTS bduni_server CASCADE;
 CREATE SERVER bduni_server
@@ -13,13 +15,12 @@ CREATE USER MAPPING FOR {user}
 
 GRANT USAGE ON FOREIGN SERVER bduni_server TO {user};
 
-
 CREATE SCHEMA IF NOT EXISTS {output_schema};
 
 DROP FOREIGN TABLE IF EXISTS {output_schema}.troncon_de_route CASCADE;
 DROP FOREIGN TABLE IF EXISTS {output_schema}.non_communication CASCADE;
 
-IMPORT FOREIGN SCHEMA {input_schema} LIMIT TO (troncon_de_route, non_communication)
+IMPORT FOREIGN SCHEMA {input_schema}  LIMIT TO (troncon_de_route, non_communication)
 FROM SERVER bduni_server
 INTO {output_schema};
 
@@ -138,7 +139,7 @@ $$ LANGUAGE SQL;
 -- populate.sql
 -- On doit copier au préalable troncon_de_route pour figer les tronçons car elle est mise à jour en continue
 
-CREATE TEMP TABLE bduni_non_com_tmp AS
+CREATE TEMP TABLE IF NOT EXISTS bduni_non_com_tmp AS
 SELECT * FROM {output_schema}.non_communication;
 
 
@@ -151,8 +152,8 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     SELECT
       -- GCVS (système d'historique)
       t.cleabs as cleabs,
-      t.gcms_detruit AS detruit,
-      t.gcms_territoire as territoire,
+      -- t.gcms_detruit AS detruit,
+      -- t.gcms_territoire as territoire,
 
       -- BD TOPO
       t.etat_de_l_objet as etat,
@@ -202,7 +203,9 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.cpx_classement_administratif as cpx_classement_administratif,
 
       -- géométrie du troncon
-      ST_Force2D(ST_Transform(ST_SetSrid(t.geometrie, {output_schema}.bduni_srid(t.gcms_territoire)), 4326)) as geom
+      ST_Force2D(ST_Transform(t.geom, 4326)) as geom
+      -- ST_Force2D(ST_Transform(ST_SetSrid(t.geometrie, {output_schema}.bduni_srid(t.gcms_territoire)), 4326)) as geom
+
 
     FROM (
       -- decomposition liens_vers_route_nommee en lien_vers_route_nommee (split et duplication des lignes)
@@ -210,7 +213,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       -- SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
     ) t
   ) s
-    WHERE NOT detruit AND etat LIKE 'En service'
+    WHERE etat LIKE 'En service'
     AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
     -- décommenter pour tester :
     -- AND territoire='REU'
@@ -299,7 +302,8 @@ SELECT * FROM (
     -- liens_vers_troncon_sortie
     regexp_split_to_table(bduni_non_com_tmp.liens_vers_troncon_sortie, E'/') AS lien_vers_troncon_sortie
   FROM bduni_non_com_tmp
-  WHERE lien_vers_troncon_entree IN (SELECT cleabs from {output_schema}.edges) AND NOT gcms_detruit
+  WHERE lien_vers_troncon_entree IN (SELECT cleabs from {output_schema}.edges)
+  -- WHERE lien_vers_troncon_entree IN (SELECT cleabs from {output_schema}.edges) AND NOT gcms_detruit
 ) AS non_comm_split
 WHERE non_comm_split.lien_vers_troncon_sortie IN (SELECT cleabs from {output_schema}.edges);
 

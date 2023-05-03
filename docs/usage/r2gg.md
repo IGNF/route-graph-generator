@@ -7,7 +7,7 @@ Bibliothèque de scripts Python permettant la génération de graphs utilisables
 Les fonctions publiques exposées par r2gg permettent de réaliser les trois processus des scripts de génération. Les fonctions utile à une génération complète peuvent être lancées via la commande suivante :
 `python3 r2gg.fonction config.json`
 
-Au passage, ces fonctions ont toutes besoin d'un fichier de configuration (décrit [ici](../io)) pour pouvoir fonctionner. Des exemples sont dans disponibles [ici](../docker/config/).
+Au passage, ces fonctions ont toutes besoin d'un fichier de configuration (décrit [ici](./configuration.md)) pour pouvoir fonctionner. Des exemples sont disponibles dans le dossier {{ '[docker/config]({}/tree/{}/docker/config)'.format(repo_url, repo_branch) }}.
 
 Mais on peut décider de n'en lancer que certaines selon le résultat que l'on souhaite obtenir. 
 

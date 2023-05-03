@@ -58,9 +58,8 @@
             "source": {
               "baseId": "base_bduni"
             },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
             }
           },
           "storage": {
@@ -76,7 +75,7 @@
               "configuration": {
                 "name": "cost_s_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
@@ -92,9 +91,8 @@
             "source": {
               "baseId": "base_bduni"
             },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
             }
           },
           "storage": {
@@ -110,7 +108,7 @@
               "configuration": {
                 "name": "cost_m_car",
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 }
               }
             }
@@ -178,7 +176,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {

@@ -58,9 +58,8 @@
             "source": {
               "baseId": "base_bduni"
             },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
             }
           },
           "storage": {
@@ -89,7 +88,7 @@
             {
               "profile": "car",
               "optimization": "shortest",
-              "costType": "time",
+              "costType": "distance",
               "costing": "auto_shorter",
               "compute": {
                 "storage": {
@@ -106,6 +105,23 @@
             {
               "profile": "pedestrian",
               "optimization": "shortest",
+              "costType": "distance",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "fastest",
               "costType": "time",
               "costing": "pedestrian",
               "compute": {
@@ -185,7 +201,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
@@ -228,7 +245,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
@@ -293,7 +318,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
@@ -317,7 +350,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {

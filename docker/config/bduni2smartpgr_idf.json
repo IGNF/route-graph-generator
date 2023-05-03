@@ -72,7 +72,7 @@
         },
         {
           "id": "bduni-idf-pgr",
-          "description":"Graphe BDuni au format PGRouting France entière", 
+          "description":"Graphe BDuni au format PGRouting France entière",
           "type": "pgr",
           "projection": "EPSG:4326",
           "bbox": "1.7,48.4,3.3,49.1",
@@ -88,11 +88,6 @@
             "base": {
               "baseId": "base_sortie",
               "attributes": [
-                {
-                  "key": "name",
-                  "column": "way_names",
-                  "default": "false"
-                },
                 {
                   "key": "nom_1_gauche",
                   "column": "nom_1_gauche",
@@ -251,73 +246,73 @@
               "profile": "car",
               "optimization": "fastest",
               "costType": "time",
-              "costColumn": "cost_s_car",                      
+              "costColumn": "cost_s_car",
               "rcostColumn": "reverse_cost_s_car",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 },
                 "configuration": {
                   "name": "cost_s_car",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
-              }           
+              }
             },
             {
-              "profile": "car",                               
-              "optimization": "shortest",  
-              "costType": "distance",                    
-              "costColumn": "cost_m_car",                  
+              "profile": "car",
+              "optimization": "shortest",
+              "costType": "distance",
+              "costColumn": "cost_m_car",
               "rcostColumn": "reverse_cost_m_car",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 },
                 "configuration": {
                   "name": "cost_m_car",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
-              }            
+              }
             },
             {
-              "profile": "pedestrian",                               
-              "optimization": "fastest",  
-              "costType": "time",                    
-              "costColumn": "cost_s_pedestrian",                  
+              "profile": "pedestrian",
+              "optimization": "fastest",
+              "costType": "time",
+              "costColumn": "cost_s_pedestrian",
               "rcostColumn": "reverse_cost_s_pedestrian",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 },
                 "configuration": {
                   "name": "cost_s_pedestrian",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
-              }            
+              }
             },
             {
-              "profile": "pedestrian",                               
-              "optimization": "shortest",  
-              "costType": "distance",                    
-              "costColumn": "cost_m_pedestrian",                  
+              "profile": "pedestrian",
+              "optimization": "shortest",
+              "costType": "distance",
+              "costColumn": "cost_m_pedestrian",
               "rcostColumn": "reverse_cost_m_pedestrian",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/costs_calculation_sample.json"
+                  "file": "/home/docker/config/costs_calculation.json"
                 },
                 "configuration": {
                   "name": "cost_m_pedestrian",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
-              }            
+              }
             }
           ]
         }
@@ -376,7 +371,6 @@
             {
               "id": "waysAttributes",
               "values": [
-                "name",
                 "nom_1_gauche",
                 "nom_1_droite",
                 "cpx_numero",
@@ -414,7 +408,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
@@ -713,7 +708,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {

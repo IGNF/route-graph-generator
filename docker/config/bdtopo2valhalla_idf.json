@@ -1,7 +1,7 @@
 {
   "generation": {
     "general": {
-      "id": "bduni2valhalla-idf",
+      "id": "bdtopo2valhalla",
       "logs": {
         "configFile": "/home/docker/config/sample_log_config.json"
       },
@@ -44,12 +44,12 @@
       }
     },
     "resource": {
-      "id": "bduni-idf-valhalla",
+      "id": "bdtopo-idf-valhalla",
       "type": "valhalla",
       "description": "Données BDUNI v2.",
       "sources": [
         {
-          "id": "bduni-idf-valhalla",
+          "id": "bdtopo-idf-valhalla",
           "type": "valhalla",
           "description": "Données issues de la BDUNI de l'IGN au format Valhalla.",
           "projection": "EPSG:4326",
@@ -58,15 +58,14 @@
             "source": {
               "baseId": "base_bduni"
             },
-            "storage": {
-              "file": "/home/docker/sql/bduni_convert.sql",
-              "baseId": "base_pivot"
+            "conversion": {
+              "file": "/home/docker/sql/bduni_convert.sql"
             }
           },
           "storage": {
-            "tar": "/home/docker/data/bduni-idf-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bduni-idf-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla-idf.json"
+            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/valhalla.json"
           },
           "costs": [
             {
@@ -76,12 +75,12 @@
               "costing": "auto",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/graph_bduni.lua"
+                  "file": "/home/docker/config/graph_bdtopo.lua"
                 },
                 "configuration": {
                   "costing": "auto",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }
@@ -89,16 +88,16 @@
             {
               "profile": "car",
               "optimization": "shortest",
-              "costType": "time",
+              "costType": "distance",
               "costing": "auto_shorter",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/graph_bduni.lua"
+                  "file": "/home/docker/config/graph_bdtopo.lua"
                 },
                 "configuration": {
                   "costing": "auto_shorter",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }
@@ -106,16 +105,33 @@
             {
               "profile": "pedestrian",
               "optimization": "shortest",
-              "costType": "time",
+              "costType": "distance",
               "costing": "pedestrian",
               "compute": {
                 "storage": {
-                  "file": "/home/docker/config/graph_bduni.lua"
+                  "file": "/home/docker/config/graph_bdtopo.lua"
                 },
                 "configuration": {
                   "costing": "pedestrian",
                   "storage": {
-                    "file": "/home/docker/config/costs_calculation_sample.json"
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
+            },
+            {
+              "profile": "pedestrian",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "pedestrian",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
                   }
                 }
               }
@@ -130,7 +146,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-valhalla"
+                "bdtopo-idf-valhalla"
               ]
             },
             {
@@ -185,7 +201,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
@@ -228,7 +245,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
@@ -242,7 +267,7 @@
             {
               "id": "resource",
               "values": [
-                "bduni-idf-valhalla"
+                "bdtopo-idf-valhalla"
               ]
             },
             {
@@ -293,7 +318,15 @@
                   "availableValues": [
                     {
                       "value": "autoroute",
-                      "field": "toll"
+                      "field": "exclude_tolls"
+                    },
+                    {
+                      "value": "pont",
+                      "field": "exclude_bridges"
+                    },
+                    {
+                      "value": "tunnel",
+                      "field": "exclude_tunnels"
                     }
                   ]
                 }
@@ -317,7 +350,8 @@
               "defaultValueContent": "geojson",
               "values": [
                 "geojson",
-                "polyline"
+                "polyline",
+                "wkt"
               ]
             },
             {
