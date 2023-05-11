@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 2.2.1 
+## 2.2.2
+
+UPDATE:
+- Mise à jour du script bduni_convert.sql pour rattacher les tronçons d'autoroute aux frontières pour éviter les impasses en sens unique
+
+## 2.2.1
 
 CHANGED:
 - reference de la doc à la branche master
@@ -32,7 +37,7 @@ ADD:
 - Ajout support des schémas d'entrée pour la conversion vers la base pivot
 - Ajout d'un script pour la conversion d'une BDTOPO
 
-UPDATE: 
+UPDATE:
 - Mise à jour version python en 3.10 dans l'image docker
 - Mise à jour dockerfile pour meilleur gestion des requirements
 - Mise à jour dockerfile pour utiliser la version bullseye de debian
@@ -49,7 +54,7 @@ CHANGE:
 ADD:
 - Ajout du fichier licence
 
-UPDATE: 
+UPDATE:
 - Mise à jour de la documentation des fichiers de génération
 - Mise à jour des fichiers de génération dans la partie docker (wkt, renommage de fichiers, contraintes sur valhalla)
 
