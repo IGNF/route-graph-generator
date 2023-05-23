@@ -93,3 +93,7 @@ Elle est indiquée dans le `__init__.py` et dans le `setup.py`.
 ## Licence
 
 Route-graph-generator est diffusé sous la licence GPL v3.
+
+## Participer aux développements 
+
+Les participations à ce projet sont encouragées (votre notre [charte](./CODE_OF_CONDUCT.md) à ce sujet). Il vous est demandé de réaliser vos développements en partant de la branche *develop*. 

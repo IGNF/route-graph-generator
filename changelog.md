@@ -7,6 +7,9 @@ CHANGED:
 - modification de la ci github pour prendre en compte la branche master
 - suppression du déploiement de github pages lors d'un tag
 
+ADDED:
+- A code of conduct was adapted from the contributor covenant 
+
 ## 2.2.0
 
 FIX:
