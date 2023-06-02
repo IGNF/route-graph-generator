@@ -45,4 +45,6 @@ caption: Développement
 ---
 Documentation <development/documentation>
 Changelog <development/history>
+Contribuer <development/contributing>
+Code de conduite <development/conduct>
 ```
