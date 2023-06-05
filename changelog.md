@@ -9,6 +9,7 @@ CHANGED:
 
 ADDED:
 - A code of conduct was adapted from the contributor covenant 
+- A contributing was added
 
 ## 2.2.0
 
