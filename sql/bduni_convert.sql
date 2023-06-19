@@ -19,7 +19,7 @@ CREATE SCHEMA IF NOT EXISTS {output_schema};
 DROP FOREIGN TABLE IF EXISTS {output_schema}.troncon_de_route CASCADE;
 DROP FOREIGN TABLE IF EXISTS {output_schema}.non_communication CASCADE;
 
-IMPORT FOREIGN SCHEMA {input_schema} LIMIT TO (troncon_de_route, non_communication)
+IMPORT FOREIGN SCHEMA {input_schema} LIMIT TO (troncon_de_route, non_communication, bduni_verrouillage)
 FROM SERVER bduni_server
 INTO {output_schema};
 
@@ -141,6 +141,67 @@ $$ LANGUAGE SQL;
 CREATE TEMP TABLE bduni_non_com_tmp AS
 SELECT * FROM {output_schema}.non_communication;
 
+-- rattachement des tronçons aux frontières pour éviter la perte d'itinéraires (impasses à sens unique)
+-- OSRM supprime les impasses à sens unique de ses itinéraires
+-- Aux frontières, les autoroutes (2 tronçons car 2 chaussées) sont coupées abruptement, créant ce type d'impasse
+-- Cette fonction rattache les 2 tronçons des autoroutes après la frontière avec un tronçon fictif
+-- Cela correspond à 19 cas sur la france entière.
+CREATE OR REPLACE FUNCTION {output_schema}.liaison_fictive_chor_frontaliere()
+RETURNS TABLE(
+  cleabs character varying, nature character varying, nom_1_gauche character varying, nom_1_droite character varying, nom_2_gauche character varying, nom_2_droite character varying, importance character varying, fictif boolean, position_par_rapport_au_sol character varying, etat_de_l_objet character varying, gcms_detruit boolean, gcms_date_creation timestamp without time zone, gcms_date_modification timestamp without time zone, gcms_date_destruction timestamp without time zone, date_d_apparition date, date_de_confirmation date, diffusion boolean, source_detaillee jsonb, sources character varying, identifiants_sources character varying, methode_d_acquisition_planimetrique character varying, precision_planimetrique numeric, methode_d_acquisition_altimetrique character varying, precision_altimetrique numeric, complement jsonb, nombre_de_voies character varying, largeur_de_chaussee numeric, itineraire_vert boolean, prive boolean, sens_de_circulation character varying, bande_cyclable character varying, reserve_aux_bus character varying, urbain boolean, vitesse_moyenne_vl integer, acces_vehicule_leger character varying, acces_pieton character varying, periode_de_fermeture jsonb, nature_de_la_restriction character varying, restriction_de_hauteur numeric, restriction_de_poids_total numeric, restriction_de_poids_par_essieu numeric, restriction_de_largeur numeric, restriction_de_longueur numeric, matieres_dangereuses_interdites boolean, borne_debut_gauche character varying, borne_debut_droite character varying, borne_fin_gauche character varying, borne_fin_droite character varying, insee_commune_gauche character varying, insee_commune_droite character varying, type_d_adressage_du_troncon character varying, alias_gauche character varying, alias_droit character varying, code_postal_gauche character varying, code_postal_droit character varying, itineraire_pedestre boolean, itineraire_equestre boolean, inscrit_au_pdipr boolean, bornes_debut_interpolees boolean, bornes_fin_interpolees boolean, nom_rue_gauche_valide date, nom_rue_droite_valide date, bornes_postales_validees date, nom character varying, commentaire_centralise character varying, commentaire_collecteur character varying, date_de_mise_en_service date, source_restitution character varying, metadonnees_guichet_adresse character varying, identifiant_voie_1_gauche character varying, identifiant_voie_1_droite character varying, liens_vers_evolution character varying, liens_vers_route_nommee character varying, liens_vers_itineraire_ffr character varying, liens_vers_itineraire_club_vosgien character varying, liens_vers_itineraire_autre character varying, gcms_numrec integer, gcms_territoire character varying, gcms_fingerprint character varying, gcvs_nom_lot character varying, exception_legitime character varying, affichage_rue boolean, cpx_numero character varying, cpx_numero_route_europeenne character varying, cpx_classement_administratif character varying, cpx_gestionnaire character varying, cpx_toponyme_route_nommee character varying, cpx_toponyme_itineraire_cyclable character varying, cpx_toponyme_voie_verte character varying, cpx_nature_itineraire_ffr character varying, cpx_toponyme_itineraire_ffr character varying, cpx_balisage_itineraire_club_vosgien character varying, cpx_toponyme_itineraire_club_vosgien character varying, cpx_nature_itineraire_autre character varying, cpx_toponyme_itineraire_autre character varying, geometrie geometry, gcvs_empreinte geometry, couloir_de_bus character varying, delestage boolean, liens_vers_prescriptions_te character varying, source_voie_ban_gauche character varying, source_voie_ban_droite character varying, nom_voie_ban_gauche character varying, nom_voie_ban_droite character varying, lieux_dits_ban_gauche character varying, lieux_dits_ban_droite character varying, identifiant_voie_ban_gauche character varying, identifiant_voie_ban_droite character varying, code_insee_du_departement_te character varying, reseau_te character varying, identifiant_te character varying, sens_amenagement_cyclable_gauche character varying, sens_amenagement_cyclable_droit character varying, amenagement_cyclable_gauche character varying, amenagement_cyclable_droit character varying
+)
+AS $$
+BEGIN
+  DROP TABLE IF EXISTS extr;
+  CREATE TEMP TABLE extr as
+  --selection des extrémités des troncon_de_route de la table bduni_verrouillage on ne conserve que les valences 1 (extrémités pendantes)
+  SELECT a.cleabs, a.geom, a.extr FROM
+  (SELECT min(a.cleabs) as cleabs, st_force2d(geom) as geom, min(extr) as extr FROM
+    (SELECT t.cleabs, ST_StartPoint(t.geometrie) geom, 'start' as extr
+      FROM troncon_de_route t,
+      (SELECT t.* FROM troncon_de_route t WHERE t.cleabs IN (SELECT v.cleabs FROM bduni_verrouillage v WHERE v.processus = 'itin_geoportail' AND v.id > 4107280))b
+        WHERE not t.gcms_detruit AND t.nature IN('Type autoroutier','Route à 2 chaussées') AND ST_Intersects(t.geometrie, b.geometrie)
+    UNION ALL
+    SELECT t.cleabs, ST_EndPoint(t.geometrie), 'end'
+      FROM troncon_de_route t,
+      (SELECT t.* FROM troncon_de_route t WHERE t.cleabs IN (SELECT v.cleabs FROM bduni_verrouillage v WHERE v.processus = 'itin_geoportail' AND v.id > 4107280))b
+        WHERE not t.gcms_detruit AND t.nature IN('Type autoroutier','Route à 2 chaussées') AND ST_Intersects(t.geometrie, b.geometrie)
+  ) a
+  GROUP BY st_force2d(geom) HAVING count(*) = 1
+  ) a
+  WHERE a.cleabs IN (SELECT v.cleabs FROM bduni_verrouillage v WHERE v.processus = 'itin_geoportail' AND v.id > 4107280);
+  --Génération de la table des points initiaux
+  DROP TABLE IF EXISTS ptini;
+  CREATE TEMP TABLE ptini as
+  SELECT a.cleabs, ST_Translate(a.geom,0,0,-1000) as geom FROM extr a WHERE a.extr = 'start';
+  --Génération de la table des points finaux
+  DROP TABLE IF EXISTS ptfin;
+  CREATE TEMP TABLE ptfin as
+  SELECT a.cleabs, ST_Translate(a.geom,0,0,-1000) as geom  FROM extr a WHERE a.extr = 'end';
+  --Création de la liaison géométrie dépourvue de Z (-1000), affectation d'une cleabs non bduni mais de même format
+  DROP TABLE IF EXISTS calc;
+  CREATE TEMP TABLE calc as
+  SELECT rpad('TRONROUT',24-length(Row_Number() Over()::text),'0')||Row_Number() Over()::varchar(24) as cleabs,
+  c.cleabs as cleabs_ini, st_translate(st_force3d(st_force2d(ST_Makeline(b.geom, a.geom))),0,0,-1000)::geometry(LinestringZ) as geometrie
+  FROM ptini a, ptfin b, troncon_de_route c
+  WHERE ST_DWithin(a.geom,b.geom,100)
+  AND a.cleabs = c.cleabs;
+  --On propage tous les attributs des chaussées à étendre
+  DROP TABLE IF EXISTS jonction_fictive_chaussor;
+  CREATE TEMP TABLE jonction_fictive_chaussor as
+  SELECT t.*
+  FROM troncon_de_route t WHERE t.cleabs IN(SELECT a.cleabs FROM ptini a);
+  UPDATE jonction_fictive_chaussor a SET geometrie = b.geometrie, cleabs = b.cleabs
+  FROM calc b WHERE a.cleabs = b.cleabs_ini;
+  RETURN QUERY SELECT * FROM jonction_fictive_chaussor;
+    DROP TABLE extr;
+    DROP TABLE ptini;
+    DROP TABLE ptfin;
+    DROP TABLE calc;
+    DROP TABLE jonction_fictive_chaussor;
+END
+$$ LANGUAGE plpgsql ;
+
 
 -- ############################
 -- REMPLISSAGE DE BDUNI_TRONCON
@@ -206,7 +267,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
 
     FROM (
       -- decomposition liens_vers_route_nommee en lien_vers_route_nommee (split et duplication des lignes)
-      SELECT * FROM {output_schema}.troncon_de_route
+      SELECT * FROM {output_schema}.troncon_de_route UNION ALL SELECT * FROM {output_schema}.liaison_fictive_chor_frontaliere()
       -- SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
     ) t
   ) s
