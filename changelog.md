@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## 2.2.1 
+## NEXT-VERSION
+
+FIX:
+- Durée de parcours incohérente sur OSRM entre car-fastest et car-shortest
+
+## 2.2.1
 
 CHANGED:
 - reference de la doc à la branche master
@@ -8,7 +13,7 @@ CHANGED:
 - suppression du déploiement de github pages lors d'un tag
 
 ADDED:
-- A code of conduct was adapted from the contributor covenant 
+- A code of conduct was adapted from the contributor covenant
 - A contributing was added
 
 ## 2.2.0
@@ -36,7 +41,7 @@ ADD:
 - Ajout support des schémas d'entrée pour la conversion vers la base pivot
 - Ajout d'un script pour la conversion d'une BDTOPO
 
-UPDATE: 
+UPDATE:
 - Mise à jour version python en 3.10 dans l'image docker
 - Mise à jour dockerfile pour meilleur gestion des requirements
 - Mise à jour dockerfile pour utiliser la version bullseye de debian
@@ -53,7 +58,7 @@ CHANGE:
 ADD:
 - Ajout du fichier licence
 
-UPDATE: 
+UPDATE:
 - Mise à jour de la documentation des fichiers de génération
 - Mise à jour des fichiers de génération dans la partie docker (wkt, renommage de fichiers, contraintes sur valhalla)
 
