@@ -172,10 +172,9 @@ def _build_process_way(costs_config, output_cost):
     process_way_string += "\n"
 
     # durée
-    if output_cost["cost_type"] == 'duration':
-        process_way_string += "\n    -- durée\n"
-        process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output_cost["operations"]))
-        process_way_string += "\n"
+    process_way_string += "\n    -- durée\n"
+    process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output_cost["operations"]))
+    process_way_string += "\n"
 
     # gestion du sens direct
     process_way_string += "    -- gestion du sens direct\n"
