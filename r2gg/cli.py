@@ -66,6 +66,7 @@ def main():
     elif (resource['type'] == 'valhalla'):
         config, resource, db_configs, connection, logger = configure()
         osm_convert(config, resource, db_configs, connection, logger, True)
+        disconnect_working_db(connection, logger)
         valhalla_convert(config, resource, logger)
     else:
         raise ValueError("Wrong resource type, should be in ['pgr',osrm','valhalla','smartpgr']")

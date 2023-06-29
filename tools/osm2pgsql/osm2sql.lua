@@ -43,12 +43,15 @@ tables.edges = osm2pgsql.define_way_table('edges', {
     { column = 'name', type = 'text' }
 })
 
---tables.non_comm = osm2pgsql.define_node_table('non_comm', {
---    { column = 'id', sql_type = 'serial', create_only = true },
---    { column = 'lon', sql_type = 'real' },
---    { column = 'lat', sql_type = 'real' },
---    { column = 'geom', type = 'point', projection = srid }
---})
+tables.non_comm = osm2pgsql.define_relation_table('non_comm', {
+    -- here, we add a cleabs because OSM data could often create multiple lines for the same restriction
+    { column = 'cleabs', type = 'serial', create_only = true },
+    { column = 'id_from', type = 'bigint' },
+    { column = 'id_to', type = 'bigint' },
+    { column = 'common_vertex_id', type = 'bigint' },
+    -- Additional colums for specific OSM data
+    { column = 'restriction_type' , type = 'text' }
+})
 
 
 -- These tag keys are generally regarded as useless for most rendering. Most
@@ -338,3 +341,87 @@ function osm2pgsql.process_way(object)
     })
 
 end
+
+function osm2pgsql.process_relation(object) 
+
+    -- Cleaning unecessary tags
+    if clean_tags(object.tags) then
+        return
+    end
+
+    -- We only want a restriction
+    if object.tags.type ~= 'restriction' then
+	return
+    end
+
+    -- Analyzing the restriction 
+    local from_ids, to_ids, via_node_ids = {},{},{}
+    local nb_from, nb_to, nb_via_node = 0,0,0
+
+    for _,member in ipairs(object.members) do
+        
+	if member.role == 'from' and member.type == 'w' then
+            nb_from = nb_from + 1
+	    from_ids[nb_from] = member.ref
+        end
+	if member.role == 'to' and member.type == 'w' then
+	    nb_to = nb_to + 1
+	    to_ids[nb_to] = member.ref
+	end
+
+	if member.role =='via' then
+
+	    if member.type == 'n' then
+	        nb_via_node = nb_via_node + 1
+		via_node_ids[nb_via_node] = member.ref
+	    elseif member.type == 'w' then
+		-- TODO : handle this case 
+		return
+	    else
+	        -- should not arrive
+		return
+	    end
+
+	end
+
+    end 
+
+    -- Little verification
+    if nb_from == 0 or nb_to == 0 or nb_via_node ~= 1 then
+	return
+    end 
+
+    -- Get restriction type 
+    local trestriction_type = object:grab_tag('restriction')
+
+
+    -- For each possible from and to, we will add a row  
+
+    for _,from_id in ipairs(from_ids) do
+
+	for _,to_id in ipairs(to_ids) do
+
+            -- Add the resttriction
+            tables.non_comm:add_row({
+	
+                -- Cleabs : nothing to do here
+	
+	        -- Restriction type 
+	        restriction_type = trestriction_type,
+
+		id_from = from_id,
+
+		id_to = to_id,
+
+		common_vertex_id = via_node_ids[1]
+
+
+	    })
+
+
+	end
+
+    end
+
+
+end 
