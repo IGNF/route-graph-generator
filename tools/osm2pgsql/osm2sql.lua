@@ -18,17 +18,12 @@ local srid = 4326
 local tables = {}
 
 -- Definitions of the tables and their columns 
--- We only need nodes, ways and relations usefull for routing
--- We create the structure of the pivot of r2gg with additional columns (ex. 'osm_id')
-
-tables.nodes = osm2pgsql.define_node_table('nodes', {
-    { column = 'lon', type = 'real' },
-    { column = 'lat', type = 'real' },
-    { column = 'geom', type = 'point', projection = srid }
-})
-
+-- We only need ways and relations, there are usefull for routing
+-- a nodes table will be created later by an sql script
+-- We create a structure close to the pivot of r2gg. It has additional columns (ex. 'osm_id')
 
 tables.edges = osm2pgsql.define_way_table('edges', {
+
     { column = 'source_id', type = 'bigint' },
     { column = 'target_id', type = 'bigint' },
     { column = 'x1', type = 'real' },
@@ -39,18 +34,23 @@ tables.edges = osm2pgsql.define_way_table('edges', {
     { column = 'direction', type = 'integer' },
     { column = 'vitesse_moyenne_vl', type = 'integer' },
     { column = 'geom', type = 'linestring', projection = srid },
+
     -- Additional colums for specific OSM data
     { column = 'name', type = 'text' }
+
 })
 
 tables.non_comm = osm2pgsql.define_relation_table('non_comm', {
+
     -- here, we add a cleabs because OSM data could often create multiple lines for the same restriction
     { column = 'cleabs', type = 'serial', create_only = true },
     { column = 'id_from', type = 'bigint' },
     { column = 'id_to', type = 'bigint' },
     { column = 'common_vertex_id', type = 'bigint' },
+    
     -- Additional colums for specific OSM data
     { column = 'restriction_type' , type = 'text' }
+
 })
 
 
@@ -263,32 +263,8 @@ function parse_speed(input)
     end
 
     return nil
+
 end
-
-function osm2pgsql.process_node(object)
-
-    -- Cleaning tags
-    if clean_tags(object.tags) then
-	return
-    end
-
-    local tlon,tlat,_,_ = object:get_bbox()
-
-    tables.nodes:add_row({
-
-        -- OSM id is in node_id column
-	-- So we need to be careful on adding rows because multiple add_rows 
-	-- of the same object will create multiple rows with the same id  
-
-	-- Geometry
-	geom = { create = 'point' },
-	-- Lon and Lat 
-	lon = tlon,
-	lat = tlat
-
-    })
-
-end 
 
 function osm2pgsql.process_way(object)
    
@@ -313,12 +289,12 @@ function osm2pgsql.process_way(object)
     -- Add the edge
     tables.edges:add_row({
 
-	-- OSM id is in the way_id column
-	-- So we need to be careful on adding rows because multiple add_rows 
-	-- of the same object will create multiple rows with the same id
+        -- OSM id is in the way_id column
+        -- So we need to be careful on adding rows because multiple add_rows 
+        -- of the same object will create multiple rows with the same id
 
-	-- Geometry
-	geom = { create = 'line' },
+        -- Geometry
+        geom = { create = 'line' },
 
         -- The 'vitesse_moyenne_vl' column gets the maxspeed in km/h
         vitesse_moyenne_vl = parse_speed(object.tags.maxspeed),
@@ -328,15 +304,14 @@ function osm2pgsql.process_way(object)
         -- as 0.
         direction = object.tags.oneway or 0,
 
-	-- Bbox of the way
-	x1 = tx1,
-	y1 = ty1,
-	x2 = tx2,
-	y2 = ty2,
+        -- Bbox of the way
+        x1 = tx1,
+        y1 = ty1,
+        x2 = tx2,
+        y2 = ty2,
 
-	-- Name 
-	name = tname
-
+        -- Name 
+        name = tname
 
     })
 
@@ -351,44 +326,35 @@ function osm2pgsql.process_relation(object)
 
     -- We only want a restriction
     if object.tags.type ~= 'restriction' then
-	return
+	    return
     end
 
     -- Analyzing the restriction 
-    local from_ids, to_ids, via_node_ids = {},{},{}
-    local nb_from, nb_to, nb_via_node = 0,0,0
+    local from_ids, to_ids = {},{}
+    local nb_from, nb_to = 0,0
 
     for _,member in ipairs(object.members) do
         
-	if member.role == 'from' and member.type == 'w' then
+        if member.role == 'from' and member.type == 'w' then
             nb_from = nb_from + 1
-	    from_ids[nb_from] = member.ref
+            from_ids[nb_from] = member.ref
         end
-	if member.role == 'to' and member.type == 'w' then
-	    nb_to = nb_to + 1
-	    to_ids[nb_to] = member.ref
-	end
 
-	if member.role =='via' then
+        if member.role == 'to' and member.type == 'w' then
+            nb_to = nb_to + 1
+            to_ids[nb_to] = member.ref
+        end
 
-	    if member.type == 'n' then
-	        nb_via_node = nb_via_node + 1
-		via_node_ids[nb_via_node] = member.ref
-	    elseif member.type == 'w' then
-		-- TODO : handle this case 
-		return
-	    else
-	        -- should not arrive
-		return
-	    end
-
-	end
-
+        -- We don't take the via for now 
+        -- Because for nodes, we will create a new id from edges 
+        -- And for ways, we don't handle this case in the pivot
+        -- So ways via are a TODO 
+    
     end 
 
     -- Little verification
-    if nb_from == 0 or nb_to == 0 or nb_via_node ~= 1 then
-	return
+    if nb_from == 0 or nb_to == 0 then
+	    return
     end 
 
     -- Get restriction type 
@@ -399,29 +365,24 @@ function osm2pgsql.process_relation(object)
 
     for _,from_id in ipairs(from_ids) do
 
-	for _,to_id in ipairs(to_ids) do
+        for _,to_id in ipairs(to_ids) do
 
             -- Add the resttriction
             tables.non_comm:add_row({
-	
+        
                 -- Cleabs : nothing to do here
-	
-	        -- Restriction type 
-	        restriction_type = trestriction_type,
+        
+                -- Restriction type 
+                restriction_type = trestriction_type,
 
-		id_from = from_id,
+                id_from = from_id,
 
-		id_to = to_id,
+                id_to = to_id
 
-		common_vertex_id = via_node_ids[1]
+            })
 
-
-	    })
-
-
-	end
+        end
 
     end
 
-
-end 
+end
