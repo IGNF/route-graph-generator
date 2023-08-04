@@ -21,6 +21,11 @@
       "mapping": "value"
     },
     {
+      "name": "acces_pieton",
+      "column_name": "acces_pieton",
+      "mapping": "value"
+    },
+    {
       "name": "urbain",
       "column_name": "urbain",
       "mapping" : { "True": 5, "False": 0}
