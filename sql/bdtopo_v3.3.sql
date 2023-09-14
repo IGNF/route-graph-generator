@@ -74,11 +74,11 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   urbain boolean,
   acces_pieton text,
   nature_de_la_restriction text,
-  restriction_de_hauteur text,
-  restriction_de_poids_total text,
-  restriction_de_poids_par_essieu text,
-  restriction_de_largeur text,
-  restriction_de_longueur text,
+  restriction_de_hauteur double precision,
+  restriction_de_poids_total double precision,
+  restriction_de_poids_par_essieu double precision,
+  restriction_de_largeur double precision,
+  restriction_de_longueur double precision,
   matieres_dangereuses_interdites boolean,
   cpx_gestionnaire text,
   cpx_numero_route_europeenne text,
@@ -162,6 +162,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.sens_de_circulation as sens_de_circulation,
       (CASE
       WHEN t.vitesse_moyenne_vl=1 THEN 0
+      WHEN t.vitesse_moyenne_vl IS NULL THEN 0
       ELSE t.vitesse_moyenne_vl::integer
       END) as vitesse_moyenne_vl,
 
