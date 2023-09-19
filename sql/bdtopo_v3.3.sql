@@ -190,7 +190,10 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       -- TODO: remove
       t.bande_cyclable as bande_cyclable,
       t.reserve_aux_bus as reserve_aux_bus,
-      t.urbain as urbain,
+      (CASE
+      WHEN t.urbain IS NULL THEN 0
+      ELSE t.urbain
+      END) as urbain,
       t.acces_pieton as acces_pieton,
       t.nature_de_la_restriction as nature_de_la_restriction,
       t.restriction_de_hauteur as restriction_de_hauteur,
