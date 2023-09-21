@@ -190,7 +190,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.bande_cyclable as bande_cyclable,
       t.reserve_aux_bus as reserve_aux_bus,
       (CASE
-      WHEN t.urbain IS NULL THEN 0
+      WHEN t.urbain IS NULL THEN 0::boolean
       ELSE t.urbain
       END) as urbain,
       t.acces_pieton as acces_pieton,
