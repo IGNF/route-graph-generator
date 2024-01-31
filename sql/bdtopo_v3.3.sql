@@ -347,4 +347,6 @@ DROP FOREIGN TABLE IF EXISTS {output_schema}.troncon_de_route CASCADE;
 DROP FOREIGN TABLE IF EXISTS {output_schema}.non_communication CASCADE;
 
 END TRANSACTION;
-VACUUM ANALYZE;
+VACUUM ANALYZE {output_schema}.non_comm;
+VACUUM ANALYZE {output_schema}.edges;
+VACUUM ANALYZE {output_schema}.nodes;
