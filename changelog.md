@@ -2,6 +2,9 @@
 
 ## NEXT-VERSION
 
+ADDED:
+- VACUUM ANALYSE is done only on created tables
+
 FIX:
 - Durée de parcours incohérente sur OSRM entre car-fastest et car-shortest
 
