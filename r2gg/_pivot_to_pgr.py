@@ -356,12 +356,31 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
 
     old_isolation_level = connection_out.isolation_level
     connection_out.set_isolation_level(0)
-    vacuum_query = "VACUUM ANALYZE;"
+
+    # VACCUM ANALYZE for ways
+    vacuum_query = f"VACUUM ANALYZE {ways_table_name};"
     logger.info("SQL: {}".format(vacuum_query))
     st_execute = time.time()
     cursor_out.execute(vacuum_query)
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+
+    # VACCUM ANALYZE for ways_vertices_pgr
+    vacuum_query = f"VACUUM ANALYZE {ways_table_name}_vertices_pgr;"
+    logger.info("SQL: {}".format(vacuum_query))
+    st_execute = time.time()
+    cursor_out.execute(vacuum_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+
+    # VACCUM ANALYZE for turn_restrictions
+    vacuum_query = f"VACUUM ANALYZE {schema}.turn_restrictions;"
+    logger.info("SQL: {}".format(vacuum_query))
+    st_execute = time.time()
+    cursor_out.execute(vacuum_query)
+    et_execute = time.time()
+    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+
     connection_out.set_isolation_level(old_isolation_level)
     connection_out.commit()
 
