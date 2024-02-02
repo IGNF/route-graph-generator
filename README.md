@@ -88,7 +88,7 @@ r2gg-road2config config.json
 
 ## Version
 
-Elle est indiquée dans le `__init__.py` et dans le `setup.py`.
+Elle est indiquée dans le `__about__.py`.
 
 ## Licence
 
