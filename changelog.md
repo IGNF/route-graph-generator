@@ -1,12 +1,19 @@
 # CHANGELOG
 
-## NEXT-VERSION
+## 2.2.2
 
-ADDED:
+ADD:
 - VACUUM ANALYSE is done only on created tables
+- Templates for issues and PR 
+- A code of conduct was adapted from the contributor covenant
+- A contributing was added
+- The DCO was added 
+- Restrict access to pedestrian ways according to BDTOPO
+- Better handling of urbain column inside the BDTOPO 
 
 FIX:
 - Durée de parcours incohérente sur OSRM entre car-fastest et car-shortest
+- Wrong data types for some restrictions of the BDTOPO
 
 ## 2.2.1
 
@@ -15,9 +22,6 @@ CHANGED:
 - modification de la ci github pour prendre en compte la branche master
 - suppression du déploiement de github pages lors d'un tag
 
-ADDED:
-- A code of conduct was adapted from the contributor covenant
-- A contributing was added
 
 ## 2.2.0
 
