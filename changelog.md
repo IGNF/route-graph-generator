@@ -1,15 +1,20 @@
 # CHANGELOG
 
+## 2.2.3
+
+CHANGED:
+- Pivot to osm: Using batches for fetching edges in pivot DB
+
 ## 2.2.2
 
 ADD:
 - VACUUM ANALYSE is done only on created tables
-- Templates for issues and PR 
+- Templates for issues and PR
 - A code of conduct was adapted from the contributor covenant
 - A contributing was added
-- The DCO was added 
+- The DCO was added
 - Restrict access to pedestrian ways according to BDTOPO
-- Better handling of urbain column inside the BDTOPO 
+- Better handling of urbain column inside the BDTOPO
 
 FIX:
 - Durée de parcours incohérente sur OSRM entre car-fastest et car-shortest

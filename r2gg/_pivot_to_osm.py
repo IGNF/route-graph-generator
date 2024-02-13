@@ -90,31 +90,44 @@ def pivot_to_osm(config, source, db_configs, connection, logger, output_is_pbf =
                 et_execute = time.time()
                 logger.info("Writing nodes ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
-                # Ecriture des ways
-                sql_query2 = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], ['*', f'{input_schema}.inter_nodes(geom) as internodes'])
-                logger.info("SQL: {}".format(sql_query2))
+                # Récupération du nombre de ways
+                sql_query = f"SELECT COUNT(*) as cnt FROM {input_schema}.edges"
+                logger.info("SQL: {}".format(sql_query))
                 st_execute = time.time()
-                cursor.execute(sql_query2)
+                cursor.execute(sql_query)
                 et_execute = time.time()
                 logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
                 row = cursor.fetchone()
-                logger.info("Writing ways")
+                edgesize = row["cnt"]
+
+                # Ecriture des ways
+                batchsize = 500000
+                offset = 0
+                logger.info(f"Writing ways: {edgesize} ways to write")
                 st_execute = time.time()
-                i = 1
-                while row:
-                    wayEl = writeWay(row, extraction_date)
-                    for node in row['internodes']:
-                        vertexSequence = vertexSequence + 1
-                        node['id'] = vertexSequence
-                        nodeEl = writeNode(node, extraction_date)
-                        xf.write(nodeEl, pretty_print=True)
-                    wayEl = writeWayNds(wayEl, row, row['internodes'])
-                    wayEl = writeWayTags(wayEl, row)
-                    xf.write(wayEl, pretty_print=True)
-                    row = cursor.fetchone()
-                    if (i % ceil(cursor.rowcount/10) == 0):
-                        logger.info("%s / %s ways ajoutés" %(i, cursor.rowcount))
-                    i += 1
+                while offset < edgesize:
+                  sql_query2 = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], ['*', f'{input_schema}.inter_nodes(geom) as internodes'])
+                  sql_query2 += " LIMIT {} OFFSET {}".format(batchsize, offset)
+                  logger.info("SQL: {}".format(sql_query2))
+                  cursor.execute(sql_query2)
+                  et_execute = time.time()
+                  offset += batchsize
+                  logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+                  row = cursor.fetchone()
+                  st_execute = time.time()
+                  i = 1
+                  while row:
+                      wayEl = writeWay(row, extraction_date)
+                      for node in row['internodes']:
+                          vertexSequence = vertexSequence + 1
+                          node['id'] = vertexSequence
+                          nodeEl = writeNode(node, extraction_date)
+                          xf.write(nodeEl, pretty_print=True)
+                      wayEl = writeWayNds(wayEl, row, row['internodes'])
+                      wayEl = writeWayTags(wayEl, row)
+                      xf.write(wayEl, pretty_print=True)
+                      row = cursor.fetchone()
+                  logger.info("%s / %s ways ajoutés" %(offset, edgesize))
                 et_execute = time.time()
                 logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
