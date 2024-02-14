@@ -86,7 +86,7 @@ def pivot_to_osm(config, source, db_configs, connection, logger, output_is_pbf =
                 st_nodes = time.time()
                 while offset < nodesize:
                   sql_query = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'])
-                  sql_query2 += " LIMIT {} OFFSET {}".format(batchsize, offset)
+                  sql_query += " LIMIT {} OFFSET {}".format(batchsize, offset)
                   logger.info("SQL: {}".format(sql_query))
                   st_execute = time.time()
                   cursor.execute(sql_query)
