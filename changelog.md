@@ -2,6 +2,11 @@
 
 ## x.y.z
 
+## 2.2.4
+
+CHANGED:
+- Pivot to pgr: Not using clean_grpah method anymore, but a SQL query
+
 ## 2.2.3
 
 CHANGED:
