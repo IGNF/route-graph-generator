@@ -395,13 +395,43 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
 
     for profile_name in profile_names:
         logger.info("Cleaning isolated edges for profile {}...".format(profile_name))
-        clean_graph_query = "SELECT {0}.clean_graph('{1}')".format(schema, profile_name)
+        clean_graph_query = """
+        WITH connected_components AS (
+          SELECT * FROM pgr_connectedComponents(
+            'SELECT id, source, target, cost_s_{1} as cost, reverse_cost_s_{1} as reverse_cost FROM {0}.ways'
+          )
+        ),
+        remove_nodes AS (
+          SELECT node
+          FROM
+            connected_components
+          WHERE
+          component = ANY(
+            SELECT DISTINCT component
+            FROM
+            (
+              SELECT component, count(*) AS nb
+              FROM
+                connected_components
+              GROUP BY component
+            )
+            AS components
+            WHERE nb <= 10
+          )
+        )
+        UPDATE {0}.ways
+        SET cost_s_{1} = -1,
+          reverse_cost_s_{1} = -1,
+          cost_m_{1} = -1,
+          reverse_cost_m_{1} = -1
+        WHERE {0}.ways.target = ANY(SELECT * from remove_nodes) OR {0}.ways.source = ANY(SELECT * from remove_nodes);
+        """.format(schema, profile_name)
         logger.info("SQL: {}".format(clean_graph_query))
         cursor_isolated.execute(clean_graph_query)
+        connection_out.commit()
 
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    connection_out.commit()
     cursor_isolated.close()
 
     end_time = time.time()
