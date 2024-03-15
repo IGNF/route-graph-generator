@@ -6,6 +6,7 @@
 
 CHANGED:
 - Valhalla build config: increase default isochrone limits
+- subprocess : check return code and raise Runtime exception if not 0
 
 ## 2.2.4
 

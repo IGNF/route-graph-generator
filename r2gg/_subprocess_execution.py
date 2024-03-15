@@ -14,7 +14,8 @@ def subprocess_execution(args, logger, outfile = None):
     """
     try:
         str_args = [str(arg) for arg in args]
-        logger.info('Subprocess: \"' + " ".join(str_args) + '\"')
+        subprocess_arg = " ".join(str_args)
+        logger.info('Subprocess: \"' + subprocess_arg + '\"')
         if outfile is not None:
             with open(outfile, "w") as out:
                 process = subprocess.Popen(
@@ -31,6 +32,12 @@ def subprocess_execution(args, logger, outfile = None):
             )
             process_output, _ =  process.communicate()
             logger.info(process_output.decode("utf-8"))
+
+        returncode = process.returncode
+        if process.returncode != 0:
+            error_msg = f"Invalid returncode {returncode} for subprocess '{subprocess_arg}'"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
 
     except (OSError, subprocess.CalledProcessError) as exception:
