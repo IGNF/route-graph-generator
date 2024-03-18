@@ -2,6 +2,11 @@
 
 ## x.y.z
 
+## 2.2.5
+
+CHANGED:
+- Valhalla build config: increase default isochrone limits
+
 ## 2.2.4
 
 CHANGED:
