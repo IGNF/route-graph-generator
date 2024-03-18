@@ -407,16 +407,20 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
         start_command = time.time()
         valhalla_build_config_args = ["valhalla_build_config",
             "--mjolnir-tile-dir",  source["storage"]["dir"],
-            "--mjolnir-tile-extract", source["storage"]["tar"]]
+            "--mjolnir-tile-extract", source["storage"]["tar"],
+            # Modification des limites par défaut du service : 10h pour isochrone et 1000km pour iso distance
+            # contre 2h et 200km par défaut
+            "--service-limits-isochrone-max-time-contour", "600",
+            "--service-limits-isochrone-max-distance-contour", "1000",
+            # Ajout de l'autorisation à exclure les ponts/tunnels/péages
+            "--service-limits-allow-hard-exclusions", "True"]
         subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
         time.sleep(1)
-        # Ajout du graph custom dans la config valhalla
+        # Ajout du graph custom dans la config valhalla (impossible via les paramètres du build_config)
         with open(source["storage"]["config"], "r") as valhalla_config:
             config_dict = json.load(valhalla_config)
             config_dict["mjolnir"]["graph_lua_name"] = source["costs"][0]["compute"]["storage"]["file"]
-            # Ajout de l'autorisation à exclure les ponts/tunnels/péages
-            config_dict["service_limits"]["allow_hard_exclusions"] = True
 
         with open(source["storage"]["config"], "w") as valhalla_config:
             valhalla_config.write(json.dumps(config_dict))
