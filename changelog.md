@@ -2,6 +2,11 @@
 
 ## x.y.z
 
+## 2.2.6
+
+FIXED:
+- subprocess : None value can be returned as returncode. Need to wait for process stop in this case
+
 ## 2.2.5
 
 CHANGED:
