@@ -33,9 +33,12 @@ def subprocess_execution(args, logger, outfile = None):
             process_output, _ =  process.communicate()
             logger.info(process_output.decode("utf-8"))
 
-        returncode = process.returncode
+        # Wait for process stop
+        while process.returncode is None:
+            process.wait()
+
         if process.returncode != 0:
-            error_msg = f"Invalid returncode {returncode} for subprocess '{subprocess_arg}'"
+            error_msg = f"Invalid returncode {process.returncode} for subprocess '{subprocess_arg}'"
             logger.error(error_msg)
             raise RuntimeError(error_msg)
 
