@@ -322,7 +322,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
 
         # Définition des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", cost_dir]
-        copy_args = ["cp", ".".join(osm_file.split(".")[:-1]) + extension, tmp_osm_file]
+        copy_args = ["ln", "-s", ".".join(osm_file.split(".")[:-1]) + extension, tmp_osm_file]
         osrm_extract_args = ["osrm-extract", tmp_osm_file, "-p", lua_file, "-t", cpu_count]
         osrm_contract_args = ["osrm-contract", osrm_file, "-t", cpu_count]
         rm_args = ["rm", tmp_osm_file]
