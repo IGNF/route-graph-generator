@@ -1,4 +1,4 @@
-from r2gg._output_costs_from_costs_config import compute_operations_string
+from _output_costs_from_costs_config import compute_operations_string
 
 def build_lua(costs_config, output_cost_name):
     """
@@ -172,9 +172,12 @@ def _build_process_way(costs_config, output_cost):
     process_way_string += "\n"
 
     # durée
-    process_way_string += "\n    -- durée\n"
-    process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output_cost["operations"]))
-    process_way_string += "\n"
+    current_profile = output_cost["name"].split("_")[-1]
+    for output in costs_config["outputs"]:
+        if output["name"] == "cost_s_" + current_profile:
+          process_way_string += "\n    -- durée\n"
+          process_way_string += "    result.duration  = {}\n".format(compute_operations_string(output["operations"]))
+          process_way_string += "\n"
 
     # gestion du sens direct
     process_way_string += "    -- gestion du sens direct\n"
