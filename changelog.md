@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## x.y.z
+## 2.2.7
+FIXED:
+- Osrm : wrong duration in shortest profiles
 
 ## 2.2.6
 
