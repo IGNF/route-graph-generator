@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.8
+FIXED:
+- wrong import in _lua_builder.py
+
 ## 2.2.7
 FIXED:
 - Osrm : wrong duration in shortest profiles
