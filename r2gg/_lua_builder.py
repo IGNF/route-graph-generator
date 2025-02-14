@@ -1,4 +1,4 @@
-from _output_costs_from_costs_config import compute_operations_string
+from r2gg._output_costs_from_costs_config import compute_operations_string
 
 def build_lua(costs_config, output_cost_name):
     """
