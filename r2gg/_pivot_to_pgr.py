@@ -79,7 +79,8 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             matieres_dangereuses_interdites boolean,
             cpx_gestionnaire text,
             cpx_numero_route_europeenne text,
-            cpx_classement_administratif text
+            cpx_classement_administratif text,
+            transport_exceptionnel boolean
         );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -256,7 +257,8 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             'matieres_dangereuses_interdites as matieres_dangereuses_interdites',
             'cpx_gestionnaire as cpx_gestionnaire',
             'cpx_numero_route_europeenne as cpx_numero_route_europeenne',
-            'cpx_classement_administratif as cpx_classement_administratif'
+            'cpx_classement_administratif as cpx_classement_administratif',
+            'transport_exceptionnel as transport_exceptionnel'
         ]
     in_columns = attribute_columns.copy()
     for variable in costs["variables"]:

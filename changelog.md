@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.9
+ADDED:
+- get transport_exceptionnel field of bdtopo in pgr data
+
 ## 2.2.8
 FIXED:
 - wrong import in _lua_builder.py

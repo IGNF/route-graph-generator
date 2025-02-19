@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   matieres_dangereuses_interdites boolean,
   cpx_gestionnaire text,
   cpx_numero_route_europeenne text,
-  cpx_classement_administratif text
+  cpx_classement_administratif text,
+  transport_exceptionnel boolean
 );
 
 
@@ -205,6 +206,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.cpx_gestionnaire as cpx_gestionnaire,
       t.cpx_numero_route_europeenne as cpx_numero_route_europeenne,
       t.cpx_classement_administratif as cpx_classement_administratif,
+      t.transport_exceptionnel as transport_exceptionnel,
 
       -- géométrie du troncon
       ST_Force2D(ST_Transform(t.geom, 4326)) as geom
@@ -288,7 +290,8 @@ INSERT INTO {output_schema}.edges
     matieres_dangereuses_interdites as matieres_dangereuses_interdites,
     cpx_gestionnaire as cpx_gestionnaire,
     cpx_numero_route_europeenne as cpx_numero_route_europeenne,
-    cpx_classement_administratif as cpx_classement_administratif
+    cpx_classement_administratif as cpx_classement_administratif,
+    transport_exceptionnel as transport_exceptionnel
   FROM bduni_troncon
 ;
 
