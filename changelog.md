@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.2.10
+## 3.0.0
 REMOVED:
 - remove field "bade_cyclable" after its removal in BD TOPO
 
