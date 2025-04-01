@@ -138,11 +138,6 @@
                   "default": "false"
                 },
                 {
-                  "key": "bande_cyclable",
-                  "column": "bande_cyclable",
-                  "default": "false"
-                },
-                {
                   "key": "reserve_aux_bus",
                   "column": "reserve_aux_bus",
                   "default": "false"
@@ -372,7 +367,6 @@
                 "largeur_de_chaussee",
                 "itineraire_vert",
                 "sens_de_circulation",
-                "bande_cyclable",
                 "reserve_aux_bus",
                 "urbain",
                 "vitesse_moyenne_vl",

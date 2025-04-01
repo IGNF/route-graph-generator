@@ -67,7 +67,6 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   nombre_de_voies text,
   insee_commune_gauche text,
   insee_commune_droite text,
-  bande_cyclable text,
   itineraire_vert boolean,
   reserve_aux_bus text,
   urbain boolean,
@@ -186,8 +185,6 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.nombre_de_voies as nombre_de_voies,
       t.insee_commune_gauche as insee_commune_gauche,
       t.insee_commune_droite as insee_commune_droite,
-      -- TODO: remove
-      t.bande_cyclable as bande_cyclable,
       t.reserve_aux_bus as reserve_aux_bus,
       (CASE
       WHEN t.urbain IS NULL THEN 0::boolean
@@ -271,7 +268,6 @@ INSERT INTO {output_schema}.edges
     nombre_de_voies as nombre_de_voies,
     insee_commune_gauche as insee_commune_gauche,
     insee_commune_droite as insee_commune_droite,
-    bande_cyclable as bande_cyclable,
     itineraire_vert as itineraire_vert,
     reserve_aux_bus as reserve_aux_bus,
     urbain as urbain,
