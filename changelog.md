@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.10
+REMOVED:
+- remove field "bade_cyclable" after its removal in BD TOPO
+
 ## 2.2.9
 ADDED:
 - get transport_exceptionnel field of bdtopo in pgr data
