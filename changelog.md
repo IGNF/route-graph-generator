@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.1.0
+ADDED:
+- fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire 
+
+
 ## 3.0.0
 REMOVED:
 - remove field "bade_cyclable" after its removal in BD TOPO
