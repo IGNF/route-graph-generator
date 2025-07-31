@@ -288,6 +288,11 @@ INSERT INTO {output_schema}.edges
     cpx_numero_route_europeenne as cpx_numero_route_europeenne,
     cpx_classement_administratif as cpx_classement_administratif,
     transport_exceptionnel as transport_exceptionnel
+    -- Nouveaux champs initialisés avec valeur par défaut
+    0::integer AS vla_par_defaut,
+    0::numeric AS cout_penalites,
+    false AS vehicule_leger_interdit,
+    0::numeric AS cout_vehicule_prioritaire
   FROM bduni_troncon
 ;
 

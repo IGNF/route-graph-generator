@@ -79,7 +79,11 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             cpx_gestionnaire text,
             cpx_numero_route_europeenne text,
             cpx_classement_administratif text,
-            transport_exceptionnel boolean
+            transport_exceptionnel boolean,
+            vla_par_defaut integer,
+            cout_penalites numeric,
+            vehicule_leger_interdit boolean,
+            cout_vehicule_prioritaire numeric
         );""".format(ways_table_name)
     logger.debug("SQL: {}".format(create_table))
     cursor_out.execute(create_table)
@@ -256,7 +260,11 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             'cpx_gestionnaire as cpx_gestionnaire',
             'cpx_numero_route_europeenne as cpx_numero_route_europeenne',
             'cpx_classement_administratif as cpx_classement_administratif',
-            'transport_exceptionnel as transport_exceptionnel'
+            'transport_exceptionnel as transport_exceptionnel',
+            'vla_par_defaut as vla_par_defaut',
+            'cout_penalites as cout_penalites',
+            'vehicule_leger_interdit as vehicule_leger_interdit',
+            'cout_vehicule_prioritaire as cout_vehicule_prioritaire'
         ]
     in_columns = attribute_columns.copy()
     for variable in costs["variables"]:
