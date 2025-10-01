@@ -3,38 +3,30 @@
 """Main CLI entrypoint."""
 
 # Package
-from r2gg.__about__ import (
-    __author__,
-    __cli_usage__,
-    __summary__,
-    __title__,
-    __title_clean__,
-    __uri_homepage__,
-    __version__,
-)
-from r2gg._configure import configure, connect_working_db, disconnect_working_db
+from r2gg._configure import configure
 from r2gg._main import sql_convert, pgr_convert, osm_convert, osrm_convert, valhalla_convert, write_road2_config
+from r2gg._database import DatabaseManager
 
 # ############################################################################
 # ########## MAIN ################
 # ################################
 def sql2pivot():
     config, resource, db_configs, logger = configure()
-    connection = connect_working_db(config, db_configs, logger)
-    sql_convert(config, resource, db_configs, connection, logger)
-    disconnect_working_db(connection, logger)
+    database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
+    sql_convert(config, resource, db_configs, database, logger)
+    database.disconnect_working_db()
 
 def pivot2pgrouting():
     config, resource, db_configs, logger = configure()
-    connection = connect_working_db(config, db_configs, logger)
-    pgr_convert(config, resource, db_configs, connection, logger)
-    disconnect_working_db(connection, logger)
+    database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
+    pgr_convert(resource, db_configs, database, logger)
+    database.disconnect_working_db()
 
 def pivot2osm():
     config, resource, db_configs, logger = configure()
-    connection = connect_working_db(config, db_configs, logger)
-    osm_convert(config, resource, db_configs, connection, logger)
-    disconnect_working_db(connection, logger)
+    database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
+    osm_convert(config, resource, db_configs, database, logger)
+    database.disconnect_working_db()
 
 def osm2osrm():
     config, resource, _, logger = configure()
@@ -52,20 +44,14 @@ def main():
     """Main CLI entrypoint.
     """
     config, resource, db_configs, logger = configure()
-    connection = connect_working_db(config, db_configs, logger)
-    sql_convert(config, resource, db_configs, connection, logger)
-    if (resource['type'] in ['pgr', 'smartpgr']):
-        config, resource, db_configs, connection, logger = configure()
-        pgr_convert(config, resource, db_configs, connection, logger)
-        disconnect_working_db(connection, logger)
-    elif (resource['type'] == 'osrm'):
-        config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, db_configs,  connection, logger)
-        disconnect_working_db(connection, logger)
+    sql2pivot()
+    if resource['type'] in ['pgr', 'smartpgr']:
+        pivot2pgrouting()
+    elif resource['type'] == 'osrm':
+        pivot2osm()
         osrm_convert(config, resource, logger)
-    elif (resource['type'] == 'valhalla'):
-        config, resource, db_configs, connection, logger = configure()
-        osm_convert(config, resource, db_configs, connection, logger, True)
+    elif resource['type'] == 'valhalla':
+        pivot2osm()
         valhalla_convert(config, resource, logger)
     else:
         raise ValueError("Wrong resource type, should be in ['pgr',osrm','valhalla','smartpgr']")

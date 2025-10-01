@@ -14,7 +14,6 @@ docker build -t r2gg-debian -f docker/debian/Dockerfile .
 ## Initialisation de la base de données de tests
 
 ```sh
-```
 docker-compose -f tests/dev/docker-compose.dev.yml up -d
 ```
 
