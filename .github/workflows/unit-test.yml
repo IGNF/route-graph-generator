@@ -6,6 +6,7 @@ on:
     paths:
     - ".github/workflows/unit-test.yml"
     - "**/*.py"
+    - "sql/*.sql"
 
 permissions:
   contents: read
