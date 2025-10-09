@@ -1,8 +1,6 @@
 import argparse
-import json
 import os
 from pathlib import Path
-from urllib import request
 
 # 3rd party
 import pytest
