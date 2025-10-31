@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   direction integer,
   geom geometry(Linestring,4326),
   -- Attributs spécifiques à la bd uni
-  vitesse_moyenne_vl integer,
+  vitesse_moyenne_vl integer NOT NULL DEFAULT 0,
   nature text,
   cleabs text,
   importance integer,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   insee_commune_droite text,
   itineraire_vert boolean,
   reserve_aux_bus text,
-  urbain boolean,
+  urbain boolean NOT NULL DEFAULT false,
   acces_pieton text,
   nature_de_la_restriction text,
   restriction_de_hauteur double precision,
@@ -82,7 +82,11 @@ CREATE TABLE IF NOT EXISTS {output_schema}.edges (
   cpx_gestionnaire text,
   cpx_numero_route_europeenne text,
   cpx_classement_administratif text,
-  transport_exceptionnel boolean
+  transport_exceptionnel boolean,
+  vla_par_defaut integer,
+  cout_penalites numeric,
+  vehicule_leger_interdit boolean,
+  cout_vehicule_prioritaire numeric
 );
 
 
@@ -189,7 +193,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.insee_commune_droite as insee_commune_droite,
       t.reserve_aux_bus as reserve_aux_bus,
       (CASE
-      WHEN t.urbain IS NULL THEN 0::boolean
+      WHEN t.urbain IS NULL THEN false
       ELSE t.urbain
       END) as urbain,
       t.acces_pieton as acces_pieton,
@@ -203,28 +207,99 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
       t.cpx_gestionnaire as cpx_gestionnaire,
       t.cpx_numero_route_europeenne as cpx_numero_route_europeenne,
       t.cpx_classement_administratif as cpx_classement_administratif,
-      t.transport_exceptionnel as transport_exceptionnel,
 
       -- géométrie du troncon
-      ST_Force2D(ST_Transform(t.geom, 4326)) as geom
-      -- ST_Force2D(ST_Transform(ST_SetSrid(t.geometrie, {output_schema}.bduni_srid(t.gcms_territoire)), 4326)) as geom
+      ST_Force2D(ST_Transform(t.geom, 4326)) as geom,
+
+      -- Nouveaux champs initialisés avec valeur par défaut
+      false AS transport_exceptionnel,
+      0::integer AS vla_par_defaut,
+      0::numeric AS cout_penalites,
+      false AS vehicule_leger_interdit,
+      0::numeric AS cout_vehicule_prioritaire
 
 
-    FROM (
-      -- decomposition liens_vers_route_nommee en lien_vers_route_nommee (split et duplication des lignes)
-      SELECT * FROM {output_schema}.troncon_de_route
-      -- SELECT t1.*, regexp_split_to_table( t1.liens_vers_route_nommee,'/') as lien_vers_route_nommee FROM troncon_de_route t1
-    ) t
-  ) s
-    WHERE etat LIKE 'En service'
-    AND geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
+    FROM {output_schema}.troncon_de_route AS t
+  ) AS s
+    WHERE s.etat LIKE 'En service'
+    AND s.geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
     -- décommenter pour tester :
     -- AND territoire='REU'
 ;
 
-  -- ############################
-  -- REMPLISSAGE DE nodes
-  -- ############################
+-- Mise à jour des nouveaux champs de bduni_troncon avec les valeurs réelles si le champ existe dans la table troncon_de_route.
+-- Si les colonnes n'existent pas dans troncon_de_route : pas de mise à jour des nouveaux champs.
+
+DO $$
+BEGIN
+  -- transport_exceptionnel
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{output_schema}'
+      AND table_name = 'troncon_de_route'
+      AND column_name = 'transport_exceptionnel'
+  ) THEN
+    UPDATE bduni_troncon s
+    SET transport_exceptionnel = t.transport_exceptionnel
+    FROM {output_schema}.troncon_de_route t
+    WHERE s.cleabs = t.cleabs;
+	END IF;
+
+  -- vla_par_defaut
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{output_schema}'
+      AND table_name = 'troncon_de_route'
+      AND column_name = 'vla_par_defaut'
+  ) THEN
+    UPDATE bduni_troncon s
+    SET vla_par_defaut = t.vla_par_defaut
+    FROM {output_schema}.troncon_de_route t
+    WHERE s.cleabs = t.cleabs;
+	END IF;
+
+  -- cout_penalites
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{output_schema}'
+      AND table_name = 'troncon_de_route'
+      AND column_name = 'cout_penalites'
+  ) THEN
+    UPDATE bduni_troncon s
+    SET cout_penalites = t.cout_penalites
+    FROM {output_schema}.troncon_de_route t
+    WHERE s.cleabs = t.cleabs;
+  END IF;
+
+  -- vehicule_leger_interdit
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{output_schema}'
+      AND table_name = 'troncon_de_route'
+      AND column_name = 'vehicule_leger_interdit'
+  ) THEN
+    UPDATE bduni_troncon s
+    SET vehicule_leger_interdit = t.vehicule_leger_interdit
+    FROM {output_schema}.troncon_de_route t
+    WHERE s.cleabs = t.cleabs;
+  END IF;
+
+  -- cout_vehicule_prioritaire
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = '{output_schema}'
+      AND table_name = 'troncon_de_route'
+      AND column_name = 'cout_vehicule_prioritaire'
+  ) THEN
+    UPDATE bduni_troncon s
+    SET cout_vehicule_prioritaire = t.cout_vehicule_prioritaire
+    FROM {output_schema}.troncon_de_route t
+    WHERE s.cleabs = t.cleabs;
+  END IF;
+END $$;
+-- ############################
+-- REMPLISSAGE DE nodes
+-- ############################
 -- Remplissage de nodes avec les sommets initiaux et finaux des tronçons
 -- (les points intermédiaires ne forment pas la topologie)
 WITH t AS (
@@ -287,13 +362,12 @@ INSERT INTO {output_schema}.edges
     cpx_gestionnaire as cpx_gestionnaire,
     cpx_numero_route_europeenne as cpx_numero_route_europeenne,
     cpx_classement_administratif as cpx_classement_administratif,
-    transport_exceptionnel as transport_exceptionnel
-    -- Nouveaux champs initialisés avec valeur par défaut
-    0::integer AS vla_par_defaut,
-    0::numeric AS cout_penalites,
-    false AS vehicule_leger_interdit,
-    0::numeric AS cout_vehicule_prioritaire
-  FROM bduni_troncon
+    transport_exceptionnel as transport_exceptionnel,
+    vla_par_defaut as vla_par_defaut,
+	  cout_penalites as cout_penalites,
+	  vehicule_leger_interdit as vehicule_leger_interdit,
+	  cout_vehicule_prioritaire as cout_vehicule_prioritaire
+FROM bduni_troncon
 ;
 
 -- ############################
