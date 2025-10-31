@@ -1,8 +1,6 @@
 import argparse
-import json
 import os
 from pathlib import Path
-from urllib import request
 
 # 3rd party
 import pytest
@@ -29,9 +27,6 @@ PASS = os.environ.get("POSTGRES_PASSWORD", "ign")
 INPUT_SCHEMA = "input"
 OUTPUT_SCHEMA = "output"
 
-TRONCON_ROUTE_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/troncon_route_marseille10.sql"
-NON_COMMUNICATION_URL = "https://storage.gra.cloud.ovh.net/v1/AUTH_366279ce616242ebb14161b7991a8461/road2/non_communication_marseille10.sql"
-
 @pytest.fixture
 def init_database(tmp_path) -> None:
     """Init database for test."""
@@ -48,12 +43,9 @@ def init_database(tmp_path) -> None:
     cur = con.cursor()
     cur.execute(f"SET search_path TO {INPUT_SCHEMA}")
 
-    request.urlretrieve(TRONCON_ROUTE_URL, tmp_path / "troncon_route_marseille10.sql")
-    request.urlretrieve(NON_COMMUNICATION_URL, tmp_path / "non_communication_marseille10.sql")
-
-    with open(str(tmp_path / "troncon_route_marseille10.sql"), mode="r") as sql_script:
+    with open(str(cur_dir / "fixtures" / "troncon_route_marseille10.sql"), mode="r") as sql_script:
         cur.execute(sql_script.read())
-    with open(str(tmp_path / "non_communication_marseille10.sql"), mode="r") as sql_script:
+    with open(str(cur_dir / "fixtures" / "non_communication_marseille10.sql"), mode="r") as sql_script:
         cur.execute(sql_script.read())
 
     con.commit()
