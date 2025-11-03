@@ -1,9 +1,12 @@
 # CHANGELOG
 
+## 3.1.1
+CHANGED:
+- database connection managment now handled by separate class, that implements retries and timeout
+
 ## 3.1.0
 ADDED:
 - fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire 
-
 
 ## 3.0.0
 REMOVED:
