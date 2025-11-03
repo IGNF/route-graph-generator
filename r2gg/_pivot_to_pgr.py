@@ -7,8 +7,9 @@ from psycopg2.extras import DictCursor
 from r2gg._output_costs_from_costs_config import output_costs_from_costs_config
 from r2gg._read_config import config_from_path
 from r2gg._sql_building import getQueryByTableAndBoundingBox
+from r2gg._database import DatabaseManager
 
-def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection_out, schema, input_schema, logger):
+def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseManager, database_out: DatabaseManager, schema, input_schema, logger):
     """
     Fonction de conversion depuis la bdd pivot vers la base pgr
 
@@ -17,9 +18,9 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     source: dict
     cost_calculation_file_path: str
         chemin vers le fichier json de configuration des coûts
-    connection_work: psycopg2.connection
+    database_work: DatabaseManager
         connection à la bdd de travail
-    connection_out: psycopg2.connection
+    database_out: DatabaseManager
         connection à la bdd pgrouting de sortie
     schema: str
         nom du schéma dans la base de sortie
@@ -28,12 +29,10 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     logger: logging.Logger
     """
 
-    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     ways_table_name = schema + '.ways'
     # Récupération des coûts à calculer
     costs = config_from_path(cost_calculation_file_path)
 
-    cursor_out = connection_out.cursor()
     # Création de la edge_table pgrouting
     create_table = """
         DROP TABLE IF EXISTS {0};
@@ -85,8 +84,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             vehicule_leger_interdit boolean,
             cout_vehicule_prioritaire numeric
         );""".format(ways_table_name)
-    logger.debug("SQL: {}".format(create_table))
-    cursor_out.execute(create_table)
+    database_out.execute_update(create_table)
 
     # Ajout des colonnes de coûts
     add_columns = "ALTER TABLE {} ".format(ways_table_name)
@@ -95,7 +93,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
         add_columns += "ADD COLUMN IF NOT EXISTS {} double precision,".format("reverse_" + output["name"])
     add_columns = add_columns[:-1]
     logger.debug("SQL: adding costs columns \n {}".format(add_columns))
-    cursor_out.execute(add_columns)
+    database_out.execute_update(add_columns)
 
     logger.info("Starting conversion")
     start_time = time.time()
@@ -109,34 +107,30 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             id_from bigint,
             id_to bigint
     );""".format(schema)
-    logger.debug("SQL: {}".format(create_non_comm))
-    cursor_out.execute(create_non_comm)
+    database_out.execute_update(create_non_comm)
 
     logger.info("Populating turn restrictions")
     tr_query = f"SELECT id_from, id_to FROM {input_schema}.non_comm;"
 
-    logger.debug("SQL: {}".format(tr_query))
-    st_execute = time.time()
-    cursor_in.execute(tr_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    # Insertion petit à petit -> plus performant
-    logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
-    st_execute = time.time()
     index = 0
     batchsize = 10000
-    rows = cursor_in.fetchmany(batchsize)
+    generator = database_work.execute_select_fetch_multiple(tr_query, show_duration=True, batchsize=batchsize)
+    rows, count = next(generator,(None, None))
+    # Insertion petit à petit -> plus performant
+
+    logger.info("SQL: Inserting or updating {} values in out db".format(count))
+
+    st_execute = time.time()
+
     while rows:
         values_str = ""
-        for row in rows:
-            values_str += "(%s, %s, %s),"
-        values_str = values_str[:-1]
-
         # Tuple des valuers à insérer
         values_tuple = ()
         for row in rows:
+            values_str += "(%s, %s, %s),"
             values_tuple += (index, row['id_from'], row['id_to'])
             index += 1
+        values_str = values_str[:-1]
 
         set_on_conflict = (
             "id_from = excluded.id_from,id_to = excluded.id_to"
@@ -148,17 +142,15 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             ON CONFLICT (id) DO UPDATE
               SET {};
         """.format(schema, values_str, set_on_conflict)
-        cursor_out.execute(sql_insert, values_tuple)
-        connection_out.commit()
-        rows = cursor_in.fetchmany(batchsize)
+        database_out.execute_update(sql_insert, values_tuple)
+
+        rows, _ = next(generator,(None, None))
 
     et_execute = time.time()
-    cursor_in.close()
     logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Noeuds ---------------------------------------------------------------------------------------
     logger.info("Writing vertices...")
-    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     create_nodes = """
         DROP TABLE IF EXISTS {0}_vertices_pgr;
         CREATE TABLE {0}_vertices_pgr(
@@ -169,34 +161,26 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             eout int,
             the_geom geometry(Point,4326)
     );""".format(ways_table_name)
-    logger.debug("SQL: {}".format(create_nodes))
-    cursor_out.execute(create_nodes)
+    database_out.execute_update(create_nodes)
 
     logger.info("Populating vertices")
     nd_query = f"SELECT id, geom FROM {input_schema}.nodes;"
-
-    logger.debug("SQL: {}".format(nd_query))
-    st_execute = time.time()
-    cursor_in.execute(nd_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
     # Insertion petit à petit -> plus performant
     # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     index = 0
     batchsize = 10000
-    rows = cursor_in.fetchmany(batchsize)
+    generator = database_work.execute_select_fetch_multiple(nd_query, show_duration=True, batchsize=batchsize)
+    rows, count = next(generator, (None, None))
     while rows:
         values_str = ""
-        for row in rows:
-            values_str += "(%s, %s),"
-        values_str = values_str[:-1]
-
         # Tuple des valeurs à insérer
         values_tuple = ()
         for row in rows:
+            values_str += "(%s, %s),"
             values_tuple += (row['id'], row['geom'])
             index += 1
+        values_str = values_str[:-1]
 
         set_on_conflict = (
             "the_geom = excluded.the_geom"
@@ -208,18 +192,15 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             ON CONFLICT (id) DO UPDATE
               SET {};
         """.format(ways_table_name, values_str, set_on_conflict)
-        cursor_out.execute(sql_insert, values_tuple)
-        connection_out.commit()
-        rows = cursor_in.fetchmany(batchsize)
+        database_out.execute_update(sql_insert, values_tuple)
+        rows, _ = next(generator,(None, None))
 
 
     et_execute = time.time()
-    cursor_in.close()
     logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Ways -----------------------------------------------------------------------------------------
     # Colonnes à lire dans la base source (champs classiques + champs servant aux coûts)
-    cursor_in = connection_work.cursor(cursor_factory=DictCursor, name="cursor_in")
     attribute_columns = [
             'id',
             'geom as the_geom',
@@ -274,11 +255,8 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
 
     # Ecriture des ways
     sql_query = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], in_columns)
-    logger.info("SQL: {}".format(sql_query))
-    st_execute = time.time()
-    cursor_in.execute(sql_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    batchsize = 10000
+    generator = database_work.execute_select_fetch_multiple(sql_query, show_duration=True, batchsize=batchsize)
 
     # Chaîne de n %s, pour l'insertion de données via psycopg
     single_value_str = "%s," * (len(attribute_columns) + 2 * len(costs["outputs"]))
@@ -287,24 +265,21 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
     # Insertion petit à petit -> plus performant
     # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
-    batchsize = 10000
     percent = 0
-    rows = cursor_in.fetchmany(batchsize)
+    rows, count = next(generator, (None, None))
     while rows:
-        percent += 1000000 / cursor_in.rowcount
+        percent += 1000000 / count
         # Chaîne permettant l'insertion de valeurs via psycopg
         values_str = ""
-        for row in rows:
-            values_str += "(" + single_value_str + "),"
-        values_str = values_str[:-1]
-
         # Tuple des valuers à insérer
         values_tuple = ()
         for row in rows:
+            values_str += "(" + single_value_str + "),"
             output_costs = output_costs_from_costs_config(costs, row)
             values_tuple += tuple(
                 row[ output_columns_name ] for output_columns_name in output_columns_names
             ) + output_costs
+        values_str = values_str[:-1]
 
         output_columns = "("
         for output_columns_name in output_columns_names:
@@ -328,12 +303,10 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
             ON CONFLICT (id) DO UPDATE
               SET {};
             """.format(ways_table_name, output_columns, values_str, set_on_conflict)
-        cursor_out.execute(sql_insert, values_tuple)
-        connection_out.commit()
-        rows = cursor_in.fetchmany(batchsize)
+        database_out.execute_update(sql_insert, values_tuple)
+        rows, _ = next(generator,(None, None))
 
     et_execute = time.time()
-    cursor_in.close();
     logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     spacial_indices_query = """
@@ -343,60 +316,31 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
         CLUSTER {0}_vertices_pgr USING ways_vertices_geom_gist ;
         CREATE INDEX IF NOT EXISTS ways_importance_idx ON {0} USING btree (importance);
     """.format(ways_table_name)
-    logger.info("SQL: {}".format(spacial_indices_query))
-    st_execute = time.time()
-    cursor_out.execute(spacial_indices_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    connection_out.commit()
+    database_out.execute_update(spacial_indices_query)
 
     turn_restrictions_indices_query = """
         CREATE INDEX IF NOT EXISTS turn_restrictions_id_key ON {0}.turn_restrictions USING btree (id);
         CREATE INDEX IF NOT EXISTS ways_id_key ON {1} USING btree (id);
         CREATE INDEX IF NOT EXISTS ways_vertices_pgr_id_key ON {1}_vertices_pgr USING btree (id);
     """.format(schema, ways_table_name)
-    logger.info("SQL: {}".format(turn_restrictions_indices_query))
-    st_execute = time.time()
-    cursor_out.execute(turn_restrictions_indices_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    connection_out.commit()
+    database_out.execute_update(turn_restrictions_indices_query)
 
-    old_isolation_level = connection_out.isolation_level
-    connection_out.set_isolation_level(0)
 
     # VACCUM ANALYZE for ways
     vacuum_query = f"VACUUM ANALYZE {ways_table_name};"
-    logger.info("SQL: {}".format(vacuum_query))
-    st_execute = time.time()
-    cursor_out.execute(vacuum_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    database_out.execute_update(vacuum_query, isolation_level=0)
 
     # VACCUM ANALYZE for ways_vertices_pgr
     vacuum_query = f"VACUUM ANALYZE {ways_table_name}_vertices_pgr;"
-    logger.info("SQL: {}".format(vacuum_query))
-    st_execute = time.time()
-    cursor_out.execute(vacuum_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    database_out.execute_update(vacuum_query, isolation_level=0)
 
     # VACCUM ANALYZE for turn_restrictions
     vacuum_query = f"VACUUM ANALYZE {schema}.turn_restrictions;"
-    logger.info("SQL: {}".format(vacuum_query))
-    st_execute = time.time()
-    cursor_out.execute(vacuum_query)
-    et_execute = time.time()
-    logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
+    database_out.execute_update(vacuum_query, isolation_level=0)
 
-    connection_out.set_isolation_level(old_isolation_level)
-    connection_out.commit()
-
-    cursor_out.close()
 
     # Nettoyage du graphe
     logger.info("Cleaning isolated clusters of less than 10 edges...")
-    cursor_isolated = connection_out.cursor()
 
     profile_names = set([ cost['profile'] for cost in source["costs"]])
     st_execute = time.time()
@@ -435,12 +379,10 @@ def pivot_to_pgr(source, cost_calculation_file_path, connection_work, connection
         WHERE {0}.ways.target = ANY(SELECT * from remove_nodes) OR {0}.ways.source = ANY(SELECT * from remove_nodes);
         """.format(schema, profile_name)
         logger.info("SQL: {}".format(clean_graph_query))
-        cursor_isolated.execute(clean_graph_query)
-        connection_out.commit()
+        database_out.execute_update(clean_graph_query)
 
     et_execute = time.time()
     logger.info("Execution ended. Elapsed time : %s seconds." %(et_execute - st_execute))
-    cursor_isolated.close()
 
     end_time = time.time()
     logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(end_time - start_time))

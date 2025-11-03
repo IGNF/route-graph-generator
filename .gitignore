@@ -1,3 +1,7 @@
 .coverage
 coverage.xml
 junit
+build
+dist
+.idea
+*.egg-info

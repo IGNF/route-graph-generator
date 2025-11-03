@@ -1,26 +1,25 @@
 import json
 import multiprocessing
 import os
-import json
 import time
 from datetime import datetime
 
-import psycopg2
 # https://github.com/andialbrecht/sqlparse
 import sqlparse
 
+from r2gg._database import DatabaseManager
+from r2gg._file_copier import copy_file_locally
 from r2gg._lua_builder import build_lua
+from r2gg._osm_to_pbf import osm_to_pbf
+from r2gg._path_converter import convert_path
 from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
-from r2gg._path_converter import convert_path
-from r2gg._file_copier import copy_file_locally
 from r2gg._valhalla_lua_builder import build_valhalla_lua
-from r2gg._osm_to_pbf import osm_to_pbf
 
 
-def sql_convert(config, resource, db_configs, connection, logger):
+def sql_convert(config, resource, db_configs, database: DatabaseManager, logger):
     """
     Fonction de conversion depuis la bdd source vers la bdd pivot
 
@@ -32,8 +31,8 @@ def sql_convert(config, resource, db_configs, connection, logger):
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     db_configs: dict
         dictionnaire correspondant aux configurations des bdd
-    connection: psycopg2.connection
-        connection à la bdd de travail
+    database: r2gg.DatabaseManager
+        gestionnaire de connexion et d'exécution de la base de la bdd
     logger: logging.Logger
     """
 
@@ -57,7 +56,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
     used_bases = []
 
     # Il y a potentiellement une conversion par source indiquée dans la ressource
-    for source in resource[ 'sources' ]:
+    for source in resource['sources']:
 
         logger.info("Create pivot of source: " + source['id'])
 
@@ -77,12 +76,12 @@ def sql_convert(config, resource, db_configs, connection, logger):
         else:
             logger.info("Mapping not done")
 
-        # Configuration de la bdd source
-        source_db_config = db_configs[ source['mapping']['source']['baseId'] ]
+        #  Configuration de la bdd source
+        source_db_config = db_configs[source['mapping']['source']['baseId']]
         used_bases.append(source['mapping']['source']['baseId'])
 
         # Configuration de la bdd de travail utilisée pour ce pivot
-        work_db_config = db_configs[ config['workingSpace']['baseId'] ]
+        work_db_config = db_configs[config['workingSpace']['baseId']]
 
         # Récupération de la bbox
         bbox = [float(coord) for coord in source["bbox"].split(",")]
@@ -94,9 +93,7 @@ def sql_convert(config, resource, db_configs, connection, logger):
         logger.info("Create source on bbox: " + source["bbox"])
 
         # Lancement du script SQL de conversion source --> pivot
-        connection.autocommit = True
-        with open( source['mapping']['conversion']['file'] ) as sql_script:
-            cur = connection.cursor()
+        with open(source['mapping']['conversion']['file']) as sql_script:
             logger.info("Executing SQL conversion script")
             instructions = sqlparse.split(sql_script.read().format(user=work_db_config.get('user'),
                                                                    input_schema=source_db_config.get('schema'),
@@ -107,37 +104,39 @@ def sql_convert(config, resource, db_configs, connection, logger):
             for instruction in instructions:
                 if instruction == '':
                     continue
-                logger.debug("SQL:\n{}\n".format(instruction) )
+                logger.debug("SQL:\n{}\n".format(instruction))
                 st_instruction = time.time()
-                cur.execute(instruction,
-                    {
-                    'bdpwd': source_db_config.get('password'), 'bdport': source_db_config.get('port'),
-                    'bdhost': source_db_config.get('host'), 'bduser': source_db_config.get('user'),
-                    'dbname': source_db_config.get('database'),
-                    'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
-                    }
-                )
+                database.execute_update(instruction,
+                                        {
+                                            'bdpwd': source_db_config.get('password'),
+                                            'bdport': source_db_config.get('port'),
+                                            'bdhost': source_db_config.get('host'),
+                                            'bduser': source_db_config.get('user'),
+                                            'dbname': source_db_config.get('database'),
+                                            'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
+                                        }
+                                        )
                 et_instruction = time.time()
-                logger.info("Execution ended. Elapsed time : %s seconds." %(et_instruction - st_instruction))
+                logger.info("Execution ended. Elapsed time : %s seconds." % (et_instruction - st_instruction))
 
     et_sql_conversion = time.time()
 
-    logger.info("Conversion from BDD to pivot ended. Elapsed time : %s seconds." %(et_sql_conversion - st_sql_conversion))
+    logger.info(
+        "Conversion from BDD to pivot ended. Elapsed time : %s seconds." % (et_sql_conversion - st_sql_conversion))
 
-def pgr_convert(config, resource, db_configs, connection, logger):
+
+def pgr_convert(resource, db_configs, database: DatabaseManager, logger):
     """
     Fonction de conversion depuis la bdd pivot vers la bdd pgrouting
 
     Parameters
     ----------
-    config: dict
-        dictionnaire correspondant à la configuration décrite dans le fichier passé en argument
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     db_configs: dict
         dictionnaire correspondant aux configurations des bdd
-    connection: psycopg2.connection
-        connection à la bdd de travail
+    database: r2gg.DatabaseManager
+        gestionnaire de connexion et d'exécution de la base de la bdd
     logger: logging.Logger
     """
 
@@ -150,19 +149,13 @@ def pgr_convert(config, resource, db_configs, connection, logger):
     i = 0
     for source in resource["sources"]:
 
-        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+        logger.info("Source {} of {}...".format(i + 1, len(resource["sources"])))
         logger.info("Source id : " + source["id"])
 
         # Configuration et connection à la base de sortie
-        out_db_config = db_configs[ source['storage']['base']['baseId'] ]
-        host = out_db_config.get('host')
-        dbname = out_db_config.get('database')
-        user = out_db_config.get('user')
-        password = out_db_config.get('password')
-        port = out_db_config.get('port')
-        connect_args = 'host=%s dbname=%s user=%s password=%s port=%s' %(host, dbname, user, password, port)
+        out_db_config = db_configs[source['storage']['base']['baseId']]
         logger.info("Connecting to output database")
-        connection_out = psycopg2.connect(connect_args)
+        database_out = DatabaseManager(out_db_config, logger)
 
         schema_out = out_db_config.get('schema')
 
@@ -172,14 +165,14 @@ def pgr_convert(config, resource, db_configs, connection, logger):
         cost_calculation_files_paths = {cost["compute"]["configuration"]["storage"]["file"] for cost in source["costs"]}
 
         for cost_calculation_file_path in cost_calculation_files_paths:
-            pivot_to_pgr(source, cost_calculation_file_path, connection, connection_out, schema_out, input_schema, logger)
-        connection_out.close()
+            pivot_to_pgr(source, cost_calculation_file_path, database, database_out, schema_out, input_schema, logger)
+        database_out.disconnect_working_db()
 
     et_pivot_to_pgr = time.time()
-    logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." %(et_pivot_to_pgr - st_pivot_to_pgr))
+    logger.info("Conversion from pivot to PGR ended. Elapsed time : %s seconds." % (et_pivot_to_pgr - st_pivot_to_pgr))
 
 
-def osm_convert(config, resource, db_configs, connection, logger):
+def osm_convert(config, resource, db_configs, database: DatabaseManager, logger):
     """
     Fonction de conversion depuis la bdd pivot vers un fichier osm
 
@@ -191,8 +184,8 @@ def osm_convert(config, resource, db_configs, connection, logger):
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     db_configs: dict
         dictionnaire correspondant aux configurations des bdd
-    connection: psycopg2.connection
-        connection à la bdd de travail
+    database: r2gg.DatabaseManager
+        gestionnaire de connexion et d'exécution de la base de la bdd
     logger: logging.Logger
     """
 
@@ -224,7 +217,7 @@ def osm_convert(config, resource, db_configs, connection, logger):
         # Plusieurs sources peuvent référencer le même mapping mais changer plus tard dans la génération
         found_base = False
         found_id = ''
-        for sid,sub in used_bases.items():
+        for sid, sub in used_bases.items():
             if sub == source['mapping']['source']['baseId']:
                 found_base = True
                 found_id = sid
@@ -251,11 +244,12 @@ def osm_convert(config, resource, db_configs, connection, logger):
 
         else:
             logger.info("Mapping not already done")
-            pivot_to_osm(config, source, db_configs, connection, logger, convert_osm_to_pbf)
+            pivot_to_osm(config, source, db_configs, database, logger, convert_osm_to_pbf)
 
-        used_bases[ source['id'] ] = source['mapping']['source']['baseId']
+        used_bases[source['id']] = source['mapping']['source']['baseId']
 
-def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
+
+def osrm_convert(config, resource, logger, build_lua_from_cost_config=True):
     """
     Fonction de conversion depuis le fichier osm vers les fichiers osrm
 
@@ -282,7 +276,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
     i = 0
     for source in resource["sources"]:
 
-        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+        logger.info("Source {} of {}...".format(i + 1, len(resource["sources"])))
 
         logger.info('LUA part')
         lua_file = source["cost"]["compute"]["storage"]["file"]
@@ -293,7 +287,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
             costs_config = config_from_path(config_file)
             cost_name = source["cost"]["compute"]["configuration"]["name"]
 
-            if cost_name not in [ output["name"] for output in costs_config["outputs"] ]:
+            if cost_name not in [output["name"] for output in costs_config["outputs"]]:
                 raise ValueError("cost_name must be in cost configuration")
 
             with open(lua_file, "w") as lua_f:
@@ -332,15 +326,15 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config = True):
         start_command = time.time()
         subprocess_execution(osrm_extract_args, logger)
         end_command = time.time()
-        logger.info("OSRM extract ended. Elapsed time : %s seconds." %(end_command - start_command))
+        logger.info("OSRM extract ended. Elapsed time : %s seconds." % (end_command - start_command))
         subprocess_execution(osrm_contract_args, logger)
         final_command = time.time()
-        logger.info("OSRM contract ended. Elapsed time : %s seconds." %(final_command - end_command))
+        logger.info("OSRM contract ended. Elapsed time : %s seconds." % (final_command - end_command))
         subprocess_execution(rm_args, logger)
         i += 1
 
 
-def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True):
+def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
     """
     Fonction de conversion depuis le fichier .osm.pbf vers les fichiers valhalla
 
@@ -367,7 +361,7 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
     i = 0
     for source in resource["sources"]:
 
-        logger.info("Source {} of {}...".format(i+1, len(resource["sources"])))
+        logger.info("Source {} of {}...".format(i + 1, len(resource["sources"])))
 
         logger.info('Looking for OSM PBF file')
 
@@ -406,15 +400,15 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
 
         start_command = time.time()
         valhalla_build_config_args = ["valhalla_build_config",
-            "--mjolnir-tile-dir",  source["storage"]["dir"],
-            "--mjolnir-tile-extract", source["storage"]["tar"],
-            # Modification des limites par défaut du service : 10h pour isochrone et 1000km pour iso distance
-            # contre 2h et 200km par défaut
-            "--service-limits-isochrone-max-time-contour", "600",
-            "--service-limits-isochrone-max-distance-contour", "1000",
-            # Ajout de l'autorisation à exclure les ponts/tunnels/péages
-            "--service-limits-allow-hard-exclusions", "True"]
-        subprocess_execution(valhalla_build_config_args, logger, outfile = source["storage"]["config"])
+                                      "--mjolnir-tile-dir", source["storage"]["dir"],
+                                      "--mjolnir-tile-extract", source["storage"]["tar"],
+                                      # Modification des limites par défaut du service : 10h pour isochrone et 1000km pour iso distance
+                                      # contre 2h et 200km par défaut
+                                      "--service-limits-isochrone-max-time-contour", "600",
+                                      "--service-limits-isochrone-max-distance-contour", "1000",
+                                      # Ajout de l'autorisation à exclure les ponts/tunnels/péages
+                                      "--service-limits-allow-hard-exclusions", "True"]
+        subprocess_execution(valhalla_build_config_args, logger, outfile=source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
         time.sleep(1)
         # Ajout du graph custom dans la config valhalla (impossible via les paramètres du build_config)
@@ -432,10 +426,10 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config = True
         subprocess_execution(valhalla_build_extract_args, logger)
 
         final_command = time.time()
-        logger.info("Valhalla tiles built. Elapsed time : %s seconds." %(final_command - start_command))
+        logger.info("Valhalla tiles built. Elapsed time : %s seconds." % (final_command - start_command))
 
 
-def write_road2_config(config, resource, logger, convert_file_paths = True):
+def write_road2_config(config, resource, logger, convert_file_paths=True):
     """
     Fonction pour l'écriture du fichier de ressource
 
@@ -456,7 +450,8 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
 
     for source in resource["sources"]:
 
-        source_file = os.path.join(config["outputs"]["configurations"]["sources"]["storage"]["directory"], source['id'] + ".source")
+        source_file = os.path.join(config["outputs"]["configurations"]["sources"]["storage"]["directory"],
+                                   source['id'] + ".source")
         logger.info("Writing source file : " + source_file)
 
         # On modifie la source en fonction de son type
@@ -474,10 +469,11 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
             bid_tmp = source["storage"]["base"]["baseId"]
             for base in config["bases"]:
                 if base["id"] == bid_tmp:
-                    db_file_out = convert_path(base["configFile"], config["outputs"]["configurations"]["databases"]["storage"]["directory"])
+                    db_file_out = convert_path(base["configFile"],
+                                               config["outputs"]["configurations"]["databases"]["storage"]["directory"])
                     copy_file_locally(base["configFile"], db_file_out)
-                    source["storage"]["base"].update({"dbConfig":db_file_out})
-                    source["storage"]["base"].update({"schema":base["schema"]})
+                    source["storage"]["base"].update({"dbConfig": db_file_out})
+                    source["storage"]["base"].update({"schema": base["schema"]})
             source["storage"]["base"].pop("baseId", None)
             for cost in source["costs"]:
                 cost.pop("compute", None)
@@ -492,7 +488,8 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
         source_ids.append(source['id'])
 
     # On passe à la ressource
-    resource_file = os.path.join(config["outputs"]["configurations"]["resource"]["storage"]["directory"], resource['id'] + ".resource")
+    resource_file = os.path.join(config["outputs"]["configurations"]["resource"]["storage"]["directory"],
+                                 resource['id'] + ".resource")
     logger.info("Writing resource file: " + resource_file)
 
     # Récupération de la date d'extraction
@@ -500,7 +497,7 @@ def write_road2_config(config, resource, logger, convert_file_paths = True):
     date_file = os.path.join(work_dir_config, "r2gg.date")
     f = open(date_file, "r")
     extraction_date = f.read()
-    logger.info("extraction date to add in resource (from "+ date_file +"): " + extraction_date)
+    logger.info("extraction date to add in resource (from " + date_file + "): " + extraction_date)
     f.close()
 
     # On fait le dossier s'il n'existe pas
