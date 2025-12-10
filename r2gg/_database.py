@@ -137,8 +137,9 @@ class DatabaseManager:
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator
-    def execute_update_query(self, query, params=None, isolation_level=None):
-        self.logger.info("SQL: {}".format(query))
+    def execute_update_query(self, query, params=None, isolation_level=None, show_duration=False):
+        if show_duration :
+            self.logger.info("SQL: {}".format(query))
         st_execute = time.time()
         with self._connection.cursor(cursor_factory=DictCursor) as cursor:
             old_isolation_level = self._connection.isolation_level
@@ -146,8 +147,9 @@ class DatabaseManager:
                 self._connection.set_isolation_level(isolation_level)
             cursor.execute(query, params)
             self._connection.commit()
-            et_execute = time.time()
-            self.logger.info("Execution ended. Elapsed time : %s seconds." % (et_execute - st_execute))
+            if show_duration:
+                et_execute = time.time()
+                self.logger.info("Execution ended. Elapsed time : %s seconds." % (et_execute - st_execute))
             self._connection.set_isolation_level(old_isolation_level)
         yield  # the decorator database_retry_decorator only supports generators
         return

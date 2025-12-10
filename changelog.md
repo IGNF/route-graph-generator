@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.1.2
+CHANGED:
+- reduce log verbosity on database update
+
 ## 3.1.1
 CHANGED:
 - database connection managment now handled by separate class, that implements retries and timeout
