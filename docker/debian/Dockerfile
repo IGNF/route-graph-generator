@@ -55,7 +55,7 @@ COPY --from=build /home/osrm/osrm-backend-5.26.0/build/OSRM-0.1.1-Linux.tar.gz .
 RUN tar -xzvf OSRM-0.1.1-Linux.tar.gz && cd OSRM-0.1.1-Linux && cp -r bin/* /usr/bin/ && cp -r lib/* /usr/lib/ && cp -r include/* /usr/include/ && cp -r share/* /usr/share/
 
 ### Installation prime-server
-COPY --from=build /usr/local/lib/libprime_server.so.0.7.1 /usr/lib/libprime_server.so.0.0.0
+COPY --from=build /usr/local/lib/libprime_server.so.0.7.2 /usr/lib/libprime_server.so.0.0.0
 COPY --from=build /usr/local/lib/libprime_server.so.0 /usr/lib/libprime_server.so.0
 COPY --from=build /usr/local/lib/libprime_server.so /usr/lib/libprime_server.so
 
