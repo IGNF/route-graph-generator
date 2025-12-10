@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 3.1.2
+## 3.1.3
 CHANGED:
 - reduce log verbosity on database update
 
