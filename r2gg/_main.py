@@ -105,6 +105,9 @@ def sql_convert(config, resource, db_configs, database: DatabaseManager, logger)
                 if instruction == '':
                     continue
                 logger.debug("SQL:\n{}\n".format(instruction))
+                isolation_level = None
+                if instruction.strip().lower().startswith("vacuum"):
+                    isolation_level = 0
                 st_instruction = time.time()
                 database.execute_update(instruction,
                                         {
@@ -114,7 +117,8 @@ def sql_convert(config, resource, db_configs, database: DatabaseManager, logger)
                                             'bduser': source_db_config.get('user'),
                                             'dbname': source_db_config.get('database'),
                                             'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax
-                                        }
+                                        },
+                                        isolation_level=isolation_level
                                         )
                 et_instruction = time.time()
                 logger.info("Execution ended. Elapsed time : %s seconds." % (et_instruction - st_instruction))
