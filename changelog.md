@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 3.1.5
+FIXED :
+- database manager does not raie error when retries have failed
+
+## 3.1.4
+FIXED :
+- sql convert interprets VACUUM incorrectly
+
 ## 3.1.3
 CHANGED:
 - reduce log verbosity on database update

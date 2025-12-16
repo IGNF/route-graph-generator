@@ -23,7 +23,7 @@ def database_retry_decorator(func):
             except (OperationalError, DatabaseError, InterfaceError) as e:
                 if attempt >= RETRY:
                     self.logger.error(f"Query failed after {RETRY} attempts: {str(e).rstrip()}")
-                    return
+                    raise e
 
                 self.logger.error(
                     f"Attempt {attempt}/{RETRY} failed ({str(e).rstrip()}), retrying in {DELAY} seconds"
