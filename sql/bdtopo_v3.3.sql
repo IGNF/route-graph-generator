@@ -227,6 +227,13 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     -- AND territoire='REU'
 ;
 
+-- ajout d'index pour la mise à jour
+CREATE INDEX IF NOT EXISTS idx_bduni_troncon_cleabs
+    ON bduni_troncon (cleabs);
+
+CREATE INDEX IF NOT EXISTS idx_troncon_de_route_cleabs
+    ON {output_schema}.troncon_de_route (cleabs);
+
 -- Mise à jour des nouveaux champs de bduni_troncon avec les valeurs réelles si le champ existe dans la table troncon_de_route.
 -- Si les colonnes n'existent pas dans troncon_de_route : pas de mise à jour des nouveaux champs.
 
