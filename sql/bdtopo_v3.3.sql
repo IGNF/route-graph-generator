@@ -1,8 +1,7 @@
--- ####################################################
--- IMPORT DE LA TABLE DES TRONCON DE ROUTE DEPUIS BDUNI
--- ####################################################
+-- ##########################################################
+-- IMPORT DE LA TABLE DES TRONCON DE ROUTE DEPUIS BDTOPO V3.3
+-- ##########################################################
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
-CREATE EXTENSION IF NOT EXISTS Postgis;
 
 DROP SERVER IF EXISTS bduni_server CASCADE;
 CREATE SERVER bduni_server
@@ -98,30 +97,6 @@ CREATE INDEX IF NOT EXISTS edges_geom_gist ON {output_schema}.edges USING GIST (
 -- UTILITAIRES DE REMPLISSAGE DU GRAPHE
 -- ####################################
 
--- Renvoie le srid à partir du code territoire
-CREATE OR REPLACE FUNCTION {output_schema}.bduni_srid(code_territoire text) RETURNS int AS $$
-BEGIN
-  CASE
-    WHEN (code_territoire = 'FXX') THEN
-      RETURN 2154;
-    WHEN (code_territoire = 'GLP') THEN
-      RETURN 4559;
-    WHEN (code_territoire = 'MTQ') THEN
-      RETURN 4559;
-    WHEN (code_territoire = 'GUF') THEN
-      RETURN 2972;
-    WHEN (code_territoire = 'REU') THEN
-      RETURN 2975;
-    WHEN (code_territoire = 'SPM') THEN
-      RETURN 4467;
-    WHEN (code_territoire = 'MYT') THEN
-      RETURN 4471;
-    ELSE
-      RETURN NULL;
-  END CASE;
-END;
-$$ LANGUAGE plpgsql;
-
 -- Récupération d'un identifiant de sommet en fonction d'un point (égalité stricte)
 CREATE OR REPLACE FUNCTION {output_schema}.nodes_id( _geom geometry ) RETURNS bigint AS $$
   SELECT id FROM {output_schema}.nodes WHERE lon = ST_X(_geom) AND lat = ST_Y(_geom);
@@ -146,85 +121,88 @@ $$ LANGUAGE SQL;
 CREATE TEMP TABLE IF NOT EXISTS bduni_non_com_tmp AS
 SELECT * FROM {output_schema}.non_communication;
 
+CREATE TEMP TABLE troncon_de_route_local AS
+SELECT
+  *
+FROM {output_schema}.troncon_de_route;
+
 
 -- ############################
 -- REMPLISSAGE DE BDUNI_TRONCON
 -- ############################
 -- Ajout des tronçons de routes (jointure avec routes numérotées et nommées)
 CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
-  SELECT DISTINCT ON (cleabs) * FROM (
+  SELECT * FROM (
     SELECT
       -- GCVS (système d'historique)
-      t.cleabs as cleabs,
-      -- t.gcms_detruit AS detruit,
-      -- t.gcms_territoire as territoire,
+    t.cleabs as cleabs,
+    -- t.gcms_detruit AS detruit,
+    -- t.gcms_territoire as territoire,
 
-      -- BD TOPO
-      t.etat_de_l_objet as etat,
-      t.nature as nature,
-      NULLIF(t.importance,'')::int as importance,
-      t.sens_de_circulation as sens_de_circulation,
-      (CASE
-      WHEN t.vitesse_moyenne_vl=1 THEN 0
-      WHEN t.vitesse_moyenne_vl IS NULL THEN 0
-      ELSE t.vitesse_moyenne_vl::integer
-      END) as vitesse_moyenne_vl,
+    -- BD TOPO
+    t.etat_de_l_objet as etat,
+    t.nature as nature,
+    NULLIF(t.importance,'')::int as importance,
+    t.sens_de_circulation as sens_de_circulation,
+    (CASE
+    WHEN t.vitesse_moyenne_vl=1 THEN 0
+    WHEN t.vitesse_moyenne_vl IS NULL  THEN 0
+    ELSE t.vitesse_moyenne_vl::integer
+    END) as vitesse_moyenne_vl,
 
-      -- Pour l'attribut name
-      -- TODO: nom_collaboratif_gauche
-      t.nom_1_gauche as nom_1_gauche,
-      -- TODO: nom_collaboratif_droite
-      t.nom_1_droite as nom_1_droite,
-      t.cpx_numero as cpx_numero,
-      t.cpx_toponyme_route_nommee as cpx_toponyme,
+    -- Pour l'attribut name
+    t.nom_collaboratif_gauche as nom_1_gauche,
+    t.nom_collaboratif_droite as nom_1_droite,
+    t.cpx_numero as cpx_numero,
+    t.cpx_toponyme_route_nommee as cpx_toponyme,
 
-      (CASE
-      WHEN t.position_par_rapport_au_sol='Gué ou radier' THEN 0
-      ELSE t.position_par_rapport_au_sol::integer
-      END) as position_par_rapport_au_sol,
-      t.acces_vehicule_leger as acces_vehicule_leger,
+    (CASE
+    WHEN t.position_par_rapport_au_sol='Gué ou radier' THEN 0
+    ELSE t.position_par_rapport_au_sol::integer
+    END) as position_par_rapport_au_sol,
+    t.acces_vehicule_leger as acces_vehicule_leger,
 
-      t.largeur_de_chaussee as largeur_de_chaussee,
+    t.largeur_de_chaussee as largeur_de_chaussee,
 
-      -- Champs demandés par la DP
-      t.itineraire_vert as itineraire_vert,
-      t.nombre_de_voies as nombre_de_voies,
-      t.insee_commune_gauche as insee_commune_gauche,
-      t.insee_commune_droite as insee_commune_droite,
-      t.reserve_aux_bus as reserve_aux_bus,
-      (CASE
-      WHEN t.urbain IS NULL THEN false
-      ELSE t.urbain
-      END) as urbain,
-      t.acces_pieton as acces_pieton,
-      t.nature_de_la_restriction as nature_de_la_restriction,
-      t.restriction_de_hauteur as restriction_de_hauteur,
-      t.restriction_de_poids_total as restriction_de_poids_total,
-      t.restriction_de_poids_par_essieu as restriction_de_poids_par_essieu,
-      t.restriction_de_largeur as restriction_de_largeur,
-      t.restriction_de_longueur as restriction_de_longueur,
-      t.matieres_dangereuses_interdites as matieres_dangereuses_interdites,
-      t.cpx_gestionnaire as cpx_gestionnaire,
-      t.cpx_numero_route_europeenne as cpx_numero_route_europeenne,
-      t.cpx_classement_administratif as cpx_classement_administratif,
+    -- Champs demandés par la DP
+    t.itineraire_vert as itineraire_vert,
+    t.nombre_de_voies as nombre_de_voies,
+    t.insee_commune_gauche as insee_commune_gauche,
+    t.insee_commune_droite as insee_commune_droite,
+    t.reserve_aux_bus as reserve_aux_bus,
+    (CASE
+    WHEN t.urbain IS NULL THEN false
+    ELSE t.urbain
+    END) as urbain,
+    t.acces_pieton as acces_pieton,
+    t.nature_de_la_restriction as nature_de_la_restriction,
+    t.restriction_de_hauteur as restriction_de_hauteur,
+    t.restriction_de_poids_total as restriction_de_poids_total,
+    t.restriction_de_poids_par_essieu as restriction_de_poids_par_essieu,
+    t.restriction_de_largeur as restriction_de_largeur,
+    t.restriction_de_longueur as restriction_de_longueur,
+    t.matieres_dangereuses_interdites as matieres_dangereuses_interdites,
+    t.cpx_gestionnaire as cpx_gestionnaire,
+    t.cpx_numero_route_europeenne as cpx_numero_route_europeenne,
+    t.cpx_classement_administratif as cpx_classement_administratif,
 
-      -- géométrie du troncon
-      ST_Force2D(ST_Transform(t.geom, 4326)) as geom,
+    -- géométrie du troncon
+    ST_Force2D(ST_Transform(t.{troncon_de_route_geom_col}, 4326)) as geom,
 
       -- Nouveaux champs initialisés avec valeur par défaut
-      false AS transport_exceptionnel,
-      0::integer AS vla_par_defaut,
-      0::numeric AS cout_penalites,
-      false AS vehicule_leger_interdit,
-      0::numeric AS cout_vehicule_prioritaire
+    false AS transport_exceptionnel,
+    0::integer AS vla_par_defaut,
+    0::numeric AS cout_penalites,
+    false AS vehicule_leger_interdit,
+    0::numeric AS cout_vehicule_prioritaire
 
 
-    FROM {output_schema}.troncon_de_route AS t
-  ) AS s
-    WHERE s.etat LIKE 'En service'
-    AND s.geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
-    -- décommenter pour tester :
-    -- AND territoire='REU'
+  FROM troncon_de_route_local AS t
+  ) as s
+  WHERE s.etat LIKE 'En service'
+  AND s.geom && ST_MakeEnvelope(%(xmin)s,%(ymin)s,%(xmax)s,%(ymax)s, 4326 )
+  -- décommenter pour tester :
+  -- AND territoire='REU'
 ;
 
 -- ajout d'index pour la mise à jour
@@ -232,78 +210,92 @@ CREATE INDEX IF NOT EXISTS idx_bduni_troncon_cleabs
     ON bduni_troncon (cleabs);
 
 CREATE INDEX IF NOT EXISTS idx_troncon_de_route_cleabs
-    ON {output_schema}.troncon_de_route (cleabs);
+    ON troncon_de_route_local (cleabs);
 
 -- Mise à jour des nouveaux champs de bduni_troncon avec les valeurs réelles si le champ existe dans la table troncon_de_route.
 -- Si les colonnes n'existent pas dans troncon_de_route : pas de mise à jour des nouveaux champs.
+CREATE TEMP TABLE troncon_columns AS
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema = '{output_schema}'
+  AND table_name = 'troncon_de_route'
+  AND column_name IN (
+    'transport_exceptionnel',
+    'vla_par_defaut',
+    'cout_penalites',
+    'vehicule_leger_interdit',
+    'cout_vehicule_prioritaire'
+  );
 
 DO $$
 BEGIN
   -- transport_exceptionnel
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{output_schema}'
+    WHERE table_schema = 'public'
       AND table_name = 'troncon_de_route'
       AND column_name = 'transport_exceptionnel'
   ) THEN
     UPDATE bduni_troncon s
     SET transport_exceptionnel = t.transport_exceptionnel
-    FROM {output_schema}.troncon_de_route t
+    FROM troncon_de_route_local t
     WHERE s.cleabs = t.cleabs;
 	END IF;
 
   -- vla_par_defaut
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{output_schema}'
+    WHERE table_schema = 'public'
       AND table_name = 'troncon_de_route'
       AND column_name = 'vla_par_defaut'
   ) THEN
     UPDATE bduni_troncon s
     SET vla_par_defaut = t.vla_par_defaut
-    FROM {output_schema}.troncon_de_route t
+    FROM troncon_de_route_local t
     WHERE s.cleabs = t.cleabs;
 	END IF;
 
   -- cout_penalites
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{output_schema}'
+    WHERE table_schema = 'public'
       AND table_name = 'troncon_de_route'
       AND column_name = 'cout_penalites'
   ) THEN
     UPDATE bduni_troncon s
     SET cout_penalites = t.cout_penalites
-    FROM {output_schema}.troncon_de_route t
+    FROM troncon_de_route_local t
     WHERE s.cleabs = t.cleabs;
   END IF;
 
   -- vehicule_leger_interdit
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{output_schema}'
+    WHERE table_schema = 'public'
       AND table_name = 'troncon_de_route'
       AND column_name = 'vehicule_leger_interdit'
   ) THEN
     UPDATE bduni_troncon s
     SET vehicule_leger_interdit = t.vehicule_leger_interdit
-    FROM {output_schema}.troncon_de_route t
+    FROM troncon_de_route_local t
     WHERE s.cleabs = t.cleabs;
   END IF;
 
   -- cout_vehicule_prioritaire
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_schema = '{output_schema}'
+    WHERE table_schema = 'public'
       AND table_name = 'troncon_de_route'
       AND column_name = 'cout_vehicule_prioritaire'
   ) THEN
     UPDATE bduni_troncon s
     SET cout_vehicule_prioritaire = t.cout_vehicule_prioritaire
-    FROM {output_schema}.troncon_de_route t
+    FROM troncon_de_route_local t
     WHERE s.cleabs = t.cleabs;
   END IF;
 END $$;
+
+
 -- ############################
 -- REMPLISSAGE DE nodes
 -- ############################
@@ -371,10 +363,10 @@ INSERT INTO {output_schema}.edges
     cpx_classement_administratif as cpx_classement_administratif,
     transport_exceptionnel as transport_exceptionnel,
     vla_par_defaut as vla_par_defaut,
-	  cout_penalites as cout_penalites,
-	  vehicule_leger_interdit as vehicule_leger_interdit,
-	  cout_vehicule_prioritaire as cout_vehicule_prioritaire
-FROM bduni_troncon
+    cout_penalites as cout_penalites,
+    vehicule_leger_interdit as vehicule_leger_interdit,
+    cout_vehicule_prioritaire as cout_vehicule_prioritaire
+  FROM bduni_troncon
 ;
 
 -- ############################
