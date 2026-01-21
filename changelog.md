@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.0.0
+UPDATED :
+- (breaking) upgrade OSRM to 6.0.0
+- upgrade Valhalla to 3.6.1, using main repo instead of custom one
+- lighter and faster docker image build
+
 ## 3.1.5
 FIXED :
 - database manager does not raie error when retries have failed
@@ -18,7 +24,7 @@ CHANGED:
 
 ## 3.1.0
 ADDED:
-- fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire 
+- fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire
 
 ## 3.0.0
 REMOVED:
