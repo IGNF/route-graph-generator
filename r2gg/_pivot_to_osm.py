@@ -107,21 +107,17 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                                                                                                               f'{input_schema}.inter_nodes(geom) as internodes'])
                     sql_query_edges += " LIMIT {} OFFSET {}".format(batchsize, offset)
                     offset += batchsize
-                    gen = database.execute_select_fetch_multiple(sql_query_edges, show_duration=True)
-                    try:
-                        for row, count in gen:
-                            wayEl = writeWay(row, extraction_date)
-                            for node in row['internodes']:
-                                vertexSequence = vertexSequence + 1
-                                node['id'] = vertexSequence
+                    for row, count in database.execute_select_fetch_multiple(sql_query_edges, show_duration=True):
+                        wayEl = writeWay(row, extraction_date)
+                        for node in row['internodes']:
+                            vertexSequence = vertexSequence + 1
+                            node['id'] = vertexSequence
                             nodeEl = writeNode(node, extraction_date)
                             xf.write(nodeEl, pretty_print=True)
                         wayEl = writeWayNds(wayEl, row, row['internodes'])
                         wayEl = writeWayTags(wayEl, row)
                         xf.write(wayEl, pretty_print=True)
 
-                    finally:
-                        gen.close()
                     logger.info("%s / %s ways ajoutés" % (offset, edgesize))
                 et_edges = time.time()
                 logger.info("Writing ways ended. Elapsed time : %s seconds." % (et_edges - st_edges))

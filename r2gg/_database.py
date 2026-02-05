@@ -139,7 +139,8 @@ class DatabaseManager:
                 rows = cursor.fetchmany(batchsize)
                 if not rows:
                     break
-
+                if batchsize == 1:
+                    rows = rows.pop()
                 yield rows, count
 
     # the method below should be used as a generator function otherwise use execute_update
