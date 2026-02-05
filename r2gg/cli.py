@@ -13,20 +13,26 @@ from r2gg._database import DatabaseManager
 def sql2pivot():
     config, resource, db_configs, logger = configure()
     database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
-    sql_convert(config, resource, db_configs, database, logger)
-    database.disconnect_working_db()
+    try:
+        sql_convert(config, resource, db_configs, database, logger)
+    finally:
+        database.disconnect_working_db()
 
 def pivot2pgrouting():
     config, resource, db_configs, logger = configure()
     database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
-    pgr_convert(resource, db_configs, database, logger)
-    database.disconnect_working_db()
+    try:
+        pgr_convert(resource, db_configs, database, logger)
+    finally:
+        database.disconnect_working_db()
 
 def pivot2osm():
     config, resource, db_configs, logger = configure()
     database = DatabaseManager(db_configs[config["workingSpace"]["baseId"]], logger)
-    osm_convert(config, resource, db_configs, database, logger)
-    database.disconnect_working_db()
+    try:
+        osm_convert(config, resource, db_configs, database, logger)
+    finally:
+        database.disconnect_working_db()
 
 def osm2osrm():
     config, resource, _, logger = configure()
