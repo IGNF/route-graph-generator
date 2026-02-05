@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.1.6
+FIXED :
+- wrong database manager logic for select + batch fetch
+
 ## 3.1.5
 FIXED :
 - database manager does not raie error when retries have failed
@@ -18,7 +22,7 @@ CHANGED:
 
 ## 3.1.0
 ADDED:
-- fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire 
+- fields vla_par_defaut, cout_penalites, vehicule_leger_interdit, cout_vehicule_prioritaire
 
 ## 3.0.0
 REMOVED:

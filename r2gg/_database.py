@@ -108,49 +108,59 @@ class DatabaseManager:
             time.sleep(DELAY)
             self._connection = self.connect_working_db()
 
-    def execute_select_query(self, cursor, query, show_duration):
-        if TIMEOUT:
-            cursor.execute("SET statement_timeout = %s", (1000 * TIMEOUT,))  # timeout in milliseconds
-
-        if show_duration:
-            self.logger.info("SQL: {}".format(query))
-            st_execute = time.time()
-            cursor.execute(query)
-            et_execute = time.time()
-            self.logger.info("Execution ended. Elapsed time : %s seconds." % (et_execute - st_execute))
-        else:
-            cursor.execute(query)
-
-    @database_retry_decorator
+    # IMPORTANT:
+    # Streaming SELECTs must NOT use retry logic.
+    # If the connection drops, the cursor state is unrecoverable.
     def execute_select_fetch_multiple(self, query, batchsize=1, show_duration=False):
-        with self._connection.cursor(cursor_factory=DictCursor) as cursor:
-            self.execute_select_query(cursor, query, show_duration)
-            rows = cursor.fetchmany(batchsize)
+        """
+        Streaming SELECT using a named server-side cursor.
+        No retry. No reconnect. No commit.
+        Fail fast if the connection drops (old behavior).
+        """
+        self.ensure_connection()
+        cursor_name = f"cursor_{int(time.time() * 1000)}"
+        with self._connection.cursor(cursor_factory=DictCursor, name=cursor_name) as cursor:
+            if TIMEOUT:
+                cursor.execute("SET statement_timeout = %s", (1000 * TIMEOUT,))
+            if show_duration:
+                self.logger.info(f"SQL: {query}")
+                st = time.time()
+                cursor.execute(query)
+                self.logger.info(
+                    "Execution ended. Elapsed time : %s seconds.",
+                    time.time() - st
+                )
+            else:
+                cursor.execute(query)
+
             count = cursor.rowcount
-            while rows:
-                if batchsize == 1:
-                    rows = rows.pop()
-                yield rows, count
+
+            while True:
                 rows = cursor.fetchmany(batchsize)
-            self._connection.commit()
-            return
+                if not rows:
+                    break
+
+                yield rows, count
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator
     def execute_update_query(self, query, params=None, isolation_level=None, show_duration=False):
+        self.ensure_connection()
         if show_duration :
             self.logger.info("SQL: {}".format(query))
         st_execute = time.time()
-        with self._connection.cursor(cursor_factory=DictCursor) as cursor:
+        with self._connection.cursor(cursor_factory=DictCursor, name="cursor_out") as cursor:
             old_isolation_level = self._connection.isolation_level
-            if isolation_level is not None:
-                self._connection.set_isolation_level(isolation_level)
-            cursor.execute(query, params)
-            self._connection.commit()
+            try:
+                if isolation_level is not None:
+                    self._connection.set_isolation_level(isolation_level)
+                cursor.execute(query, params)
+                self._connection.commit()
+            finally:
+                self._connection.set_isolation_level(old_isolation_level)
             if show_duration:
                 et_execute = time.time()
                 self.logger.info("Execution ended. Elapsed time : %s seconds." % (et_execute - st_execute))
-            self._connection.set_isolation_level(old_isolation_level)
         yield  # the decorator database_retry_decorator only supports generators
         return
 
