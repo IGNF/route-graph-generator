@@ -115,38 +115,41 @@ def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseMana
     index = 0
     batchsize = 10000
     generator = database_work.execute_select_fetch_multiple(tr_query, show_duration=True, batchsize=batchsize)
-    rows, count = next(generator,(None, None))
-    # Insertion petit à petit -> plus performant
+    try:
+        rows, count = next(generator,(None, None))
+        # Insertion petit à petit -> plus performant
 
-    logger.info("SQL: Inserting or updating {} values in out db".format(count))
+        logger.info("SQL: Inserting or updating {} values in out db".format(count))
 
-    st_execute = time.time()
+        st_execute = time.time()
 
-    while rows:
-        values_str = ""
-        # Tuple des valuers à insérer
-        values_tuple = ()
-        for row in rows:
-            values_str += "(%s, %s, %s),"
-            values_tuple += (index, row['id_from'], row['id_to'])
-            index += 1
-        values_str = values_str[:-1]
+        while rows:
+            values_str = ""
+            # Tuple des valuers à insérer
+            values_tuple = ()
+            for row in rows:
+                values_str += "(%s, %s, %s),"
+                values_tuple += (index, row['id_from'], row['id_to'])
+                index += 1
+            values_str = values_str[:-1]
 
-        set_on_conflict = (
-            "id_from = excluded.id_from,id_to = excluded.id_to"
-        )
+            set_on_conflict = (
+                "id_from = excluded.id_from,id_to = excluded.id_to"
+            )
 
-        sql_insert = """
-            INSERT INTO {}.turn_restrictions (id, id_from, id_to)
-            VALUES {}
-            ON CONFLICT (id) DO UPDATE
-              SET {};
-        """.format(schema, values_str, set_on_conflict)
-        database_out.execute_update(sql_insert, values_tuple)
+            sql_insert = """
+                INSERT INTO {}.turn_restrictions (id, id_from, id_to)
+                VALUES {}
+                ON CONFLICT (id) DO UPDATE
+                SET {};
+            """.format(schema, values_str, set_on_conflict)
+            database_out.execute_update(sql_insert, values_tuple)
 
-        rows, _ = next(generator,(None, None))
+            rows, _ = next(generator,(None, None))
 
-    et_execute = time.time()
+        et_execute = time.time()
+    finally:
+        generator.close()  # Ensure the generator is closed to free resources
     logger.info("Writing turn restrinctions Done. Elapsed time : %s seconds." %(et_execute - st_execute))
 
     # Noeuds ---------------------------------------------------------------------------------------
@@ -171,30 +174,32 @@ def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseMana
     index = 0
     batchsize = 10000
     generator = database_work.execute_select_fetch_multiple(nd_query, show_duration=True, batchsize=batchsize)
-    rows, count = next(generator, (None, None))
-    while rows:
-        values_str = ""
-        # Tuple des valeurs à insérer
-        values_tuple = ()
-        for row in rows:
-            values_str += "(%s, %s),"
-            values_tuple += (row['id'], row['geom'])
-            index += 1
-        values_str = values_str[:-1]
+    try:
+        rows, count = next(generator, (None, None))
+        while rows:
+            values_str = ""
+            # Tuple des valeurs à insérer
+            values_tuple = ()
+            for row in rows:
+                values_str += "(%s, %s),"
+                values_tuple += (row['id'], row['geom'])
+                index += 1
+            values_str = values_str[:-1]
 
-        set_on_conflict = (
-            "the_geom = excluded.the_geom"
-        )
+            set_on_conflict = (
+                "the_geom = excluded.the_geom"
+            )
 
-        sql_insert = """
-            INSERT INTO {}_vertices_pgr (id, the_geom)
-            VALUES {}
-            ON CONFLICT (id) DO UPDATE
-              SET {};
-        """.format(ways_table_name, values_str, set_on_conflict)
-        database_out.execute_update(sql_insert, values_tuple)
-        rows, _ = next(generator,(None, None))
-
+            sql_insert = """
+                INSERT INTO {}_vertices_pgr (id, the_geom)
+                VALUES {}
+                ON CONFLICT (id) DO UPDATE
+                SET {};
+            """.format(ways_table_name, values_str, set_on_conflict)
+            database_out.execute_update(sql_insert, values_tuple)
+            rows, _ = next(generator,(None, None))
+    finally:
+        generator.close()  # Ensure the generator is closed to free resources
 
     et_execute = time.time()
     logger.info("Writing vertices Done. Elapsed time : %s seconds." %(et_execute - st_execute))
@@ -266,45 +271,48 @@ def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseMana
     # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
     percent = 0
-    rows, count = next(generator, (None, None))
-    while rows:
-        percent += 1000000 / count
-        # Chaîne permettant l'insertion de valeurs via psycopg
-        values_str = ""
-        # Tuple des valuers à insérer
-        values_tuple = ()
-        for row in rows:
-            values_str += "(" + single_value_str + "),"
-            output_costs = output_costs_from_costs_config(costs, row)
-            values_tuple += tuple(
-                row[ output_columns_name ] for output_columns_name in output_columns_names
-            ) + output_costs
-        values_str = values_str[:-1]
+    try:
+        rows, count = next(generator, (None, None))
+        while rows:
+            percent += 1000000 / count
+            # Chaîne permettant l'insertion de valeurs via psycopg
+            values_str = ""
+            # Tuple des valuers à insérer
+            values_tuple = ()
+            for row in rows:
+                values_str += "(" + single_value_str + "),"
+                output_costs = output_costs_from_costs_config(costs, row)
+                values_tuple += tuple(
+                    row[ output_columns_name ] for output_columns_name in output_columns_names
+                ) + output_costs
+            values_str = values_str[:-1]
 
-        output_columns = "("
-        for output_columns_name in output_columns_names:
-            output_columns += output_columns_name + ','
-        output_columns = output_columns[:-1]
+            output_columns = "("
+            for output_columns_name in output_columns_names:
+                output_columns += output_columns_name + ','
+            output_columns = output_columns[:-1]
 
-        set_on_conflict = ''
-        for output_columns_name in output_columns_names:
-            set_on_conflict += "{0} = excluded.{0},".format(output_columns_name)
-        set_on_conflict = set_on_conflict[:-1]
+            set_on_conflict = ''
+            for output_columns_name in output_columns_names:
+                set_on_conflict += "{0} = excluded.{0},".format(output_columns_name)
+            set_on_conflict = set_on_conflict[:-1]
 
-        for output in costs["outputs"]:
-            output_columns += "," + output["name"] + ",reverse_" + output["name"]
-            set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
-            set_on_conflict += ",{0} = excluded.{0}".format("reverse_" + output["name"])
+            for output in costs["outputs"]:
+                output_columns += "," + output["name"] + ",reverse_" + output["name"]
+                set_on_conflict += ",{0} = excluded.{0}".format(output["name"])
+                set_on_conflict += ",{0} = excluded.{0}".format("reverse_" + output["name"])
 
-        output_columns += ")"
-        sql_insert = """
-            INSERT INTO {} {}
-            VALUES {}
-            ON CONFLICT (id) DO UPDATE
-              SET {};
-            """.format(ways_table_name, output_columns, values_str, set_on_conflict)
-        database_out.execute_update(sql_insert, values_tuple)
-        rows, _ = next(generator,(None, None))
+            output_columns += ")"
+            sql_insert = """
+                INSERT INTO {} {}
+                VALUES {}
+                ON CONFLICT (id) DO UPDATE
+                SET {};
+                """.format(ways_table_name, output_columns, values_str, set_on_conflict)
+            database_out.execute_update(sql_insert, values_tuple)
+            rows, _ = next(generator,(None, None))
+    finally:
+        generator.close()  # Ensure the generator is closed to free resources
 
     et_execute = time.time()
     logger.info("Writing ways ended. Elapsed time : %s seconds." %(et_execute - st_execute))

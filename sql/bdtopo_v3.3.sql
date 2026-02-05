@@ -187,7 +187,7 @@ CREATE TEMP TABLE IF NOT EXISTS bduni_troncon AS
     t.cpx_classement_administratif as cpx_classement_administratif,
 
     -- géométrie du troncon
-    ST_Force2D(ST_Transform(t.{troncon_de_route_geom_col}, 4326)) as geom,
+    ST_Force2D(ST_Transform(t.geom, 4326)) as geom,
 
       -- Nouveaux champs initialisés avec valeur par défaut
     false AS transport_exceptionnel,
