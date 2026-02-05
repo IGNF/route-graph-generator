@@ -168,6 +168,9 @@ class DatabaseManager:
         next(self.execute_update_query(query, params=params, isolation_level=isolation_level), None)
 
     def execute_select_fetch_one(self, query, show_duration=False):
-        gen = self.execute_select_fetch_multiple(query, 1, show_duration)
-        row, count = next(gen, (None, None))
-        return row, count
+        try:
+            gen = self.execute_select_fetch_multiple(query, 1, show_duration)
+            row, count = next(gen, (None, None))
+            return row, count
+        finally:
+            gen.close()  # Ensure the generator is closed to free resources

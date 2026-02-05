@@ -81,10 +81,13 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                     sql_query_nodes += " LIMIT {} OFFSET {}".format(batchsize, offset)
                     offset += batchsize
                     logger.info("Writing nodes")
-                    for row, count in database.execute_select_fetch_multiple(sql_query_nodes, show_duration=True):
-                        nodeEl = writeNode(row, extraction_date)
-                        xf.write(nodeEl, pretty_print=True)
-
+                    gen = database.execute_select_fetch_multiple(sql_query_nodes, show_duration=True)
+                    try:
+                        for row, count in gen:
+                            nodeEl = writeNode(row, extraction_date)
+                            xf.write(nodeEl, pretty_print=True)
+                    finally:
+                        gen.close()
                     logger.info("%s / %s nodes ajoutés" % (offset, nodesize))
                 et_nodes = time.time()
                 logger.info("Writing nodes ended. Elapsed time : %s seconds." % (et_nodes - st_nodes))
@@ -104,17 +107,21 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                                                                                                               f'{input_schema}.inter_nodes(geom) as internodes'])
                     sql_query_edges += " LIMIT {} OFFSET {}".format(batchsize, offset)
                     offset += batchsize
-                    for row, count in database.execute_select_fetch_multiple(sql_query_edges, show_duration=True):
-                        wayEl = writeWay(row, extraction_date)
-                        for node in row['internodes']:
-                            vertexSequence = vertexSequence + 1
-                            node['id'] = vertexSequence
+                    gen = database.execute_select_fetch_multiple(sql_query_edges, show_duration=True)
+                    try:
+                        for row, count in gen:
+                            wayEl = writeWay(row, extraction_date)
+                            for node in row['internodes']:
+                                vertexSequence = vertexSequence + 1
+                                node['id'] = vertexSequence
                             nodeEl = writeNode(node, extraction_date)
                             xf.write(nodeEl, pretty_print=True)
                         wayEl = writeWayNds(wayEl, row, row['internodes'])
                         wayEl = writeWayTags(wayEl, row)
                         xf.write(wayEl, pretty_print=True)
 
+                    finally:
+                        gen.close()
                     logger.info("%s / %s ways ajoutés" % (offset, edgesize))
                 et_edges = time.time()
                 logger.info("Writing ways ended. Elapsed time : %s seconds." % (et_edges - st_edges))
@@ -124,16 +131,19 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                 logger.info("Writing restrictions")
                 st_execute = time.time()
                 i = 1
-                for row, count in database.execute_select_fetch_multiple(sql_query_non_comm, show_duration=True):
-                    if row['common_vertex_id'] == -1:
+                gen = database.execute_select_fetch_multiple(sql_query_non_comm, show_duration=True)
+                try:
+                    for row, count in gen:
+                        if row['common_vertex_id'] == -1:
+                            i += 1
+                            continue
+                        ResEl = writeRes(row, i, extraction_date)
+                        xf.write(ResEl, pretty_print=True)
+                        if (i % ceil(count / 10) == 0):
+                            logger.info("%s / %s restrictions ajoutés" % (i, count))
                         i += 1
-                        continue
-                    ResEl = writeRes(row, i, extraction_date)
-                    xf.write(ResEl, pretty_print=True)
-                    if (i % ceil(count / 10) == 0):
-                        logger.info("%s / %s restrictions ajoutés" % (i, count))
-                    i += 1
-
+                finally:
+                    gen.close()
                 et_execute = time.time()
                 logger.info("Writing restrictions ended. Elapsed time : %s seconds." % (et_execute - st_execute))
 
