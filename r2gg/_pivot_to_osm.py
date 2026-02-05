@@ -135,7 +135,7 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                             continue
                         ResEl = writeRes(row, i, extraction_date)
                         xf.write(ResEl, pretty_print=True)
-                        if count and (i % ceil(count / 10) == 0):
+                        if count > 0 and (i % ceil(count / 10) == 0):
                             logger.info("%s / %s restrictions ajoutés" % (i, count))
                         i += 1
                 finally:
