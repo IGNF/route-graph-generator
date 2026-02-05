@@ -45,10 +45,12 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
 
     last_value_nodes_query = f"select last_value from {input_schema}.nodes_id_seq"
     vertexSequence, _ = database.execute_select_fetch_one(last_value_nodes_query, show_duration=True)
+    vertexSequence = vertexSequence[0]
     logger.info(vertexSequence)
 
     last_value_edges_query = f"select last_value from {input_schema}.edges_id_seq"
     edgeSequence, _ = database.execute_select_fetch_one(last_value_edges_query, show_duration=True)
+    edgeSequence = edgeSequence[0]
     logger.info(edgeSequence)
 
     logger.info("Starting conversion from pivot to OSM")

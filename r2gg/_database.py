@@ -171,8 +171,7 @@ class DatabaseManager:
     def execute_select_fetch_one(self, query, show_duration=False):
         try:
             gen = self.execute_select_fetch_multiple(query, 1, show_duration)
-            rows, count = next(gen, (None, None))
-            row = rows[0] if rows else None
+            row, count = next(gen, (None, None))
             return row, count
         finally:
             gen.close()  # Ensure the generator is closed to free resources
