@@ -130,14 +130,12 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                 gen = database.execute_select_fetch_multiple(sql_query_non_comm, show_duration=True)
                 try:
                     for row, count in gen:
-                        if not row:
-                            continue
                         if row['common_vertex_id'] == -1:
                             i += 1
                             continue
                         ResEl = writeRes(row, i, extraction_date)
                         xf.write(ResEl, pretty_print=True)
-                        if (i % ceil(count / 10) == 0):
+                        if count and (i % ceil(count / 10) == 0):
                             logger.info("%s / %s restrictions ajoutés" % (i, count))
                         i += 1
                 finally:
