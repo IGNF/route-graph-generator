@@ -130,6 +130,8 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
                 gen = database.execute_select_fetch_multiple(sql_query_non_comm, show_duration=True)
                 try:
                     for row, count in gen:
+                        if not row:
+                            continue
                         if row['common_vertex_id'] == -1:
                             i += 1
                             continue
