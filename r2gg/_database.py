@@ -149,7 +149,7 @@ class DatabaseManager:
         if show_duration :
             self.logger.info("SQL: {}".format(query))
         st_execute = time.time()
-        with self._connection.cursor(cursor_factory=DictCursor, name="cursor_out") as cursor:
+        with self._connection.cursor(cursor_factory=DictCursor) as cursor:
             old_isolation_level = self._connection.isolation_level
             try:
                 if isolation_level is not None:
