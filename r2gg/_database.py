@@ -144,8 +144,8 @@ class DatabaseManager:
                     if batchsize == 1:
                         rows = rows.pop()
                     yield rows, count
-    finally:
-        self._connection.commit()
+        finally:
+            self._connection.commit()
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator
