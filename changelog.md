@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.1.7
+FIXED :
+- wrong database manager logic for set statement timeout
+
 ## 3.1.6
 FIXED :
 - wrong database manager logic for select + batch fetch

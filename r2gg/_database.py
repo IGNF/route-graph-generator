@@ -71,7 +71,10 @@ class DatabaseManager:
         connect_args = "host=%s dbname=%s user=%s password=%s port=%s" % (host, dbname, user, password, port)
 
         self.logger.info("Connecting to work database")
-        connection = psycopg2.connect(connect_args)
+        if TIMEOUT:
+            connection = psycopg2.connect(connect_args, options=f"-c statement_timeout={TIMEOUT * 1000}")
+        else:
+            connection = psycopg2.connect(connect_args)
         connection.set_client_encoding("UTF8")
 
         return connection
@@ -119,29 +122,30 @@ class DatabaseManager:
         """
         self.ensure_connection()
         cursor_name = f"cursor_{int(time.time() * 1000)}"
-        with self._connection.cursor(cursor_factory=DictCursor, name=cursor_name) as cursor:
-            if TIMEOUT:
-                cursor.execute("SET statement_timeout = %s", (1000 * TIMEOUT,))
-            if show_duration:
-                self.logger.info(f"SQL: {query}")
-                st = time.time()
-                cursor.execute(query)
-                self.logger.info(
-                    "Execution ended. Elapsed time : %s seconds.",
-                    time.time() - st
-                )
-            else:
-                cursor.execute(query)
-
-            count = cursor.rowcount
-
-            while True:
-                rows = cursor.fetchmany(batchsize)
-                if not rows:
-                    break
-                if batchsize == 1:
-                    rows = rows.pop()
-                yield rows, count
+        try:
+            with self._connection.cursor(cursor_factory=DictCursor, name=cursor_name) as cursor:
+                if show_duration:
+                    self.logger.info(f"SQL: {query}")
+                    st = time.time()
+                    cursor.execute(query)
+                    self.logger.info(
+                        "Execution ended. Elapsed time : %s seconds.",
+                        time.time() - st
+                    )
+                else:
+                    cursor.execute(query)
+    
+                count = cursor.rowcount
+    
+                while True:
+                    rows = cursor.fetchmany(batchsize)
+                    if not rows:
+                        break
+                    if batchsize == 1:
+                        rows = rows.pop()
+                    yield rows, count
+    finally:
+        self._connection.commit()
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator
