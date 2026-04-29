@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.1
+FIXED :
+- osm building key error
+
 ## 4.1.0
 ADDED :
 - added new osm-specific tags in osm building for valhalla costing options

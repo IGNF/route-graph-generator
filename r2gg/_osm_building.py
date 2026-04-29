@@ -216,8 +216,8 @@ def writeWayTags(wayEl, way):
         tag.set('k', '%s' %k)
         tag.set('v', '%s' %str(v))
         tags_present.add(k)
-        if PIVOT_ATTRIBUTE_TO_OSM[k] != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM[k], dict):
-            for attr_value, new_tags in PIVOT_ATTRIBUTE_TO_OSM[k].items():
+        if PIVOT_ATTRIBUTE_TO_OSM.get(k, "") != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM.get(k, ""), dict):
+            for attr_value, new_tags in PIVOT_ATTRIBUTE_TO_OSM.get(k, "").items():
                 if v == attr_value:
                     for t, val in new_tags.items():
                         if t not in tags_present:
@@ -225,9 +225,9 @@ def writeWayTags(wayEl, way):
                             newtag.set('k', '%s' %t)
                             newtag.set('v', '%s' %str(val))
                             tags_present.add(t)
-        elif PIVOT_ATTRIBUTE_TO_OSM[k] != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM[k], str):
+        elif PIVOT_ATTRIBUTE_TO_OSM.get(k, "") != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM.get(k, ""), str):
             tag = etree.SubElement(wayEl, 'tag')
-            tag.set('k', '%s' %PIVOT_ATTRIBUTE_TO_OSM[k])
+            tag.set('k', '%s' %PIVOT_ATTRIBUTE_TO_OSM.get(k, ""))
             tag.set('v', '%s' %str(v))
             tags_present.add(k)
         # Cas particulier : vitesse
