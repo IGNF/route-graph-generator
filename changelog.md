@@ -6,6 +6,14 @@ UPDATED :
 - upgrade Valhalla to 3.6.1, using main repo instead of custom one
 - lighter and faster docker image build
 
+## 3.1.7
+FIXED :
+- wrong database manager logic for set statement timeout
+
+## 3.1.6
+FIXED :
+- wrong database manager logic for select + batch fetch
+
 ## 3.1.5
 FIXED :
 - database manager does not raie error when retries have failed
