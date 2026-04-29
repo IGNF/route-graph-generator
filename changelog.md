@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.0.0
+UPDATED :
+- (breaking) upgrade OSRM to 6.0.0
+- upgrade Valhalla to 3.6.1, using main repo instead of custom one
+- lighter and faster docker image build
+
 ## 3.1.7
 FIXED :
 - wrong database manager logic for set statement timeout
