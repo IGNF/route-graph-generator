@@ -1,5 +1,65 @@
 from lxml import etree
 
+PIVOT_ATTRIBUTE_TO_OSM = {
+    "direction": {
+        -1: {"oneway": "-1"},
+        1: {"oneway": "1"}
+    },
+    "vitesse_moyenne_vl": "",
+    "nature": {
+        "Route à 2 chaussées": {"highway": "motorway"},
+        "Type autoroutier": {"highway": "motorway", "foot": "no"},
+        "Bretelle": {"highway": "motorway", "foot": "no"},
+        "Sentier": {"highway": "footway", "surface": "unpaved"},
+        "Route empierrée": {"surface": "unpaved"},
+        "Chemin": {"surface": "unpaved"},
+    },
+    "cleabs": "",
+    "importance": "",
+    "way_names": "",
+    "nom_1_gauche": "",
+    "nom_1_droite": "",
+    "cpx_numero": "",
+    "cpx_toponyme_route_nommee": "",
+    "sens_de_circulation": "",
+    "position_par_rapport_au_sol": "",
+    "acces_vehicule_leger": {
+        "Physiquement impossible": {"highway": "footway"},
+        "A péage": {"toll": "yes"},
+    },
+    "largeur_de_chaussee": "",
+    "nombre_de_voies": "",
+    "insee_commune_gauche": "",
+    "insee_commune_droite": "",
+    "itineraire_vert": "",
+    "reserve_aux_bus": "",
+    "urbain": "",
+    "acces_pieton": {
+        "Restreint aux ayants droit": {"foot": "no"}
+    },
+    "nature_de_la_restriction": "",
+    "restriction_de_hauteur": "maxheight",
+    "restriction_de_poids_total": "maxweight",
+    "restriction_de_poids_par_essieu": "maxaxleload",
+    "restriction_de_largeur": "maxwidth",
+    "restriction_de_longueur": "maxlength",
+    "matieres_dangereuses_interdites": {
+        "t": {"hazmat": "no"}
+    },
+    "cpx_gestionnaire": "",
+    "cpx_numero_route_europeenne": "",
+    "cpx_classement_administratif": {
+        "Départementale": {"service": "driveway"},
+        "Nationale": {"service": "driveway"},
+        "Autoroute": {"service": "driveway"},
+    },
+    "transport_exceptionnel": "",
+    "vla_par_defaut": "",
+    "cout_penalites": "",
+    "vehicule_leger_interdit": "",
+    "cout_vehicule_prioritaire": "",
+}
+
 def writeNode(node, extraction_date):
     """
     Fonction qui écrit un noeud en xml à partir d'un dict (potentiellement une ligne de bdd)
@@ -148,11 +208,74 @@ def writeWayTags(wayEl, way):
     lxml.etree.Element
         element xml correspondant à l'arrête avec ses attributs
     """
-
+    tags_present = set()
     for k,v in way.items():
         if k == 'internodes' or k.endswith('_id') or k == 'geom' or k=='geometrie' :
             continue
         tag = etree.SubElement(wayEl, 'tag')
         tag.set('k', '%s' %k)
         tag.set('v', '%s' %str(v))
+        tags_present.add(k)
+        if PIVOT_ATTRIBUTE_TO_OSM[k] != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM[k], dict):
+            for attr_value, new_tags in PIVOT_ATTRIBUTE_TO_OSM[k].items():
+                if v == attr_value:
+                    for t, val in new_tags.items():
+                        if t not in tags_present:
+                            newtag = etree.SubElement(wayEl, 'tag')
+                            newtag.set('k', '%s' %t)
+                            newtag.set('v', '%s' %str(val))
+                            tags_present.add(t)
+        elif PIVOT_ATTRIBUTE_TO_OSM[k] != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM[k], str):
+            tag = etree.SubElement(wayEl, 'tag')
+            tag.set('k', '%s' %PIVOT_ATTRIBUTE_TO_OSM[k])
+            tag.set('v', '%s' %str(v))
+            tags_present.add(k)
+        # Cas particulier : vitesse
+        if k == "vitesse_moyenne_vl":
+            corrected_speed = v
+            if way["urbain"]:
+                corrected_speed = 3.6 * way["lenght_m"] / ((3.6 / corrected_speed) * way["length_m"] + 5)
+            advisory_speed = etree.SubElement(wayEl, 'tag')
+            advisory_speed.set('k', "maxspeed:advisory")
+            advisory_speed.set('v', '%s' %str(corrected_speed))
+            tags_present.add("maxspeed:advisory")
+            practical_speed = etree.SubElement(wayEl, 'tag')
+            practical_speed.set('k', "maxspeed:practical")
+            practical_speed.set('v', '%s' %str(corrected_speed))
+            tags_present.add("maxspeed:practical")
+            if way["direction"] <= 0:
+                backward_speed = etree.SubElement(wayEl, 'tag')
+                backward_speed.set('k', "maxspeed:backward")
+                backward_speed.set('v', '%s' %str(corrected_speed))
+                tags_present.add("maxspeed:backward")
+            else:
+                backward_speed = etree.SubElement(wayEl, 'tag')
+                backward_speed.set('k', "maxspeed:backward")
+                backward_speed.set('v', "0")
+                tags_present.add("maxspeed:backward")
+
+            if way["direction"] >= 0:
+                forward_speed = etree.SubElement(wayEl, 'tag')
+                forward_speed.set('k', "maxspeed:forward")
+                forward_speed.set('v', '%s' %str(corrected_speed))
+                tags_present.add("maxspeed:forward")
+            else:
+                forward_speed = etree.SubElement(wayEl, 'tag')
+                forward_speed.set('k', "maxspeed:forward")
+                forward_speed.set('v', "0")
+                tags_present.add("maxspeed:forward")
+
+        # Cas particulier : position_par_rapport_au_sol
+        if k == "position_par_rapport_au_sol":
+            if int(v) > 0:
+                bridge = etree.SubElement(wayEl, 'tag')
+                bridge.set('k', "bridge")
+                bridge.set('v', "yes")
+                tags_present.add("bridge")
+            if int(v) < 0:
+                tunnel = etree.SubElement(wayEl, 'tag')
+                tunnel.set('k', "tunnel")
+                tunnel.set('v', "yes")
+                tags_present.add("tunnel")
+
     return wayEl

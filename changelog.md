@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.1.0
+ADDED :
+- added new osm-specific tags in osm building for valhalla costing options
+
+REMOVED :
+- custom valhalla lua building
+
 ## 4.0.0
 UPDATED :
 - (breaking) upgrade OSRM to 6.0.0

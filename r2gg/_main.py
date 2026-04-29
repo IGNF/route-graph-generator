@@ -16,7 +16,6 @@ from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
-from r2gg._valhalla_lua_builder import build_valhalla_lua
 
 
 def sql_convert(config, resource, db_configs, database: DatabaseManager, logger):
@@ -338,7 +337,7 @@ def osrm_convert(config, resource, logger, build_lua_from_cost_config=True):
         i += 1
 
 
-def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
+def valhalla_convert(config, resource, logger):
     """
     Fonction de conversion depuis le fichier .osm.pbf vers les fichiers valhalla
 
@@ -349,8 +348,6 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
     resource: dict
         dictionnaire correspondant à la resource décrite dans le fichier passé en argument
     logger: logging.Logger
-    build_lua_from_cost_config : bool
-        contruire le lua à partir de le configuration des coûts. Défaut : True
     """
 
     if (resource['type'] != 'valhalla'):
@@ -370,7 +367,6 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
         logger.info('Looking for OSM PBF file')
 
         osm_file = os.path.join(work_dir_config, source['id'] + ".osm.pbf")
-        extension = ".osm.pbf"
         if not os.path.exists(osm_file):
             # On gère le cas où une génération a déjà été lancée pour du OSRM donc en .osm et pas forcément pbf
             osm_tmp_file = os.path.join(work_dir_config, source['id'] + ".osm")
@@ -386,17 +382,6 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
         # actuellement, on génère un seul LUA pour tous les coûts possibles (car/fastest, car/shortest, pedestrian/shortest)
         # Mais il serait bien de générer le LUA avec les coûts qui sont dans costs uniquement
         logger.info('LUA part')
-
-        lua_file = source["costs"][0]["compute"]["storage"]["file"]
-
-        if build_lua_from_cost_config:
-            logger.info("Building lua profile")
-            config_file = source["costs"][0]["compute"]["configuration"]["storage"]["file"]
-            costs_config = config_from_path(config_file)
-
-            with open(lua_file, "w") as lua_f:
-                lua_f.write(build_valhalla_lua(costs_config))
-            logger.info("Finished lua building")
 
         # Définition et exécution des commandes shell à exécuter
         mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
@@ -415,13 +400,6 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
         subprocess_execution(valhalla_build_config_args, logger, outfile=source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
         time.sleep(1)
-        # Ajout du graph custom dans la config valhalla (impossible via les paramètres du build_config)
-        with open(source["storage"]["config"], "r") as valhalla_config:
-            config_dict = json.load(valhalla_config)
-            config_dict["mjolnir"]["graph_lua_name"] = source["costs"][0]["compute"]["storage"]["file"]
-
-        with open(source["storage"]["config"], "w") as valhalla_config:
-            valhalla_config.write(json.dumps(config_dict))
 
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
         subprocess_execution(valhalla_build_tiles_args, logger)
@@ -433,7 +411,7 @@ def valhalla_convert(config, resource, logger, build_lua_from_cost_config=True):
         logger.info("Valhalla tiles built. Elapsed time : %s seconds." % (final_command - start_command))
 
 
-def write_road2_config(config, resource, logger, convert_file_paths=True):
+def write_road2_config(config, resource, logger):
     """
     Fonction pour l'écriture du fichier de ressource
 
