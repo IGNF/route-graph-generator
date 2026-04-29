@@ -335,7 +335,7 @@ INSERT INTO {output_schema}.edges
     nature as nature,
     cleabs as cleabs,
     importance as importance,
-    CONCAT('{{"nom_1_gauche": "', nom_1_gauche, '", "nom_1_droite": "', nom_1_droite, '", "cpx_numero": "', cpx_numero, '", "cpx_toponyme": "', cpx_toponyme, '"}}') as way_names,
+    CONCAT('{{"nom_1_gauche": "', nom_1_gauche, '", "nom_1_droite": "', nom_1_droite, '", "cpx_numero": "', cpx_numero, '", "cpx_toponyme": "', cpx_toponyme, '", "nature": "', nature,  '", "importance": "', importance,  '", "cpx_classement_administratif": "', cpx_classement_administratif, '", "restriction_de_hauteur": "', restriction_de_hauteur, '", "restriction_de_poids_total": "', restriction_de_poids_total, '", "restriction_de_poids_par_essieu": "', restriction_de_poids_par_essieu, '", "urbain": "', urbain, '", "cleabs": "', cleabs, '", "cpx_gestionnaire": "', cpx_gestionnaire, '", "vitesse_moyenne_vl": "', vitesse_moyenne_vl, '", "nature_de_la_restriction": "', nature_de_la_restriction, '"}}') as way_names,
     nom_1_gauche as nom_1_gauche,
     nom_1_droite as nom_1_droite,
     cpx_numero as cpx_numero,

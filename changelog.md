@@ -5,6 +5,7 @@ UPDATED :
 - (breaking) upgrade OSRM to 6.0.0
 - upgrade Valhalla to 3.6.1, using main repo instead of custom one
 - lighter and faster docker image build
+- added more attributes in way_names
 
 ## 3.1.7
 FIXED :
