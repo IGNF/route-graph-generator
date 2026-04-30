@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.4
+FIXED :
+- docker image build
+
 ## 4.1.3
 FIXED :
 - osm building division by zero
