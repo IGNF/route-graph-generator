@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.2
+FIXED :
+- osm building typo error
+
 ## 4.1.1
 FIXED :
 - osm building key error
