@@ -1,5 +1,5 @@
 lxml==4.9.3
-psycopg2==2.9.1
+psycopg2==2.9.12
 sqlparse==0.4.2
 osmium==4.3.1
 pyvalhalla==3.7.0

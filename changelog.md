@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.5
+FIXED :
+- psycopg2 version
+
 ## 4.1.4
 FIXED :
 - docker image build
