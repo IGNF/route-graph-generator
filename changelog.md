@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.3
+FIXED :
+- osm building division by zero
+
 ## 4.1.2
 FIXED :
 - osm building typo error

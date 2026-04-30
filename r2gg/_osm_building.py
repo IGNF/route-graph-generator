@@ -233,7 +233,7 @@ def writeWayTags(wayEl, way):
         # Cas particulier : vitesse
         if k == "vitesse_moyenne_vl":
             corrected_speed = v
-            if way["urbain"]:
+            if way["urbain"] and v > 0:
                 corrected_speed = 3.6 * way["length_m"] / ((3.6 / corrected_speed) * way["length_m"] + 5)
             advisory_speed = etree.SubElement(wayEl, 'tag')
             advisory_speed.set('k', "maxspeed:advisory")
