@@ -167,7 +167,7 @@ def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseMana
     database_out.execute_update(create_nodes)
 
     logger.info("Populating vertices")
-    nd_query = f"SELECT id, geom FROM {input_schema}.nodes;"
+    nd_query = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'], ["id", "geom"])
     # Insertion petit à petit -> plus performant
     # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
@@ -270,11 +270,9 @@ def pivot_to_pgr(source, cost_calculation_file_path, database_work: DatabaseMana
     # Insertion petit à petit -> plus performant
     # logger.info("SQL: Inserting or updating {} values in out db".format(cursor_in.rowcount))
     st_execute = time.time()
-    percent = 0
     try:
         rows, count = next(generator, (None, None))
         while rows:
-            percent += 1000000 / count
             # Chaîne permettant l'insertion de valeurs via psycopg
             values_str = ""
             # Tuple des valuers à insérer

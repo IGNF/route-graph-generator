@@ -4,7 +4,6 @@ from os import getenv
 import psycopg2
 from psycopg2 import OperationalError, DatabaseError, InterfaceError
 from psycopg2.extras import DictCursor
-import logging
 
 TIMEOUT = int(getenv("SQL_STATEMENT_TIMEOUT", 0))
 RETRY = int(getenv("SQL_STATEMENT_RETRY_ATTEMPTS", 3))
@@ -134,9 +133,9 @@ class DatabaseManager:
                     )
                 else:
                     cursor.execute(query)
-    
+
                 count = cursor.rowcount
-    
+
                 while True:
                     rows = cursor.fetchmany(batchsize)
                     if not rows:
@@ -145,7 +144,11 @@ class DatabaseManager:
                         rows = rows.pop()
                     yield rows, count
         finally:
-            self._connection.commit()
+            if self._connection and self._connection.closed == 0:
+              try:
+                  self._connection.commit()
+              except Exception:
+                  pass
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator

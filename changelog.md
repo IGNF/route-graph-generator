@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.1.6
+FIXED:
+- database timeout in osm buidling
+
 ## 4.1.5
 FIXED :
 - psycopg2 version
