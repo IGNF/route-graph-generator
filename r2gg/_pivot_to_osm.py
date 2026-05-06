@@ -66,59 +66,49 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
             attribs = {"version": "0.6", "generator": "r2gg"}
             with xf.element("osm", attribs):
 
-                # Récupération du nombre de nodes
-                number_of_nodes_query = f"SELECT COUNT(*) as cnt FROM {input_schema}.nodes"
-                row, _ = database.execute_select_fetch_one(number_of_nodes_query, show_duration=True)
-                nodesize = row["cnt"]
-
                 # Ecriture des nodes
-                batchsize = 500000
-                offset = 0
-                logger.info(f"Writing nodes: {nodesize} ways to write")
+                batchsize = 10000
+                nd_query = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'])
+                generator = database.execute_select_fetch_multiple(nd_query, show_duration=True, batchsize=batchsize)
+                logger.info(f"Writing nodes")
                 st_nodes = time.time()
-                while offset < nodesize:
-                    sql_query_nodes = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'])
-                    sql_query_nodes += " LIMIT {} OFFSET {}".format(batchsize, offset)
-                    offset += batchsize
-                    logger.info("Writing nodes")
-                    gen = database.execute_select_fetch_multiple(sql_query_nodes, show_duration=True)
-                    try:
-                        for row, count in gen:
+                try:
+                    rows, count = next(generator, (None, None))
+                    while rows:
+                        for row in rows:
                             nodeEl = writeNode(row, extraction_date)
                             xf.write(nodeEl, pretty_print=True)
-                    finally:
-                        gen.close()
-                    logger.info("%s / %s nodes ajoutés" % (offset, nodesize))
+                        rows, _ = next(generator,(None, None))
+                finally:
+                    generator.close()
                 et_nodes = time.time()
                 logger.info("Writing nodes ended. Elapsed time : %s seconds." % (et_nodes - st_nodes))
 
-                # Récupération du nombre de ways
-                sql_query_edges_count = f"SELECT COUNT(*) as cnt FROM {input_schema}.edges"
-                row, _ = database.execute_select_fetch_one(sql_query_edges_count, show_duration=True)
-                edgesize = row["cnt"]
-
                 # Ecriture des ways
-                batchsize = 300000
-                offset = 0
-                logger.info(f"Writing ways: {edgesize} ways to write")
+                logger.info(f"Writing ways")
+                sql_query_edges = getQueryByTableAndBoundingBox(
+                    f'{input_schema}.edges',
+                    source['bbox'],
+                    ['*', f'{input_schema}.inter_nodes(geom) as internodes']
+                )
+                generator = database.execute_select_fetch_multiple(sql_query_edges, show_duration=True, batchsize=batchsize)
                 st_edges = time.time()
-                while offset < edgesize:
-                    sql_query_edges = getQueryByTableAndBoundingBox(f'{input_schema}.edges', source['bbox'], ['*',
-                                                                                                              f'{input_schema}.inter_nodes(geom) as internodes'])
-                    sql_query_edges += " LIMIT {} OFFSET {}".format(batchsize, offset)
-                    offset += batchsize
-                    for row, count in database.execute_select_fetch_multiple(sql_query_edges, show_duration=True):
-                        wayEl = writeWay(row, extraction_date)
-                        for node in row['internodes']:
-                            vertexSequence = vertexSequence + 1
-                            node['id'] = vertexSequence
-                            nodeEl = writeNode(node, extraction_date)
-                            xf.write(nodeEl, pretty_print=True)
-                        wayEl = writeWayNds(wayEl, row, row['internodes'])
-                        wayEl = writeWayTags(wayEl, row)
-                        xf.write(wayEl, pretty_print=True)
-
-                    logger.info("%s / %s ways ajoutés" % (offset, edgesize))
+                try:
+                    rows, count = next(generator, (None, None))
+                    while rows:
+                        for row in rows:
+                            wayEl = writeWay(row, extraction_date)
+                            for node in row['internodes']:
+                                vertexSequence = vertexSequence + 1
+                                node['id'] = vertexSequence
+                                nodeEl = writeNode(node, extraction_date)
+                                xf.write(nodeEl, pretty_print=True)
+                            wayEl = writeWayNds(wayEl, row, row['internodes'])
+                            wayEl = writeWayTags(wayEl, row)
+                            xf.write(wayEl, pretty_print=True)
+                        rows, _ = next(generator,(None, None))
+                finally:
+                    generator.close()
                 et_edges = time.time()
                 logger.info("Writing ways ended. Elapsed time : %s seconds." % (et_edges - st_edges))
 
