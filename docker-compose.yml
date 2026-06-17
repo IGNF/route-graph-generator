@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_USER: r2gg
+      POSTGRES_PASSWORD: r2gg
+      POSTGRES_DB: pivot_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  importer:
+    build:
+      context: ./docker/import
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      - PGUSER=r2gg
+      - PGPASSWORD=r2gg
+      - PGHOST=db
+      - PGPORT=5432
+      - SOURCE_DB=source_db
+      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15.7z
+      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO/1_DONNEES_LIVRAISON_2026-03-00146/BDT_3-5_GPKG_LAMB93_D075_ED2026-03-15/BDT_3-5_GPKG_LAMB93_D075-ED2026-03-15.gpkg
+    # importer script will run once to load the source DB
+
+  r2gg:
+    build:
+      context: .
+      dockerfile: docker/debian/Dockerfile
+    depends_on:
+      - db
+      - importer
+    environment:
+      - DATABASE_URL=postgresql://r2gg:r2gg@db:5432/pivot_db
+    volumes:
+      - ./:/app
+    working_dir: /app
+    tty: true
+    command: ["bash"]
+    secrets:
+      - db_config
+
+volumes:
+  db_data:
+
+secrets:
+  db_config:
+    file: ./docker/data/pivot_base.json
