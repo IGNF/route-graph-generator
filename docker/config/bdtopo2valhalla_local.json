@@ -3,7 +3,7 @@
     "general": {
       "id": "bdtopo2valhalla",
       "logs": {
-        "configFile": "/home/docker/config/sample_log_config.json"
+        "configFile": "/home/docker/config/local_log_config.json"
       },
       "parallelization": {
         "threads": 4
@@ -33,12 +33,12 @@
       "configurations": {
         "resource": {
           "storage": {
-            "directory": "/home/docker/data/resources/"
+            "directory": "/home/docker/data/generation/resources/"
           }
         },
         "sources": {
           "storage": {
-            "directory": "/home/docker/data/sources/"
+            "directory": "/home/docker/data/generation/sources/"
           }
         }
       }
@@ -59,13 +59,13 @@
               "baseId": "base_bduni"
             },
             "conversion": {
-              "file": "/home/docker/sql/bdtopo_v3.3.sql"
+              "file": "/home/docker/sql/bdtopo_v3.3_local.sql"
             }
           },
           "storage": {
-            "tar": "/home/docker/data/bdtopo-valhalla-tiles.tar",
-            "dir": "/home/docker/data/bdtopo-valhalla-tiles/",
-            "config": "/home/docker/data/valhalla.json"
+            "tar": "/home/docker/data/generation/bdtopo-valhalla-tiles.tar",
+            "dir": "/home/docker/data/generation/bdtopo-valhalla-tiles/",
+            "config": "/home/docker/data/generation/valhalla.json"
           },
           "costs": [
             {

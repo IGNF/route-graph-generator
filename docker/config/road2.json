@@ -1,0 +1,26 @@
+{
+  "administration":{
+    "api" : {
+      "name" : "admin",
+      "version" : "1.0.0"
+    },
+    "services": [
+      {
+        "id": "main",
+        "configuration": "/home/docker/config/service.json",
+        "creationType": "newProcess" 
+      }
+    ],
+    "network" : {
+      "server" : {
+        "id": "administrator",
+        "https": "false",
+        "host": "0.0.0.0",
+        "port": "8079"
+      }
+    },
+    "logs": {
+      "configuration": "/home/docker/config/log4js-administration.json"
+    }
+  }
+}

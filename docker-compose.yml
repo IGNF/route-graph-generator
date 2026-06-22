@@ -28,21 +28,41 @@ services:
     # importer script will run once to load the source DB
 
   r2gg:
+    user: "${UID}:${GID}"
     build:
       context: .
       dockerfile: docker/debian/Dockerfile
     depends_on:
-      - db
-      - importer
+      db:
+        condition: service_started
+      importer:
+        condition: service_completed_successfully
     environment:
       - DATABASE_URL=postgresql://r2gg:r2gg@db:5432/pivot_db
     volumes:
-      - ./:/app
-    working_dir: /app
-    tty: true
-    command: ["bash"]
+      - ./:/user/app
+      - ./data/generation:/home/docker/data/generation
+    working_dir: /user/app
+    command: >
+      bash -c "
+        r2gg-sql2pivot docker/config/bdtopo2valhalla_local.json &&
+        r2gg-pivot2osm docker/config/bdtopo2valhalla_local.json &&
+        r2gg-osm2valhalla docker/config/bdtopo2valhalla_local.json &&
+        r2gg-road2config docker/config/bdtopo2valhalla_local.json
+      "
     secrets:
       - db_config
+
+  road2:
+    image: ghcr.io/ignf/road2:3.0.0
+    depends_on:
+      r2gg:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/home/docker/data
+      - ./docker/config:/home/docker/config
 
 volumes:
   db_data:
