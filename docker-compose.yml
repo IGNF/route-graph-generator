@@ -54,14 +54,16 @@ services:
       - db_config
 
   road2:
-    image: ghcr.io/ignf/road2:3.0.0
+    build:
+      context: ../road2/
+      dockerfile: docker/distributions/debian/Dockerfile
     depends_on:
       r2gg:
         condition: service_completed_successfully
     ports:
       - "8080:8080"
     volumes:
-      - ./data:/home/docker/data
+      - ./data/:/home/docker/data
       - ./docker/config:/home/docker/config
 
 volumes:

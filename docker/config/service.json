@@ -19,12 +19,12 @@
     },
     "resources": {
       "directories": [
-        "/home/docker/data/resources/"
+        "/home/docker/data/generation/resources/"
       ]
     },
     "sources": {
       "directories": [
-        "/home/docker/data/sources/"
+        "/home/docker/data/generation/sources/"
       ]
     },
     "network": {

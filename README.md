@@ -24,14 +24,19 @@ docker compose exec r2gg sh -c "r2gg-sql2pivot docker/config/bdtopo2valhalla_loc
 
 Les données se trouveront dans le dossier ./data/generation
 
-Pour faire tourner un service test valhalla sur les données ainsi générées, utiliser les commandes suivante:
+Le docker compose lance aussi un serveur road2, pour lancer un calcul d'itinéraire, copier le lien suivant
 ```
-docker run -dit valhalla -p 8002:8002 -v ${PWD}/data/generation:/custom_files -e use_tiles_ignore_pbf=True -e force_rebuild=False -e build_admins=False ghcr.io/valhalla/valhalla-scripted:latest
+http://localhost:8080/simple/1.0.0/route?resource=bdtopo-valhalla&profile=pedestrian&start=2.320041,48.8588897&end=2.3380277,48.8611473
+```
+
+Pour faire tourner un service test valhalla sans la sur couche road2 sur les données générées, utiliser la commande suivante:
+```
+docker run valhalla --user $(id -u):$(id -g) -p 8002:8002 -v ${PWD}/data/generation:/custom_files -e use_tiles_ignore_pbf=True -e force_rebuild=False -e build_admins=False ghcr.io/valhalla/valhalla-scripted:latest
 ```
 
 Puis checker la création d'itinéraire via le lien suivant
 ```
-http://localhost:8002/route?json={"costing":"pedestrian","costing_options":{"pedestrian":{"use_ferry":0,"use_living_streets":0.5,"use_tracks":0,"private_access_penalty":450,"destination_only_penalty":300,"elevator_penalty":120,"service_penalty":15,"service_factor":1,"shortest":false,"type":"Foot","use_hills":0.5,"walking_speed":5.1,"walkway_factor":1,"sidewalk_factor":1,"alley_factor":2,"driveway_factor":5,"step_penalty":0,"max_hiking_difficulty":1,"use_lit":0,"transit_start_end_max_distance":2145,"transit_transfer_max_distance":800}},"exclude_polygons":[],"locations":[{"lon":2.320041,"lat":48.8588897,"type":"break"},{"lon":2.3380277,"lat":48.8611473,"type":"break"}],"units":"kilometers","alternates":2,"id":"valhalla_directions","language":"fr-FR","directions_options":{"format":"osrm"},"shape_format":"geojson","format":"osrm"}
+http://localhost:8002/route?json={"locations":[{"lat": 48.8588897, "lon": 2.320041},{"lat": 48.8611473, "lon": 2.3380277}],"costing":"pedestrian","costing_options":{"pedestrian":{"walking_speed": 4}},"directions_options":{"format":"osrm"}}
 ```
 
 ## Prérequis
