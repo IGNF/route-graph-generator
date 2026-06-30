@@ -111,6 +111,23 @@ r2gg-pivot2osm config.json
 r2gg-osm2valhalla config.json
 ```
 
+Optionnellement, vous pouvez activer le téléchargement et nettoyage GTFS avant `r2gg-osm2valhalla` en ajoutant un bloc `gtfs` dans chaque source Valhalla du fichier `config.json`:
+
+```json
+{
+	"gtfs": {
+		"enabled": true,
+		"apiUrl": "https://transport.data.gouv.fr/api/datasets",
+		"getOutputDir": "/home/docker/data/generation/gtfs_in",
+		"cleanOutputDir": "/home/docker/data/generation/gtfs_clean",
+		"transitDir": "/home/docker/data/generation/transit_tiles",
+		"zipCleanOutput": true
+	}
+}
+```
+
+Quand `enabled` est à `true`, le pipeline GTFS est exécuté avant la génération Valhalla et le fichier `processing_report.json` est copié dans le dossier de travail (`generation.workingSpace.directory`).
+
 Enfin, si on souhaite générer la configuration pour Road2, il y a une dernière commande
 
 ```

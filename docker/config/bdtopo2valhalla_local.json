@@ -67,6 +67,14 @@
             "dir": "/home/docker/data/generation/bdtopo-valhalla-tiles/",
             "config": "/home/docker/data/generation/valhalla.json"
           },
+          "gtfs": {
+            "enabled": false,
+            "apiUrl": "https://transport.data.gouv.fr/api/datasets",
+            "getOutputDir": "/home/docker/data/generation/gtfs_in",
+            "cleanOutputDir": "/home/docker/data/generation/gtfs_clean",
+            "transitDir": "/home/docker/data/generation/transit_tiles",
+            "zipCleanOutput": true
+          },
           "costs": [
             {
               "profile": "car",
