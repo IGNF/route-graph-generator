@@ -404,7 +404,7 @@ def valhalla_convert(config, resource, logger):
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
         subprocess_execution(valhalla_build_tiles_args, logger)
 
-        valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v"]
+        valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v", "--overwrite"]
         subprocess_execution(valhalla_build_extract_args, logger)
 
         final_command = time.time()
