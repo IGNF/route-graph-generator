@@ -143,6 +143,23 @@
                   }
                 }
               }
+            },
+            {
+              "profile": "multimodal",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "multimodal",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
             }
           ]
         }
@@ -176,7 +193,8 @@
               "defaultValueContent": "car",
               "values": [
                 "car",
-                "pedestrian"
+                "pedestrian",
+                "multimodal"
               ]
             },
             {
@@ -224,6 +242,9 @@
                 "EPSG:4326",
                 "EPSG:2154"
               ]
+            },
+            {
+              "id": "date_time"
             },
             {
               "id": "timeUnit",
@@ -315,6 +336,9 @@
                 "departure",
                 "arrival"
               ]
+            },
+            {
+              "id": "date_time"
             },
             {
               "id": "constraints",
