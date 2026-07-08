@@ -44,6 +44,7 @@ jobs:
 
       - name: Install test dependencies
         run: |
+            pip install -r requirements/base.txt
             pip install -r requirements/testing.txt
 
       - name: Run test
