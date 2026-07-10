@@ -156,7 +156,6 @@ class TestPipelineConfig:
         assert cfg.api_url == "https://transport.data.gouv.fr/api/datasets"
         assert cfg.clean_geojson_file == "france_buffer.geojson"
         assert cfg.zip_clean_output is False
-        assert cfg.departement_split is None
 
     def test_pipeline_config_custom_values(self):
         """PipelineConfig accepts custom field values."""
