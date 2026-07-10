@@ -282,13 +282,11 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
 
     if 'start_pickup_drop_off_window' in stop_times.columns:
         # GTFS flex (unsupported in Valhalla https://github.com/valhalla/valhalla/issues/5419)
-        #set pickup_type and drop_off_type to 0 if empty
-        stop_times['pickup_type'] = stop_times['pickup_type'].fillna(0)
-        stop_times['drop_off_type'] = stop_times['drop_off_type'].fillna(0)
-        #remove row with pickup_type >=2 or drop_off_type >=2
-        stop_times['pickup_type'] = stop_times['pickup_type'].astype(int)
-        stop_times['drop_off_type'] = stop_times['drop_off_type'].astype(int)
-        stop_times = stop_times[(stop_times['pickup_type'] < 2) & (stop_times['drop_off_type'] < 2)].copy()
+        # set pickup_type and drop_off_type to 0 if empty (read_if_exists uses keep_default_na=False)
+        stop_times["pickup_type"] = stop_times["pickup_type"].replace("", "0").fillna("0").astype(int)
+        stop_times["drop_off_type"] = stop_times["drop_off_type"].replace("", "0").fillna("0").astype(int)
+        # remove rows with pickup_type >=2 or drop_off_type >=2
+        stop_times = stop_times[(stop_times["pickup_type"] < 2) & (stop_times["drop_off_type"] < 2)].copy()
 
     # Nettoyage de routes.txt pour NOIREAU (qui met un " tout seul dans le nom)
     if routes is not None and "route_long_name" in routes.columns:
