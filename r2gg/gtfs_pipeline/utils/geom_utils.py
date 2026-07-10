@@ -22,7 +22,7 @@ def get_gtfs_geometry(gtfs_folder, zipped=False):
                 return None
             stops = read_if_exists(stops_path)
 
-        if "stop_lat" not in stops or "stop_lon" not in stops:
+        if stops is None or "stop_lat" not in stops.columns or "stop_lon" not in stops.columns:
             return None
 
         geometry = gpd.points_from_xy(stops.stop_lon, stops.stop_lat)
