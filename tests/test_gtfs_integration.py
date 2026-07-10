@@ -1,12 +1,8 @@
 """Unit tests for GTFS preprocessing integration in Valhalla generation."""
 
-import json
 import os
-import sys
-import tempfile
-import shutil
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+
 import pytest
 
 # Test the gtfs_pipeline package directly without importing full r2gg._main
