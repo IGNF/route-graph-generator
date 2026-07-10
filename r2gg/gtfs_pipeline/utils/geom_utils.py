@@ -5,8 +5,8 @@ from .file_utils import read_if_exists
 
 def get_gtfs_geometry(gtfs_folder, zipped=False):
     """
-    Returns a shapely geometry representing GTFS coverage
-    using stops.txt
+    Return (minx, miny, maxx, maxy) bounds for GTFS stop coverage (EPSG:4326),
+    derived from stops.txt. Returns None if stops.txt is missing or invalid.
     """
 
     try:
