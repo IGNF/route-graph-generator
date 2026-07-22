@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 4.2.0
+ADDED:
+- added gtfs pipeline in valhalla building
+- (dev) local docker compose for testing
+
 ## 4.1.6
 FIXED:
 - database timeout in osm buidling
