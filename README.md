@@ -16,12 +16,6 @@ Un docker compose est mis à disposition pour générer des données Valhalla en
 UID=$(id -u) GID=$(id -g) docker compose up --build
 ```
 
-Attendre l'import de la donnée, puis
-
-```
-docker compose exec r2gg sh -c "r2gg-sql2pivot docker/config/bdtopo2valhalla_local.json && r2gg-pivot2osm docker/config/bdtopo2valhalla_local.json && r2gg-osm2valhalla docker/config/bdtopo2valhalla_local.json && r2gg-road2config docker/config/bdtopo2valhalla_local.json"
-```
-
 Les données se trouveront dans le dossier ./data/generation
 
 Le docker compose lance aussi un serveur road2, pour lancer un calcul d'itinéraire, copier le lien suivant
@@ -29,7 +23,7 @@ Le docker compose lance aussi un serveur road2, pour lancer un calcul d'itinéra
 http://localhost:8080/simple/1.0.0/route?resource=bdtopo-valhalla&profile=pedestrian&start=2.320041,48.8588897&end=2.3380277,48.8611473
 ```
 
-Pour faire tourner un service test valhalla sans la sur couche road2 sur les données générées, utiliser la commande suivante:
+Pour faire tourner un service test valhalla sans la surcouche road2 sur les données générées, utiliser la commande suivante:
 ```
 docker run valhalla --user $(id -u):$(id -g) -p 8002:8002 -v ${PWD}/data/generation:/custom_files -e use_tiles_ignore_pbf=True -e force_rebuild=False -e build_admins=False ghcr.io/valhalla/valhalla-scripted:latest
 ```

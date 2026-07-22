@@ -33,17 +33,39 @@ echo "Downloading ${GPKG_URL}..."
 wget -O archive.7z "$GPKG_URL"
 
 echo "Extracting ${GPKG_IN_ARCHIVE}..."
-7z x archive.7z "$GPKG_IN_ARCHIVE" -oextracted -y >/dev/null
-GPKG_PATH="extracted/${GPKG_IN_ARCHIVE}"
-if [ ! -f "$GPKG_PATH" ]; then
-  echo "Expected gpkg at $GPKG_PATH not found; listing extracted files:"
-  find extracted -maxdepth 5 -type f -print
+# Support comma-separated values in GPKG_IN_ARCHIVE.
+IFS=',' read -r -a GPKG_FILES <<< "$GPKG_IN_ARCHIVE"
+
+IMPORT_COUNT=0
+for GPKG_FILE in "${GPKG_FILES[@]}"; do
+  # Trim optional surrounding spaces around each entry.
+  GPKG_FILE="${GPKG_FILE#${GPKG_FILE%%[![:space:]]*}}"
+  GPKG_FILE="${GPKG_FILE%${GPKG_FILE##*[![:space:]]}}"
+
+  if [ -z "$GPKG_FILE" ]; then
+    continue
+  fi
+
+  7z x archive.7z "$GPKG_FILE" -oextracted -y >/dev/null
+  GPKG_PATH="extracted/${GPKG_FILE}"
+
+  if [ ! -f "$GPKG_PATH" ]; then
+    echo "Expected gpkg at $GPKG_PATH not found; listing extracted files:"
+    find extracted -maxdepth 5 -type f -print
+    exit 1
+  fi
+
+  echo "Importing $GPKG_PATH into database ${SOURCE_DB}..."
+  ogr2ogr -f "PostgreSQL" \
+    PG:"host=${PGHOST} user=${PGUSER} dbname=${SOURCE_DB} password=${PGPASSWORD} port=${PGPORT}" \
+    "$GPKG_PATH" -overwrite -progress
+
+  IMPORT_COUNT=$((IMPORT_COUNT + 1))
+done
+
+if [ "$IMPORT_COUNT" -eq 0 ]; then
+  echo "No valid gpkg file entries found in GPKG_IN_ARCHIVE"
   exit 1
 fi
-
-echo "Importing $GPKG_PATH into database ${SOURCE_DB}..."
-ogr2ogr -f "PostgreSQL" \
-  PG:"host=${PGHOST} user=${PGUSER} dbname=${SOURCE_DB} password=${PGPASSWORD} port=${PGPORT}" \
-  "$GPKG_PATH" -overwrite -progress
 
 echo "Import completed."

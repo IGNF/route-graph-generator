@@ -2,6 +2,7 @@ version: "3.8"
 services:
   db:
     image: postgis/postgis:15-3.4
+    shm_size: 1gb
     environment:
       POSTGRES_USER: r2gg
       POSTGRES_PASSWORD: r2gg
@@ -23,8 +24,8 @@ services:
       - PGHOST=db
       - PGPORT=5432
       - SOURCE_DB=source_db
-      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15.7z
-      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO/1_DONNEES_LIVRAISON_2026-03-00146/BDT_3-5_GPKG_LAMB93_D075_ED2026-03-15/BDT_3-5_GPKG_LAMB93_D075-ED2026-03-15.gpkg
+      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15.7z
+      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/troncon_de_route.gpkg,BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/non_communication.gpkg
     # importer script will run once to load the source DB
 
   r2gg:
@@ -41,7 +42,7 @@ services:
       - DATABASE_URL=postgresql://r2gg:r2gg@db:5432/pivot_db
     volumes:
       - ./:/user/app
-      - ./data/generation:/home/docker/data/generation
+      - /data/r2gg_output/generation:/home/docker/data/generation
     working_dir: /user/app
     command: >
       bash -c "
@@ -63,7 +64,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./data/:/home/docker/data
+      - /data/r2gg_output/:/home/docker/data
       - ./docker/config:/home/docker/config
 
 volumes:
