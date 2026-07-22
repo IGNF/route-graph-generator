@@ -67,6 +67,14 @@
             "dir": "/home/docker/data/generation/bdtopo-valhalla-tiles/",
             "config": "/home/docker/data/generation/valhalla.json"
           },
+          "gtfs": {
+            "enabled": false,
+            "apiUrl": "https://transport.data.gouv.fr/api/datasets",
+            "getOutputDir": "/home/docker/data/generation/gtfs_in",
+            "cleanOutputDir": "/home/docker/data/generation/gtfs_clean",
+            "transitDir": "/home/docker/data/generation/transit_tiles",
+            "zipCleanOutput": true
+          },
           "costs": [
             {
               "profile": "car",
@@ -135,6 +143,23 @@
                   }
                 }
               }
+            },
+            {
+              "profile": "multimodal",
+              "optimization": "fastest",
+              "costType": "time",
+              "costing": "multimodal",
+              "compute": {
+                "storage": {
+                  "file": "/home/docker/config/graph_bdtopo.lua"
+                },
+                "configuration": {
+                  "costing": "pedestrian",
+                  "storage": {
+                    "file": "/home/docker/config/costs_calculation.json"
+                  }
+                }
+              }
             }
           ]
         }
@@ -168,7 +193,8 @@
               "defaultValueContent": "car",
               "values": [
                 "car",
-                "pedestrian"
+                "pedestrian",
+                "multimodal"
               ]
             },
             {
@@ -216,6 +242,9 @@
                 "EPSG:4326",
                 "EPSG:2154"
               ]
+            },
+            {
+              "id": "date_time"
             },
             {
               "id": "timeUnit",
@@ -307,6 +336,9 @@
                 "departure",
                 "arrival"
               ]
+            },
+            {
+              "id": "date_time"
             },
             {
               "id": "constraints",

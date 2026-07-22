@@ -9,25 +9,36 @@ Les fonctions publiques exposées par r2gg permettent de réaliser les trois pro
 
 Au passage, ces fonctions ont toutes besoin d'un fichier de configuration (décrit [ici](./configuration.md)) pour pouvoir fonctionner. Des exemples sont disponibles dans le dossier {{ '[docker/config]({}/tree/{}/docker/config)'.format(repo_url, repo_branch) }}.
 
-Mais on peut décider de n'en lancer que certaines selon le résultat que l'on souhaite obtenir. 
+Mais on peut décider de n'en lancer que certaines selon le résultat que l'on souhaite obtenir.
 
 ### `sql2pivot()`
-Cette fonction permet d'extraire des données SQL d'un format quelconque vers la base pivot dans le format pivot. 
+Cette fonction permet d'extraire des données SQL d'un format quelconque vers la base pivot dans le format pivot.
 
 ### `pivot2pgrouting()`
 Permet de convertir les données au fromat pgRouting (le type de ressource dans config.json doit être `pgr`).
 
 ### `pivot2osm()`
-Permet de convertir les données au fromat osm. Le type de ressource dans config.json doit être `osrm` ou `valhalla`, sachant que le premier donnera des `.osm` et le second des `.osm.pbf`. 
+Permet de convertir les données au fromat osm. Le type de ressource dans config.json doit être `osrm` ou `valhalla`, sachant que le premier donnera des `.osm` et le second des `.osm.pbf`.
 
 ### `osm2osrm()`
-Permet de convertir des données OSM en données OSRM. 
+Permet de convertir des données OSM en données OSRM.
 
 ### `osm2valhalla()`
-Permet de convertir des données OSM (`.osm` ou `.osm.pbf`) en données Valhalla. 
+Permet de convertir des données OSM (`.osm` ou `.osm.pbf`) en données Valhalla.
+
+Pour une source `valhalla`, un bloc optionnel `gtfs` peut être ajouté dans la configuration pour télécharger et nettoyer les GTFS avant `valhalla_build_tiles`.
+Champs supportés dans `gtfs`:
+- `enabled` (booléen): active la pipeline GTFS si `true`
+- `apiUrl` (string): URL de l'API datasets GTFS
+- `getOutputDir` (string): dossier de sortie brut (`gtfs_in`)
+- `cleanOutputDir` (string): dossier de sortie nettoyé (`gtfs_clean`)
+- `transitDir` (string): dossier des tuiles transit Valhalla
+- `zipCleanOutput` (booléen): doit être `true` pour un chargement transit Valhalla
+
+Quand activé, le rapport `processing_report.json` produit par le nettoyage GTFS est copié dans `generation.workingSpace.directory`.
 
 ### `road2config()`
-Permet de générer la configuration utile à Road2 pour lire les données. 
+Permet de générer la configuration utile à Road2 pour lire les données.
 
 ## Fonctions privées
 

@@ -1,6 +1,7 @@
 import json
 import multiprocessing
 import os
+import shutil
 import time
 from datetime import datetime
 
@@ -16,6 +17,7 @@ from r2gg._pivot_to_osm import pivot_to_osm
 from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
+from r2gg.gtfs_pipeline import PipelineConfig, run_pipeline
 
 
 def sql_convert(config, resource, db_configs, database: DatabaseManager, logger):
@@ -355,6 +357,8 @@ def valhalla_convert(config, resource, logger):
 
     logger.info("Conversion from OSM PBF to VALHALLA for a resource")
 
+    gtfs_context = _prepare_gtfs_for_valhalla(config, resource, logger)
+
     logger.info("Generating graphs for each set of tiles")
 
     work_dir_config = config['workingSpace']['directory']
@@ -397,6 +401,13 @@ def valhalla_convert(config, resource, logger):
                                       "--service-limits-isochrone-max-distance-contour", "1000",
                                       # Ajout de l'autorisation à exclure les ponts/tunnels/péages
                                       "--service-limits-allow-hard-exclusions", "True"]
+
+        if gtfs_context is not None:
+            valhalla_build_config_args.extend([
+                "--mjolnir-transit-feeds-dir", gtfs_context["clean_output_dir"],
+                "--mjolnir-transit-dir", gtfs_context["transit_dir"],
+            ])
+
         subprocess_execution(valhalla_build_config_args, logger, outfile=source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
         time.sleep(1)
@@ -409,6 +420,60 @@ def valhalla_convert(config, resource, logger):
 
         final_command = time.time()
         logger.info("Valhalla tiles built. Elapsed time : %s seconds." % (final_command - start_command))
+
+
+def _prepare_gtfs_for_valhalla(config, resource, logger):
+    gtfs_settings = []
+    for source in resource.get("sources", []):
+        source_gtfs = source.get("gtfs")
+        if isinstance(source_gtfs, dict) and source_gtfs.get("enabled", False):
+            gtfs_settings.append(source_gtfs)
+
+    if not gtfs_settings:
+        return None
+
+    first_settings = gtfs_settings[0]
+    for settings in gtfs_settings[1:]:
+        if settings != first_settings:
+            raise ValueError("All enabled 'gtfs' blocks must share the same configuration")
+
+    work_dir = config["workingSpace"]["directory"]
+    gtfs_in_dir = first_settings.get("getOutputDir", os.path.join(work_dir, "gtfs_in"))
+    gtfs_clean_dir = first_settings.get("cleanOutputDir", os.path.join(work_dir, "gtfs_clean"))
+    transit_dir = first_settings.get("transitDir", os.path.join(work_dir, "transit_tiles"))
+    clean_geojson_file = first_settings.get("cleanGeojsonFile")
+    zip_clean_output = first_settings.get("zipCleanOutput", True)
+    api_url = first_settings.get("apiUrl", "https://transport.data.gouv.fr/api/datasets")
+
+    if not zip_clean_output:
+        raise ValueError("When GTFS preprocessing is enabled, 'zipCleanOutput' must be true for Valhalla transit")
+
+    if config.get("general", {}).get("overwrite", False):
+        shutil.rmtree(gtfs_in_dir, ignore_errors=True)
+        shutil.rmtree(gtfs_clean_dir, ignore_errors=True)
+        shutil.rmtree(transit_dir, ignore_errors=True)
+
+    logger.info("Running GTFS download and cleaning before Valhalla tile build")
+    run_pipeline(PipelineConfig(
+        get_output_dir=gtfs_in_dir,
+        clean_output_dir=gtfs_clean_dir,
+        api_url=api_url,
+        clean_geojson_file=clean_geojson_file,
+        zip_clean_output=zip_clean_output,
+    ))
+
+    os.makedirs(transit_dir, exist_ok=True)
+
+    processing_report = os.path.join(gtfs_clean_dir, "processing_report.json")
+    if os.path.exists(processing_report):
+        output_report = os.path.join(work_dir, "processing_report.json")
+        shutil.copyfile(processing_report, output_report)
+        logger.info("GTFS processing report exported to: " + output_report)
+
+    return {
+        "clean_output_dir": gtfs_clean_dir,
+        "transit_dir": transit_dir,
+    }
 
 
 def write_road2_config(config, resource, logger):
