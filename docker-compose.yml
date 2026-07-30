@@ -24,8 +24,12 @@ services:
       - PGHOST=db
       - PGPORT=5432
       - SOURCE_DB=source_db
-      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15.7z
-      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/troncon_de_route.gpkg,BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/non_communication.gpkg
+      # IDF
+      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15.7z
+      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO/1_DONNEES_LIVRAISON_2026-03-00146/BDT_3-5_GPKG_LAMB93_D075_ED2026-03-15/BDT_3-5_GPKG_LAMB93_D075-ED2026-03-15.gpkg
+      # # France entière
+      # - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15.7z
+      # - GPKG_IN_ARCHIVE=BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/troncon_de_route.gpkg,BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/non_communication.gpkg
     # importer script will run once to load the source DB
 
   r2gg:
@@ -46,10 +50,10 @@ services:
     working_dir: /user/app
     command: >
       bash -c "
-        r2gg-sql2pivot docker/config/bdtopo2valhalla_local.json &&
-        r2gg-pivot2osm docker/config/bdtopo2valhalla_local.json &&
-        r2gg-osm2valhalla docker/config/bdtopo2valhalla_local.json &&
-        r2gg-road2config docker/config/bdtopo2valhalla_local.json
+        r2gg-sql2pivot docker/config/bdtopo2osrm_local.json &&
+        r2gg-pivot2osm docker/config/bdtopo2osrm_local.json &&
+        r2gg-osm2osrm docker/config/bdtopo2osrm_local.json &&
+        r2gg-road2config docker/config/bdtopo2osrm_local.json
       "
     secrets:
       - db_config
@@ -58,9 +62,6 @@ services:
     build:
       context: ../road2/
       dockerfile: docker/distributions/debian/Dockerfile
-    depends_on:
-      r2gg:
-        condition: service_completed_successfully
     ports:
       - "8080:8080"
     volumes:
