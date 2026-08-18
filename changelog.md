@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.1
+CHANGED:
+- gtfs pipeline now exports rports alongside valhalla.json
+
 ## 4.2.0
 ADDED:
 - added gtfs pipeline in valhalla building

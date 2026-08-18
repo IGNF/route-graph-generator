@@ -18,6 +18,7 @@ from r2gg._pivot_to_pgr import pivot_to_pgr
 from r2gg._read_config import config_from_path
 from r2gg._subprocess_execution import subprocess_execution
 from r2gg.gtfs_pipeline import PipelineConfig, run_pipeline
+from r2gg.gtfs_pipeline.report_export import export_gtfs_reports
 
 
 def sql_convert(config, resource, db_configs, database: DatabaseManager, logger):
@@ -464,11 +465,7 @@ def _prepare_gtfs_for_valhalla(config, resource, logger):
 
     os.makedirs(transit_dir, exist_ok=True)
 
-    processing_report = os.path.join(gtfs_clean_dir, "processing_report.json")
-    if os.path.exists(processing_report):
-        output_report = os.path.join(work_dir, "processing_report.json")
-        shutil.copyfile(processing_report, output_report)
-        logger.info("GTFS processing report exported to: " + output_report)
+    export_gtfs_reports(config, resource, gtfs_in_dir, gtfs_clean_dir, logger)
 
     return {
         "clean_output_dir": gtfs_clean_dir,
