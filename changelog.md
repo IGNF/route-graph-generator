@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.2.2
+CHANGED:
+- gtfs pipeline now logs reports
+FIXED:
+- no valhalla transit tiles
+
 ## 4.2.1
 CHANGED:
 - gtfs pipeline now exports rports alongside valhalla.json

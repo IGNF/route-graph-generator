@@ -1,5 +1,6 @@
 import os
 import shutil
+import json
 
 
 def export_gtfs_reports(config, resource, gtfs_in_dir, gtfs_clean_dir, logger):
@@ -21,6 +22,8 @@ def export_gtfs_reports(config, resource, gtfs_in_dir, gtfs_clean_dir, logger):
         output_report = os.path.join(work_dir, "processing_report.json")
         shutil.copyfile(processing_report, output_report)
         logger.info("GTFS processing report exported to: " + output_report)
+        with open(processing_report) as f:
+            logger.info(json.load(f))
 
     target_dirs = set()
     for source in resource.get("sources", []):
@@ -39,3 +42,5 @@ def export_gtfs_reports(config, resource, gtfs_in_dir, gtfs_clean_dir, logger):
             output_path = os.path.join(target_dir, os.path.basename(report_path))
             shutil.copyfile(report_path, output_path)
             logger.info("GTFS report exported to: " + output_path)
+            with open(report_path) as f:
+                logger.info(json.load(f))
