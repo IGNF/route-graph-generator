@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.3
+FIXED:
+- remove zipping gtfs output by default
+
 ## 4.2.2
 CHANGED:
 - gtfs pipeline now logs reports

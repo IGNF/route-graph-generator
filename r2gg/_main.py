@@ -449,11 +449,7 @@ def _prepare_gtfs_for_valhalla(config, resource, logger):
     gtfs_clean_dir = first_settings.get("cleanOutputDir", os.path.join(work_dir, "gtfs_clean"))
     transit_dir = first_settings.get("transitDir", os.path.join(work_dir, "transit_tiles"))
     clean_geojson_file = first_settings.get("cleanGeojsonFile")
-    zip_clean_output = first_settings.get("zipCleanOutput", True)
     api_url = first_settings.get("apiUrl", "https://transport.data.gouv.fr/api/datasets")
-
-    if not zip_clean_output:
-        raise ValueError("When GTFS preprocessing is enabled, 'zipCleanOutput' must be true for Valhalla transit")
 
     if config.get("general", {}).get("overwrite", False):
         shutil.rmtree(gtfs_in_dir, ignore_errors=True)
@@ -465,8 +461,7 @@ def _prepare_gtfs_for_valhalla(config, resource, logger):
         get_output_dir=gtfs_in_dir,
         clean_output_dir=gtfs_clean_dir,
         api_url=api_url,
-        clean_geojson_file=clean_geojson_file,
-        zip_clean_output=zip_clean_output,
+        clean_geojson_file=clean_geojson_file
     ))
 
     os.makedirs(transit_dir, exist_ok=True)

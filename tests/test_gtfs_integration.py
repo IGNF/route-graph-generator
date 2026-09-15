@@ -24,13 +24,13 @@ class TestGTFSConfigParsing:
                 }
             ]
         }
-        
+
         gtfs_settings = []
         for source in resource.get("sources", []):
             source_gtfs = source.get("gtfs")
             if isinstance(source_gtfs, dict) and source_gtfs.get("enabled", False):
                 gtfs_settings.append(source_gtfs)
-        
+
         assert len(gtfs_settings) == 0
 
     def test_gtfs_disabled_explicitly_returns_none(self):
@@ -44,13 +44,13 @@ class TestGTFSConfigParsing:
                 }
             ]
         }
-        
+
         gtfs_settings = []
         for source in resource.get("sources", []):
             source_gtfs = source.get("gtfs")
             if isinstance(source_gtfs, dict) and source_gtfs.get("enabled", False):
                 gtfs_settings.append(source_gtfs)
-        
+
         assert len(gtfs_settings) == 0
 
     def test_gtfs_enabled_collected(self):
@@ -67,30 +67,30 @@ class TestGTFSConfigParsing:
                 }
             ]
         }
-        
+
         gtfs_settings = []
         for source in resource.get("sources", []):
             source_gtfs = source.get("gtfs")
             if isinstance(source_gtfs, dict) and source_gtfs.get("enabled", False):
                 gtfs_settings.append(source_gtfs)
-        
+
         assert len(gtfs_settings) == 1
         assert gtfs_settings[0]["apiUrl"] == "https://test.example.com/api"
 
     def test_gtfs_config_defaults(self):
         """GTFS config fields should default properly."""
         work_dir = "/work/dir"
-        
+
         gtfs_settings = [{
             "enabled": True,
             # Only enabled, use defaults
         }]
-        
+
         settings = gtfs_settings[0]
         in_dir = settings.get("getOutputDir", os.path.join(work_dir, "gtfs_in"))
         clean_dir = settings.get("cleanOutputDir", os.path.join(work_dir, "gtfs_clean"))
         transit_dir = settings.get("transitDir", os.path.join(work_dir, "transit_tiles"))
-        
+
         # Use normpath for platform-agnostic comparison
         assert Path(in_dir) == Path("/work/dir/gtfs_in")
         assert Path(clean_dir) == Path("/work/dir/gtfs_clean")
@@ -108,32 +108,17 @@ class TestGTFSConfigParsing:
                 "apiUrl": "https://api2.example.com",  # Different
             },
         ]
-        
+
         first_settings = gtfs_settings[0]
         for settings in gtfs_settings[1:]:
             if settings != first_settings:
                 # Mismatch detected
                 assert True
                 return
-        
+
         # Should have detected mismatch
         assert False, "Mismatch should have been detected"
 
-    def test_gtfs_zip_output_validation(self):
-        """GTFS config should enforce zip_output requirement for Valhalla."""
-        gtfs_settings = [{
-            "enabled": True,
-            "zipCleanOutput": False,
-        }]
-        
-        settings = gtfs_settings[0]
-        zip_output = settings.get("zipCleanOutput", True)
-        
-        # For Valhalla transit support, must be True
-        if not zip_output:
-            assert True  # Error condition detected
-        else:
-            assert False
 
 class TestPipelineConfig:
     """Test PipelineConfig dataclass."""
@@ -142,7 +127,7 @@ class TestPipelineConfig:
         """PipelineConfig properly stores and defaults API URL."""
         cfg = PipelineConfig()
         assert cfg.api_url == "https://transport.data.gouv.fr/api/datasets"
-        
+
         custom_api = "https://custom.api.example.com"
         cfg2 = PipelineConfig(api_url=custom_api)
         assert cfg2.api_url == custom_api
@@ -150,7 +135,7 @@ class TestPipelineConfig:
     def test_pipeline_config_all_defaults(self):
         """PipelineConfig has sensible defaults for all fields."""
         cfg = PipelineConfig()
-        
+
         assert cfg.get_output_dir == "gtfs_in"
         assert cfg.clean_output_dir == "gtfs_clean"
         assert cfg.api_url == "https://transport.data.gouv.fr/api/datasets"
@@ -165,7 +150,7 @@ class TestPipelineConfig:
             api_url="https://custom.api.com",
             zip_clean_output=True,
         )
-        
+
         assert cfg.get_output_dir == "/custom/in"
         assert cfg.clean_output_dir == "/custom/clean"
         assert cfg.api_url == "https://custom.api.com"

@@ -114,8 +114,7 @@ Optionnellement, vous pouvez activer le téléchargement et nettoyage GTFS avant
 		"apiUrl": "https://transport.data.gouv.fr/api/datasets",
 		"getOutputDir": "/home/docker/data/generation/gtfs_in",
 		"cleanOutputDir": "/home/docker/data/generation/gtfs_clean",
-		"transitDir": "/home/docker/data/generation/transit_tiles",
-		"zipCleanOutput": true
+		"transitDir": "/home/docker/data/generation/transit_tiles"
 	}
 }
 ```

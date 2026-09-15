@@ -33,7 +33,6 @@ Champs supportés dans `gtfs`:
 - `getOutputDir` (string): dossier de sortie brut (`gtfs_in`)
 - `cleanOutputDir` (string): dossier de sortie nettoyé (`gtfs_clean`)
 - `transitDir` (string): dossier des tuiles transit Valhalla
-- `zipCleanOutput` (booléen): doit être `true` pour un chargement transit Valhalla
 
 Quand activé, le rapport `processing_report.json` produit par le nettoyage GTFS est copié dans `generation.workingSpace.directory`.
 
