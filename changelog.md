@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 4.2.4
+FIXED:
+- reduce Valhalla/mjolnir log verbosity during transit tiles generation (redirected to a file instead of stdout)
+- stderr no longer merged into subprocess outfile captures, which could corrupt binary outputs
+- build and use a timezone database (valhalla_build_timezones) to avoid "Timezone not found" warnings for every stop
+CHANGED:
+- deduplicate repeated subprocess log lines instead of logging each occurrence
+- lower urllib3/requests logging level to WARNING
+- throttle/disable tqdm progress bars in gtfs pipeline when not attached to a terminal (each refresh was logged as its own line)
+
 ## 4.2.3
 FIXED:
 - remove zipping gtfs output by default

@@ -60,6 +60,11 @@ def configure():
     logger = logging.getLogger(__name__)
     logger.info("Log initialized")
 
+    # Les librairies HTTP (utilisées pour télécharger les GTFS) sont très verbeuses en INFO
+    # (une ligne par connexion/requête). On les limite au niveau WARNING pour ne pas noyer les logs.
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("requests").setLevel(logging.WARNING)
+
     # Todo : Créer une fonction qui vérifie la configuration
     db_configs = {}
     # Configuration des bases de données précisées dans la config

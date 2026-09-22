@@ -6,6 +6,7 @@ import pandas as pd
 import geopandas as gpd
 from pathlib import Path
 import shutil
+import sys
 import zipfile
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
@@ -571,8 +572,16 @@ def main(input_dir_global, output_dir_global, geojson_file=None, zip_output=Fals
         if input_path.is_dir():
             jobs.append((input_path, output_dir_global, geojson_file, zip_output))
 
+    # In non-interactive (CI/platform) logs, every tqdm refresh becomes its own line, so
+    # updates are throttled and the bar is dropped entirely when not attached to a terminal.
     with Pool(min(cpu_count(), 4)) as pool:
-        results = list(tqdm(pool.imap_unordered(process_job, jobs), total=len(jobs), desc="Cleaning GTFS feeds"))
+        results = list(tqdm(
+            pool.imap_unordered(process_job, jobs),
+            total=len(jobs),
+            desc="Cleaning GTFS feeds",
+            mininterval=5,
+            disable=not sys.stderr.isatty(),
+        ))
     if geojson_file is not None:
         temp_dir = Path(output_dir_global) / "temp"
         if temp_dir.exists():

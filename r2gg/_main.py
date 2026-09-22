@@ -364,6 +364,13 @@ def valhalla_convert(config, resource, logger):
 
     work_dir_config = config['workingSpace']['directory']
 
+    # Sans base de fuseaux horaires, mjolnir logue un warning "Timezone not found" pour
+    # chaque gare/quai (des dizaines de milliers de lignes sur un GTFS national).
+    timezone_db_file = os.path.join(work_dir_config, "tz_world.sqlite")
+    if not os.path.exists(timezone_db_file):
+        logger.info("Building timezone database")
+        subprocess_execution(["valhalla_build_timezones"], logger, outfile=timezone_db_file)
+
     i = 0
     for source in resource["sources"]:
 
@@ -392,10 +399,19 @@ def valhalla_convert(config, resource, logger):
         mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
         subprocess_execution(mkdir_args, logger)
 
+        # Valhalla (mjolnir) logs every stop/platform/tile detail at INFO/WARN level.
+        # On a country-wide GTFS this produces tens of thousands of lines, which blows
+        # past the platform's log size limit. Redirect it to a file instead of stdout
+        # so it doesn't flood the captured process log; it stays available for debugging.
+        valhalla_mjolnir_log_file = os.path.join(source["storage"]["dir"], "valhalla_mjolnir.log")
+
         start_command = time.time()
         valhalla_build_config_args = ["valhalla_build_config",
                                       "--mjolnir-tile-dir", source["storage"]["dir"],
                                       "--mjolnir-tile-extract", source["storage"]["tar"],
+                                      "--mjolnir-logging-type", "file",
+                                      "--mjolnir-logging-file-name", valhalla_mjolnir_log_file,
+                                      "--mjolnir-timezone", timezone_db_file,
                                       # Modification des limites par défaut du service : 10h pour isochrone et 1000km pour iso distance
                                       # contre 2h et 200km par défaut
                                       "--service-limits-isochrone-max-time-contour", "600",
@@ -412,6 +428,7 @@ def valhalla_convert(config, resource, logger):
         subprocess_execution(valhalla_build_config_args, logger, outfile=source["storage"]["config"])
         # Nécessaire le temps que le fichier s'écrive...
         time.sleep(1)
+        logger.info("Detailed Valhalla/Mjolnir logs will be written to " + valhalla_mjolnir_log_file)
 
         if gtfs_context is not None:
             valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-c", source["storage"]["config"]]

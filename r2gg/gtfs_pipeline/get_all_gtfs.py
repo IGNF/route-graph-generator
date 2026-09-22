@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import re
 import requests
+import sys
 import zipfile
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
@@ -256,8 +257,16 @@ def main(out_dir, api_url="https://transport.data.gouv.fr/api/datasets"):
     download_jobs = list(list_urls.values())
     os.makedirs(out_dir, exist_ok=True)
     # Download all GTFS files using multiprocessing
+    # In non-interactive (CI/platform) logs, every tqdm refresh becomes its own line, so
+    # updates are throttled and the bar is dropped entirely when not attached to a terminal.
     with Pool(min(cpu_count(), 4)) as pool:
-        download_results = list(tqdm(pool.imap_unordered(download_and_extract, download_jobs), total=len(download_jobs), desc="Downloading and extracting GTFS files"))
+        download_results = list(tqdm(
+            pool.imap_unordered(download_and_extract, download_jobs),
+            total=len(download_jobs),
+            desc="Downloading and extracting GTFS files",
+            mininterval=5,
+            disable=not sys.stderr.isatty(),
+        ))
 
     report["download_attempted_count"] = len(download_jobs)
     report["download_success_count"] = sum(1 for result in download_results if result.get("success"))
