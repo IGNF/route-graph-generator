@@ -63,7 +63,7 @@ def test_valhalla_convert_builds_timezone_database_once(tmp_path):
 
     timezone_calls = [
         call for call in mocked_subprocess_execution.call_args_list
-        if call.args[0] == ["valhalla_build_timezones"]
+        if call.args[0] == ["python", "-m", "valhalla_build_timezones"]
     ]
     assert len(timezone_calls) == 1
     assert timezone_calls[0].kwargs["outfile"] == str(tmp_path / "tz_world.sqlite")

@@ -369,7 +369,7 @@ def valhalla_convert(config, resource, logger):
     timezone_db_file = os.path.join(work_dir_config, "tz_world.sqlite")
     if not os.path.exists(timezone_db_file):
         logger.info("Building timezone database")
-        subprocess_execution(["valhalla_build_timezones"], logger, outfile=timezone_db_file)
+        subprocess_execution(["python", "-m", "valhalla_build_timezones"], logger, outfile=timezone_db_file)
 
     i = 0
     for source in resource["sources"]:
