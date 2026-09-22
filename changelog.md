@@ -1,4 +1,7 @@
 # CHANGELOG
+## 4.2.6
+FIXED:
+- valhalla_build_timezones did not run correctly
 
 ## 4.2.5
 FIXED:

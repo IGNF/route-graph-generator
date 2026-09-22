@@ -33,8 +33,11 @@ RUN python -m pip install -U --no-cache-dir -r requirements.txt
 
 RUN python -m pip install -e .
 
-### Installation de wget pour l'image
-RUN apt-get install -y wget
+### Installation des outils utilisés par valhalla_build_timezones
+RUN apt-get install -y curl spatialite-bin unzip wget && \
+    curl -fsSL https://raw.githubusercontent.com/valhalla/valhalla/master/scripts/valhalla_build_timezones \
+    -o /usr/local/bin/valhalla_build_timezones && \
+    chmod +x /usr/local/bin/valhalla_build_timezones
 
 ### Opérations pour le fonctionnement de l'image
 #### Récupérations des scripts SQL du dépôt
