@@ -399,7 +399,7 @@ def valhalla_convert(config, resource, logger):
         mkdir_args = ["mkdir", "-p", source["storage"]["dir"]]
         subprocess_execution(mkdir_args, logger)
 
-        # Valhalla (mjolnir) logs every stop/platform/tile detail at INFO/WARN level.
+        # Valhalla logs every stop/platform/tile detail at INFO/WARN level by default.
         # On a country-wide GTFS this produces tens of thousands of lines, which blows
         # past the platform's log size limit. Redirect it to a file instead of stdout
         # so it doesn't flood the captured process log; it stays available for debugging.
@@ -409,8 +409,8 @@ def valhalla_convert(config, resource, logger):
         valhalla_build_config_args = ["valhalla_build_config",
                                       "--mjolnir-tile-dir", source["storage"]["dir"],
                                       "--mjolnir-tile-extract", source["storage"]["tar"],
-                                      "--mjolnir-logging-type", "file",
-                                      "--mjolnir-logging-file-name", valhalla_mjolnir_log_file,
+                                      "--logging-type", "file",
+                                      "--logging-file-name", valhalla_mjolnir_log_file,
                                       "--mjolnir-timezone", timezone_db_file,
                                       # Modification des limites par défaut du service : 10h pour isochrone et 1000km pour iso distance
                                       # contre 2h et 200km par défaut

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.5
+FIXED:
+- valhalla_build_config failed with return code 2 (unrecognized arguments): use the top-level --logging-type/--logging-file-name flags supported by pyvalhalla 3.7.0 instead of the nonexistent --mjolnir-logging-* ones
+
 ## 4.2.4
 FIXED:
 - reduce Valhalla/mjolnir log verbosity during transit tiles generation (redirected to a file instead of stdout)
