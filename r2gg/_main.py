@@ -433,7 +433,7 @@ def valhalla_convert(config, resource, logger):
         if gtfs_context is not None:
             valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_ingest_transit_args, logger)
-            valhalla_convert_transit_args = ["valhalla_convert_transit", "-c", source["storage"]["config"]]
+            valhalla_convert_transit_args = ["valhalla_convert_transit", "-j", "2", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_convert_transit_args, logger)
 
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]

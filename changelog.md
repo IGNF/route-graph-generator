@@ -1,7 +1,10 @@
 # CHANGELOG
+
 ## 4.2.6
 FIXED:
 - valhalla_build_timezones did not run correctly
+CHANGED:
+- valhalla_convert_transit: limit to 2 cpus
 
 ## 4.2.5
 FIXED:
