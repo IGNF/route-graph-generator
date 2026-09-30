@@ -50,10 +50,10 @@ services:
     working_dir: /user/app
     command: >
       bash -c "
-        r2gg-sql2pivot docker/config/bdtopo2osrm_local.json &&
-        r2gg-pivot2osm docker/config/bdtopo2osrm_local.json &&
-        r2gg-osm2osrm docker/config/bdtopo2osrm_local.json &&
-        r2gg-road2config docker/config/bdtopo2osrm_local.json
+        r2gg-sql2pivot docker/config/bdtopo2valhalla_local.json &&
+        r2gg-pivot2osm docker/config/bdtopo2valhalla_local.json &&
+        r2gg-osm2valhalla docker/config/bdtopo2valhalla_local.json &&
+        r2gg-road2config docker/config/bdtopo2valhalla_local.json
       "
     secrets:
       - db_config

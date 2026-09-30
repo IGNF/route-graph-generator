@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 import shutil
+import tempfile
 import time
 from datetime import datetime
 
@@ -433,8 +434,22 @@ def valhalla_convert(config, resource, logger):
         if gtfs_context is not None:
             valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_ingest_transit_args, logger)
-            valhalla_convert_transit_args = ["valhalla_convert_transit", "-j", "2", "-c", source["storage"]["config"]]
-            subprocess_execution(valhalla_convert_transit_args, logger)
+            # REMEOVEME: This block is for debugging purposes and should be removed in production.
+            with open(source["storage"]["config"]) as config_file:
+                transit_config = json.load(config_file)
+            transit_config.setdefault("logging", {})["type"] = "std_out"
+
+            config_directory = os.path.dirname(source["storage"]["config"]) or "."
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", dir=config_directory) as transit_config_file:
+                json.dump(transit_config, transit_config_file)
+                transit_config_file.flush()
+                valhalla_convert_transit_args = [
+                    "valhalla_convert_transit", "-j", "2", "-c", transit_config_file.name
+                ]
+                subprocess_execution(valhalla_convert_transit_args, logger)
+            # END REMEOVEME
+            #  valhalla_convert_transit_args = ["valhalla_convert_transit", "-j", "2", "-c", source["storage"]["config"]]
+            # subprocess_execution(valhalla_convert_transit_args, logger)
 
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
         subprocess_execution(valhalla_build_tiles_args, logger)
