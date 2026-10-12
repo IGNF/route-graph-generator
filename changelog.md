@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.8
+TEMP:
+- add logs for valhalla convert transit for debugging purposes
+
 ## 4.2.7
 TEMP:
 - add logs for valhalla convert transit for debugging purposes

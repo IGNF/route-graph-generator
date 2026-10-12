@@ -34,7 +34,7 @@ RUN python -m pip install -U --no-cache-dir -r requirements.txt
 RUN python -m pip install -e .
 
 ### Installation des outils utilisés par valhalla_build_timezones
-RUN apt-get install -y curl spatialite-bin unzip wget && \
+RUN apt-get install -y curl spatialite-bin unzip wget gdb && \
     curl -fsSL https://raw.githubusercontent.com/valhalla/valhalla/master/scripts/valhalla_build_timezones \
     -o /usr/local/bin/valhalla_build_timezones && \
     chmod +x /usr/local/bin/valhalla_build_timezones

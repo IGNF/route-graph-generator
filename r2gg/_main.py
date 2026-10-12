@@ -438,15 +438,24 @@ def valhalla_convert(config, resource, logger):
             with open(source["storage"]["config"]) as config_file:
                 transit_config = json.load(config_file)
             transit_config.setdefault("logging", {})["type"] = "std_out"
-
+            transit_dir = gtfs_context["transit_dir"]
+            diag = (
+                f"stat -f -c 'fs_type=%T' {transit_dir} {source['storage']['dir']} {work_dir_config}; "
+                f"df -h {transit_dir}; ulimit -a; nproc; cat /sys/fs/cgroup/memory.max 2>/dev/null; "
+                f"echo pbf_count=$(find {transit_dir} -type f | wc -l); "
+                f"echo empty_files=$(find {transit_dir} -type f -size 0 | wc -l); "
+                f"find {transit_dir} -type f -size 0 | head -5"
+            )
+            subprocess_execution(["sh", "-c", diag], logger)
             config_directory = os.path.dirname(source["storage"]["config"]) or "."
             with tempfile.NamedTemporaryFile(mode="w", suffix=".json", dir=config_directory) as transit_config_file:
                 json.dump(transit_config, transit_config_file)
                 transit_config_file.flush()
-                valhalla_convert_transit_args = [
-                    "valhalla_convert_transit", "-j", "2", "-c", transit_config_file.name
-                ]
-                subprocess_execution(valhalla_convert_transit_args, logger)
+                subprocess_execution([
+                    "gdb", "-batch", "-ex", "run", "-ex", "thread apply all bt",
+                    "--args", "/usr/local/lib/python3.12/site-packages/valhalla/bin/valhalla_convert_transit",
+                    "-j", "1", "-c", transit_config_file.name,
+                ], logger)
             # END REMEOVEME
             #  valhalla_convert_transit_args = ["valhalla_convert_transit", "-j", "2", "-c", source["storage"]["config"]]
             # subprocess_execution(valhalla_convert_transit_args, logger)
