@@ -431,7 +431,7 @@ def valhalla_convert(config, resource, logger):
         logger.info("Detailed Valhalla/Mjolnir logs will be written to " + valhalla_mjolnir_log_file)
 
         if gtfs_context is not None:
-            valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-j", "4", "-c", source["storage"]["config"]]
+            valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-j", "6", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_ingest_transit_args, logger)
             valhalla_convert_transit_args = ["valhalla_convert_transit", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_convert_transit_args, logger)
@@ -441,6 +441,13 @@ def valhalla_convert(config, resource, logger):
 
         valhalla_build_extract_args = ["valhalla_build_extract", "-c", source["storage"]["config"], "-v", "--overwrite"]
         subprocess_execution(valhalla_build_extract_args, logger)
+
+        with open(source["storage"]["config"]) as config_file:
+            valhalla_config = json.load(config_file)
+        valhalla_config["logging"]["type"] = "std_out"
+        valhalla_config["logging"].pop("file_name", None)
+        with open(source["storage"]["config"], "w") as config_file:
+            json.dump(valhalla_config, config_file, indent=2)
 
         final_command = time.time()
         logger.info("Valhalla tiles built. Elapsed time : %s seconds." % (final_command - start_command))

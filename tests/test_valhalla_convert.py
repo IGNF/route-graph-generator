@@ -1,6 +1,19 @@
+import json
 from unittest.mock import MagicMock, patch
 
 from r2gg._main import valhalla_convert
+
+
+def _mock_valhalla_command(args, logger, outfile=None):
+    if args[0] == "valhalla_build_config":
+        with open(outfile, "w") as config_file:
+            json.dump({
+                "logging": {"type": "file", "file_name": "generation.log", "color": True},
+                "mjolnir": {"tile_dir": args[args.index("--mjolnir-tile-dir") + 1]},
+            }, config_file)
+    elif args[0] in ("valhalla_build_tiles", "valhalla_build_extract"):
+        with open(args[args.index("-c") + 1]) as config_file:
+            assert json.load(config_file)["logging"]["type"] == "file"
 
 
 def _build_resource(tmp_path):
@@ -30,9 +43,14 @@ def test_valhalla_convert_uses_top_level_logging_flags(tmp_path):
 
     logger = MagicMock()
 
-    with patch("r2gg._main.subprocess_execution") as mocked_subprocess_execution, \
+    with patch("r2gg._main.subprocess_execution", side_effect=_mock_valhalla_command) as mocked_subprocess_execution, \
             patch("time.sleep"):
         valhalla_convert(config, resource, logger)
+
+    with open(resource["sources"][0]["storage"]["config"]) as config_file:
+        generated_config = json.load(config_file)
+    assert generated_config["logging"] == {"type": "std_out", "color": True}
+    assert generated_config["mjolnir"]["tile_dir"] == resource["sources"][0]["storage"]["dir"]
 
     build_config_calls = [
         call for call in mocked_subprocess_execution.call_args_list
@@ -57,7 +75,7 @@ def test_valhalla_convert_builds_timezone_database_once(tmp_path):
 
     logger = MagicMock()
 
-    with patch("r2gg._main.subprocess_execution") as mocked_subprocess_execution, \
+    with patch("r2gg._main.subprocess_execution", side_effect=_mock_valhalla_command) as mocked_subprocess_execution, \
             patch("time.sleep"):
         valhalla_convert(config, resource, logger)
 

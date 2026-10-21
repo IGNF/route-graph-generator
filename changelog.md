@@ -3,6 +3,7 @@
 ## 4.2.9
 FIXED:
 - GTFS conversion (added steps in cleaning)
+- valhalla.json now declares std out for logging on runtime
 
 ## 4.2.8
 TEMP:
