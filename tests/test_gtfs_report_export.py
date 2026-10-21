@@ -2,6 +2,8 @@ import json
 import importlib.util
 from pathlib import Path
 
+import requests
+
 
 REPORT_EXPORT_PATH = (
     Path(__file__).resolve().parent.parent
@@ -16,6 +18,20 @@ REPORT_EXPORT_SPEC = importlib.util.spec_from_file_location(
 REPORT_EXPORT_MODULE = importlib.util.module_from_spec(REPORT_EXPORT_SPEC)
 REPORT_EXPORT_SPEC.loader.exec_module(REPORT_EXPORT_MODULE)
 export_gtfs_reports = REPORT_EXPORT_MODULE.export_gtfs_reports
+
+GET_ALL_GTFS_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "r2gg"
+    / "gtfs_pipeline"
+    / "get_all_gtfs.py"
+)
+GET_ALL_GTFS_SPEC = importlib.util.spec_from_file_location(
+    "r2gg_gtfs_pipeline_get_all_gtfs",
+    str(GET_ALL_GTFS_PATH),
+)
+GET_ALL_GTFS_MODULE = importlib.util.module_from_spec(GET_ALL_GTFS_SPEC)
+GET_ALL_GTFS_SPEC.loader.exec_module(GET_ALL_GTFS_MODULE)
+download_and_extract = GET_ALL_GTFS_MODULE.download_and_extract
 
 
 class _DummyLogger:
@@ -69,3 +85,18 @@ def test_export_gtfs_reports_to_valhalla_output(tmp_path):
     assert (valhalla_out_dir / "processing_report.json").is_file()
     # Backward compatibility: also exported in working directory root.
     assert (work_dir / "processing_report.json").is_file()
+
+
+def test_download_and_extract_returns_failure_on_redirect_loop(monkeypatch, tmp_path):
+    def raise_too_many_redirects(_url, **_kwargs):
+        raise requests.exceptions.TooManyRedirects("Exceeded 30 redirects")
+
+    monkeypatch.setattr("requests.get", raise_too_many_redirects)
+
+    result = download_and_extract(({"url": "https://example.com/gtfs.zip", "resource_name": "test-resource"}, str(tmp_path)))
+
+    assert result == {
+        "resource_name": "test-resource",
+        "success": False,
+        "reason": "redirect_loop",
+    }

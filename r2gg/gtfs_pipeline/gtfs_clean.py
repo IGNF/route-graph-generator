@@ -340,6 +340,11 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
     valid_trip_ids = filtered_trips["trip_id"].unique()
     filtered_stop_times = stop_times[stop_times["trip_id"].isin(valid_trip_ids)].copy()
 
+    # Drop stop_times referencing a stop_id absent from stops.txt (invalid GTFS, e.g. TAM Montpellier).
+    # valhalla_ingest_transit leaves such stop pairs without a graph id and valhalla_convert_transit
+    # then aborts trying to load transit_tiles/0/000/000.pbf.
+    filtered_stop_times = filtered_stop_times[filtered_stop_times["stop_id"].isin(stops["stop_id"])].copy()
+
     # cap departure time to 36:24:00 (Valhalla)
     filtered_stop_times["departure_seconds"] = filtered_stop_times["departure_time"].apply(hms_to_seconds)
     mask = filtered_stop_times["departure_seconds"] > 131040
@@ -375,9 +380,10 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
           joined = gpd.sjoin(gdf, features[["id", "geometry"]], predicate="within")
           filtered_shapes = joined.drop(columns=["index_right", "id", "geometry"]).copy()
 
-    # In trips, remove the value for shape_id if it doesn't exist in filtered_shapes
-    if filtered_shapes is not None and "shape_id" in filtered_trips.columns:
-        valid_shape_ids = filtered_shapes["shape_id"].unique()
+    # In trips, remove the value for shape_id if it doesn't exist in filtered_shapes.
+    # valhalla_convert_transit segfaults on a trip shape_id with no points in shapes.txt.
+    if "shape_id" in filtered_trips.columns:
+        valid_shape_ids = filtered_shapes["shape_id"].unique() if filtered_shapes is not None else []
         filtered_trips.loc[~filtered_trips["shape_id"].isin(valid_shape_ids), "shape_id"] = ""
 
     filtered_transfers = None
@@ -390,8 +396,7 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
 
     if calendar is not None:
         calendar.to_csv(output_dir / "calendar.txt", index=False)
-    if len(filtered_trips) - len(trips) != 0:
-        filtered_trips.to_csv(output_dir / "trips.txt", index=False)
+    filtered_trips.to_csv(output_dir / "trips.txt", index=False)
     filtered_stops.to_csv(output_dir / "stops.txt", index=False)
     filtered_stop_times.to_csv(output_dir / "stop_times.txt", index=False)
     if filtered_shapes is not None:

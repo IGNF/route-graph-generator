@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.9
+FIXED:
+- GTFS conversion (added steps in cleaning)
+
 ## 4.2.8
 TEMP:
 - add logs for valhalla convert transit for debugging purposes

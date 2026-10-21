@@ -368,9 +368,8 @@ def valhalla_convert(config, resource, logger):
     # Sans base de fuseaux horaires, mjolnir logue un warning "Timezone not found" pour
     # chaque gare/quai (des dizaines de milliers de lignes sur un GTFS national).
     timezone_db_file = os.path.join(work_dir_config, "tz_world.sqlite")
-    if not os.path.exists(timezone_db_file):
-        logger.info("Building timezone database")
-        subprocess_execution(["valhalla_build_timezones"], logger, outfile=timezone_db_file)
+    logger.info("Building timezone database")
+    subprocess_execution(["valhalla_build_timezones"], logger, outfile=timezone_db_file)
 
     i = 0
     for source in resource["sources"]:
@@ -432,33 +431,10 @@ def valhalla_convert(config, resource, logger):
         logger.info("Detailed Valhalla/Mjolnir logs will be written to " + valhalla_mjolnir_log_file)
 
         if gtfs_context is not None:
-            valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-c", source["storage"]["config"]]
+            valhalla_ingest_transit_args = ["valhalla_ingest_transit", "-j", "4", "-c", source["storage"]["config"]]
             subprocess_execution(valhalla_ingest_transit_args, logger)
-            # REMEOVEME: This block is for debugging purposes and should be removed in production.
-            with open(source["storage"]["config"]) as config_file:
-                transit_config = json.load(config_file)
-            transit_config.setdefault("logging", {})["type"] = "std_out"
-            transit_dir = gtfs_context["transit_dir"]
-            diag = (
-                f"stat -f -c 'fs_type=%T' {transit_dir} {source['storage']['dir']} {work_dir_config}; "
-                f"df -h {transit_dir}; ulimit -a; nproc; cat /sys/fs/cgroup/memory.max 2>/dev/null; "
-                f"echo pbf_count=$(find {transit_dir} -type f | wc -l); "
-                f"echo empty_files=$(find {transit_dir} -type f -size 0 | wc -l); "
-                f"find {transit_dir} -type f -size 0 | head -5"
-            )
-            subprocess_execution(["sh", "-c", diag], logger)
-            config_directory = os.path.dirname(source["storage"]["config"]) or "."
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", dir=config_directory) as transit_config_file:
-                json.dump(transit_config, transit_config_file)
-                transit_config_file.flush()
-                subprocess_execution([
-                    "gdb", "-batch", "-ex", "run", "-ex", "thread apply all bt",
-                    "--args", "/usr/local/lib/python3.12/site-packages/valhalla/bin/valhalla_convert_transit",
-                    "-j", "1", "-c", transit_config_file.name,
-                ], logger)
-            # END REMEOVEME
-            #  valhalla_convert_transit_args = ["valhalla_convert_transit", "-j", "2", "-c", source["storage"]["config"]]
-            # subprocess_execution(valhalla_convert_transit_args, logger)
+            valhalla_convert_transit_args = ["valhalla_convert_transit", "-c", source["storage"]["config"]]
+            subprocess_execution(valhalla_convert_transit_args, logger)
 
         valhalla_build_tiles_args = ["valhalla_build_tiles", "-c", source["storage"]["config"], osm_file]
         subprocess_execution(valhalla_build_tiles_args, logger)

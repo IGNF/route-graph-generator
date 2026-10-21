@@ -186,10 +186,37 @@ def download_and_extract(args):
     url = url_info.get("url")
     resource_name = url_info.get("resource_name")
 
-    response = requests.get(url)
+    try:
+        response = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
+    except requests.exceptions.TooManyRedirects:
+        return {
+            "resource_name": resource_name,
+            "success": False,
+            "reason": "redirect_loop",
+        }
+    except requests.exceptions.RequestException:
+        return {
+            "resource_name": resource_name,
+            "success": False,
+            "reason": "request_error",
+        }
+
     if response.status_code != 200:
         if response.status_code == 403:
-            response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            try:
+                response = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
+            except requests.exceptions.TooManyRedirects:
+                return {
+                    "resource_name": resource_name,
+                    "success": False,
+                    "reason": "redirect_loop",
+                }
+            except requests.exceptions.RequestException:
+                return {
+                    "resource_name": resource_name,
+                    "success": False,
+                    "reason": "request_error",
+                }
         if response.status_code != 200:
             return {
                 "resource_name": resource_name,

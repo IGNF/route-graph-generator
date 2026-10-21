@@ -72,7 +72,7 @@
             "apiUrl": "https://transport.data.gouv.fr/api/datasets",
             "getOutputDir": "/home/docker/data/generation/gtfs_in",
             "cleanOutputDir": "/home/docker/data/generation/gtfs_clean",
-            "transitDir": "/home/docker/data/generation/transit_tiles"
+            "transitDir": "/home/docker/data/transit_work/transit_tiles"
           },
           "costs": [
             {
