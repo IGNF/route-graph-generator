@@ -335,7 +335,8 @@ INSERT INTO {output_schema}.edges
     nature as nature,
     cleabs as cleabs,
     importance as importance,
-    CONCAT('{{"nom_1_gauche": "', nom_1_gauche, '", "nom_1_droite": "', nom_1_droite, '", "cpx_numero": "', cpx_numero, '", "cpx_toponyme": "', cpx_toponyme, '", "nature": "', nature,  '", "importance": "', importance,  '", "cpx_classement_administratif": "', cpx_classement_administratif, '", "restriction_de_hauteur": "', restriction_de_hauteur, '", "restriction_de_poids_total": "', restriction_de_poids_total, '", "restriction_de_poids_par_essieu": "', restriction_de_poids_par_essieu, '", "urbain": "', urbain, '", "cleabs": "', cleabs, '", "cpx_gestionnaire": "', cpx_gestionnaire, '", "vitesse_moyenne_vl": "', vitesse_moyenne_vl, '", "nature_de_la_restriction": "', nature_de_la_restriction, '"}}') as way_names,
+    -- ';' est échappé en \u003b (JSON valide) car Valhalla découpe le tag name sur ';'
+    replace(json_build_object('nom_1_gauche', CONCAT(nom_1_gauche), 'nom_1_droite', CONCAT(nom_1_droite), 'cpx_numero', CONCAT(cpx_numero), 'cpx_toponyme', CONCAT(cpx_toponyme), 'nature', CONCAT(nature), 'importance', CONCAT(importance), 'cpx_classement_administratif', CONCAT(cpx_classement_administratif), 'restriction_de_hauteur', CONCAT(restriction_de_hauteur), 'restriction_de_poids_total', CONCAT(restriction_de_poids_total), 'restriction_de_poids_par_essieu', CONCAT(restriction_de_poids_par_essieu), 'urbain', CONCAT(urbain), 'cleabs', CONCAT(cleabs), 'cpx_gestionnaire', CONCAT(cpx_gestionnaire), 'vitesse_moyenne_vl', CONCAT(vitesse_moyenne_vl), 'nature_de_la_restriction', CONCAT(nature_de_la_restriction))::text, ';', '\u003b') as way_names,
     nom_1_gauche as nom_1_gauche,
     nom_1_droite as nom_1_droite,
     cpx_numero as cpx_numero,

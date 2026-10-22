@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.2.10
+FIXED:
+- osm building: every BDTopo nature/importance now gets an OSM highway tag (most roads were dropped by Valhalla's default lua)
+- osm building: "Route à 2 chaussées" is no longer tagged as motorway
+- osm building: classified roads are no longer tagged service=driveway
+- osm building: way_names is written to the OSM name tag so Valhalla returns street names
+- sql: way_names is built with json_build_object (valid JSON when names contain `"` or `\`) and `;` is escaped as `\u003b` so Valhalla does not split the name
+
 ## 4.2.9
 FIXED:
 - GTFS conversion (added steps in cleaning)

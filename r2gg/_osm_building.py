@@ -6,17 +6,17 @@ PIVOT_ATTRIBUTE_TO_OSM = {
         1: {"oneway": "1"}
     },
     "vitesse_moyenne_vl": "",
+    # highway is derived from nature and importance in bdtopo_highway_tags
     "nature": {
-        "Route à 2 chaussées": {"highway": "motorway"},
-        "Type autoroutier": {"highway": "motorway", "foot": "no"},
-        "Bretelle": {"highway": "motorway", "foot": "no"},
-        "Sentier": {"highway": "footway", "surface": "unpaved"},
+        "Type autoroutier": {"foot": "no"},
+        "Bretelle": {"foot": "no"},
+        "Sentier": {"surface": "unpaved"},
         "Route empierrée": {"surface": "unpaved"},
         "Chemin": {"surface": "unpaved"},
     },
     "cleabs": "",
     "importance": "",
-    "way_names": "",
+    "way_names": "name",
     "nom_1_gauche": "",
     "nom_1_droite": "",
     "cpx_numero": "",
@@ -24,7 +24,7 @@ PIVOT_ATTRIBUTE_TO_OSM = {
     "sens_de_circulation": "",
     "position_par_rapport_au_sol": "",
     "acces_vehicule_leger": {
-        "Physiquement impossible": {"highway": "footway"},
+        "Physiquement impossible": {"motor_vehicle": "no"},
         "A péage": {"toll": "yes"},
     },
     "largeur_de_chaussee": "",
@@ -48,17 +48,63 @@ PIVOT_ATTRIBUTE_TO_OSM = {
     },
     "cpx_gestionnaire": "",
     "cpx_numero_route_europeenne": "",
-    "cpx_classement_administratif": {
-        "Départementale": {"service": "driveway"},
-        "Nationale": {"service": "driveway"},
-        "Autoroute": {"service": "driveway"},
-    },
+    "cpx_classement_administratif": "",
     "transport_exceptionnel": "",
     "vla_par_defaut": "",
     "cout_penalites": "",
     "vehicule_leger_interdit": "",
     "cout_vehicule_prioritaire": "",
 }
+
+# BDTopo importance (1 = most important) for roads open to cars
+IMPORTANCE_TO_HIGHWAY = {
+    1: "trunk",
+    2: "primary",
+    3: "secondary",
+    4: "tertiary",
+    6: "service",
+}
+
+NATURE_TO_HIGHWAY = {
+    "Type autoroutier": "motorway",
+    "Bretelle": "motorway_link",
+    "Sentier": "path",
+    "Escalier": "steps",
+    "Piste cyclable": "cycleway",
+    "Chemin": "track",
+    "Route empierrée": "track",
+}
+
+def bdtopo_highway_tags(way):
+    """
+    Fonction qui calcule les tags OSM de type de voie (highway, route) d'un tronçon BDTopo.
+    Sans highway (ou route=ferry), le lua par défaut de Valhalla ignore le tronçon.
+
+    Parameters
+    ----------
+    way: dict
+        Dictionnaire des attributs de l'arrête.
+
+    Returns
+    -------
+    dict
+        tags OSM à ajouter
+    """
+    nature = way.get("nature")
+    if nature == "Bac ou liaison maritime":
+        return {"route": "ferry"}
+
+    highway = NATURE_TO_HIGHWAY.get(nature)
+    if highway is None:
+        # Route à 1 chaussée, Route à 2 chaussées, Rond-point...
+        highway = IMPORTANCE_TO_HIGHWAY.get(way.get("importance"))
+    if highway is None:
+        highway = "residential" if way.get("urbain") else "unclassified"
+
+    tags = {"highway": highway}
+    if (way.get("vitesse_moyenne_vl") or 0) <= 0:
+        tags["motor_vehicle"] = "no"
+    return tags
 
 def writeNode(node, extraction_date):
     """
@@ -216,6 +262,13 @@ def writeWayTags(wayEl, way):
         tag.set('k', '%s' %k)
         tag.set('v', '%s' %str(v))
         tags_present.add(k)
+        if k == "nature":
+            for t, val in bdtopo_highway_tags(way).items():
+                if t not in tags_present:
+                    newtag = etree.SubElement(wayEl, 'tag')
+                    newtag.set('k', '%s' %t)
+                    newtag.set('v', '%s' %str(val))
+                    tags_present.add(t)
         if PIVOT_ATTRIBUTE_TO_OSM.get(k, "") != "" and isinstance(PIVOT_ATTRIBUTE_TO_OSM.get(k, ""), dict):
             for attr_value, new_tags in PIVOT_ATTRIBUTE_TO_OSM.get(k, "").items():
                 if v == attr_value:
