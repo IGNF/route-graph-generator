@@ -12,25 +12,25 @@ services:
     ports:
       - "5432:5432"
 
-  importer:
-    build:
-      context: ./docker/import
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    environment:
-      - PGUSER=r2gg
-      - PGPASSWORD=r2gg
-      - PGHOST=db
-      - PGPORT=5432
-      - SOURCE_DB=source_db
-      # # IDF
-      # - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15.7z
-      # - GPKG_IN_ARCHIVE=BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO/1_DONNEES_LIVRAISON_2026-03-00146/BDT_3-5_GPKG_LAMB93_D075_ED2026-03-15/BDT_3-5_GPKG_LAMB93_D075-ED2026-03-15.gpkg
-      # France entière
-      - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15.7z
-      - GPKG_IN_ARCHIVE=BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/troncon_de_route.gpkg,BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/non_communication.gpkg
-    # importer script will run once to load the source DB
+  # importer:
+  #   build:
+  #     context: ./docker/import
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     - PGUSER=r2gg
+  #     - PGPASSWORD=r2gg
+  #     - PGHOST=db
+  #     - PGPORT=5432
+  #     - SOURCE_DB=source_db
+  #     # # IDF
+  #     # - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15.7z
+  #     # - GPKG_IN_ARCHIVE=BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D075_2026-03-15/BDTOPO/1_DONNEES_LIVRAISON_2026-03-00146/BDT_3-5_GPKG_LAMB93_D075_ED2026-03-15/BDT_3-5_GPKG_LAMB93_D075-ED2026-03-15.gpkg
+  #     # France entière
+  #     - GPKG_URL=https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15.7z
+  #     - GPKG_IN_ARCHIVE=BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/troncon_de_route.gpkg,BDTOPO_3-5_TRANSPORT_GPKG_LAMB93_FXX_2026-06-15/BDTOPO_TRANSPORT/1_DONNEES_LIVRAISON_2026-06-00420/BDT_3-5_GPKG_LAMB93_FXX_ED2026-06-15/TRANSPORT/non_communication.gpkg
+  #   # importer script will run once to load the source DB
 
   r2gg:
     user: "${UID}:${GID}"
@@ -40,14 +40,14 @@ services:
     # depends_on:
     #   db:
     #     condition: service_started
-    #   importer:
-    #     condition: service_completed_successfully
+      # importer:
+      #   condition: service_completed_successfully
     environment:
       - DATABASE_URL=postgresql://r2gg:r2gg@db:5432/pivot_db
       - PYTHONUNBUFFERED=1
     volumes:
       - ./:/user/app
-      - /data/r2gg_output/generation:/home/docker/data/generation
+      - F:/data/r2gg_output/generation:/home/docker/data/generation
       # Valhalla writes transit tiles through mmap, which is unreliable on Windows bind mounts
       # (silently lost blocks -> "Couldn't load ...pbf" + SIGABRT). Keep them on a Linux volume.
       - transit_work:/home/docker/data/transit_work
@@ -60,15 +60,15 @@ services:
     secrets:
       - db_config
 
-  road2:
-    build:
-      context: ../road2/
-      dockerfile: docker/distributions/debian/Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - /data/r2gg_output/:/home/docker/data
-      - ./docker/config:/home/docker/config
+  # road2:
+  #   build:
+  #     context: ../road2/
+  #     dockerfile: docker/distributions/debian/Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - /data/r2gg_output/:/home/docker/data
+  #     - ./docker/config:/home/docker/config
 
 volumes:
   db_data:

@@ -8,6 +8,10 @@ from psycopg2.extras import DictCursor
 TIMEOUT = int(getenv("SQL_STATEMENT_TIMEOUT", 0))
 RETRY = int(getenv("SQL_STATEMENT_RETRY_ATTEMPTS", 3))
 DELAY = int(getenv("SQL_DELAY_BETWEEN_STATEMENTS", 30))
+# TCP keepalives: keep idle connections alive through firewalls/NAT and detect dead connections quickly
+KEEPALIVES_IDLE = int(getenv("SQL_KEEPALIVES_IDLE", 60))
+KEEPALIVES_INTERVAL = int(getenv("SQL_KEEPALIVES_INTERVAL", 10))
+KEEPALIVES_COUNT = int(getenv("SQL_KEEPALIVES_COUNT", 5))
 
 
 def database_retry_decorator(func):
@@ -69,11 +73,17 @@ class DatabaseManager:
         port = self._work_db_config.get("port")
         connect_args = "host=%s dbname=%s user=%s password=%s port=%s" % (host, dbname, user, password, port)
 
-        self.logger.info("Connecting to work database")
+        connect_kwargs = {
+            "keepalives": 1,
+            "keepalives_idle": KEEPALIVES_IDLE,
+            "keepalives_interval": KEEPALIVES_INTERVAL,
+            "keepalives_count": KEEPALIVES_COUNT,
+        }
         if TIMEOUT:
-            connection = psycopg2.connect(connect_args, options=f"-c statement_timeout={TIMEOUT * 1000}")
-        else:
-            connection = psycopg2.connect(connect_args)
+            connect_kwargs["options"] = f"-c statement_timeout={TIMEOUT * 1000}"
+
+        self.logger.info("Connecting to work database")
+        connection = psycopg2.connect(connect_args, **connect_kwargs)
         connection.set_client_encoding("UTF8")
 
         return connection
@@ -149,6 +159,55 @@ class DatabaseManager:
                   self._connection.commit()
               except Exception:
                   pass
+
+    @database_retry_decorator
+    def execute_select_query(self, query, show_duration=False):
+        """
+        Plain SELECT fetching all rows in a short transaction, with retry.
+        Generator yielding the list of rows once (required by database_retry_decorator).
+        """
+        if show_duration:
+            self.logger.info(f"SQL: {query}")
+        st = time.time()
+        with self._connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+        self._connection.commit()
+        if show_duration:
+            self.logger.info("Execution ended. Elapsed time : %s seconds.", time.time() - st)
+        yield rows
+
+    def execute_select_fetch_by_id_batches(self, build_query, batchsize, show_duration=False):
+        """
+        Keyset-paginated SELECT on the "id" column.
+        Each batch is an independent short query with retry, so a connection loss
+        only replays the current batch instead of failing the whole export.
+
+        Parameters
+        ----------
+        build_query: callable
+            build_query(last_id) must return a query filtered on "id > last_id"
+            (no filter when last_id is None) and ordered by id ASC, without LIMIT.
+        batchsize: int
+        show_duration: bool
+            log the query and duration of the first batch only
+
+        Yields
+        ------
+        list of rows
+        """
+        last_id = None
+        first = True
+        while True:
+            query = f"{build_query(last_id)} LIMIT {int(batchsize)}"
+            rows = next(self.execute_select_query(query, show_duration=show_duration and first))
+            first = False
+            if not rows:
+                return
+            yield rows
+            if len(rows) < batchsize:
+                return
+            last_id = rows[-1]["id"]
 
     # the method below should be used as a generator function otherwise use execute_update
     @database_retry_decorator

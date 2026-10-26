@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 4.2.11
+FIXED:
+- pivot2osm: nodes and ways are read with keyset pagination (`id > last_id LIMIT n`) and per-batch retry instead of a single long-lived server-side cursor, so a connection loss no longer fails the whole export
+- database: TCP keepalives enabled on the work connection (`SQL_KEEPALIVES_IDLE`, `SQL_KEEPALIVES_INTERVAL`, `SQL_KEEPALIVES_COUNT`, defaults 60/10/5)
+- pivot2osm: progress logs while writing nodes and ways
+
 ## 4.2.10
 FIXED:
 - osm building: every BDTopo nature/importance now gets an OSM highway tag (most roads were dropped by Valhalla's default lua)

@@ -68,49 +68,60 @@ def pivot_to_osm(config, source, db_configs, database: DatabaseManager, logger, 
 
                 # Ecriture des nodes
                 batchsize = 10000
-                nd_query = getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'])
-                generator = database.execute_select_fetch_multiple(nd_query, show_duration=True, batchsize=batchsize)
+                log_every = 50  # batches
+
+                def nodes_query(last_id):
+                    where = None if last_id is None else [f"id > {int(last_id)}"]
+                    return getQueryByTableAndBoundingBox(f'{input_schema}.nodes', source['bbox'], whereClauses=where)
+
                 logger.info(f"Writing nodes")
                 st_nodes = time.time()
-                try:
-                    rows, count = next(generator, (None, None))
-                    while rows:
-                        for row in rows:
-                            nodeEl = writeNode(row, extraction_date)
-                            xf.write(nodeEl, pretty_print=True)
-                        rows, _ = next(generator,(None, None))
-                finally:
-                    generator.close()
+                nb_nodes = 0
+                for i_batch, rows in enumerate(
+                    database.execute_select_fetch_by_id_batches(nodes_query, batchsize, show_duration=True), 1
+                ):
+                    for row in rows:
+                        nodeEl = writeNode(row, extraction_date)
+                        xf.write(nodeEl, pretty_print=True)
+                    nb_nodes += len(rows)
+                    if i_batch % log_every == 0:
+                        logger.info("%s nodes written (id %s / %s), %s seconds elapsed"
+                                    % (nb_nodes, rows[-1]['id'], vertexSequence, time.time() - st_nodes))
                 et_nodes = time.time()
-                logger.info("Writing nodes ended. Elapsed time : %s seconds." % (et_nodes - st_nodes))
+                logger.info("Writing nodes ended (%s nodes). Elapsed time : %s seconds." % (nb_nodes, et_nodes - st_nodes))
 
                 # Ecriture des ways
+                def edges_query(last_id):
+                    where = None if last_id is None else [f"id > {int(last_id)}"]
+                    return getQueryByTableAndBoundingBox(
+                        f'{input_schema}.edges',
+                        source['bbox'],
+                        ['*', f'{input_schema}.inter_nodes(geom) as internodes'],
+                        whereClauses=where
+                    )
+
                 logger.info(f"Writing ways")
-                sql_query_edges = getQueryByTableAndBoundingBox(
-                    f'{input_schema}.edges',
-                    source['bbox'],
-                    ['*', f'{input_schema}.inter_nodes(geom) as internodes']
-                )
-                generator = database.execute_select_fetch_multiple(sql_query_edges, show_duration=True, batchsize=batchsize)
                 st_edges = time.time()
-                try:
-                    rows, count = next(generator, (None, None))
-                    while rows:
-                        for row in rows:
-                            wayEl = writeWay(row, extraction_date)
-                            for node in row['internodes']:
-                                vertexSequence = vertexSequence + 1
-                                node['id'] = vertexSequence
-                                nodeEl = writeNode(node, extraction_date)
-                                xf.write(nodeEl, pretty_print=True)
-                            wayEl = writeWayNds(wayEl, row, row['internodes'])
-                            wayEl = writeWayTags(wayEl, row)
-                            xf.write(wayEl, pretty_print=True)
-                        rows, _ = next(generator,(None, None))
-                finally:
-                    generator.close()
+                nb_edges = 0
+                for i_batch, rows in enumerate(
+                    database.execute_select_fetch_by_id_batches(edges_query, batchsize, show_duration=True), 1
+                ):
+                    for row in rows:
+                        wayEl = writeWay(row, extraction_date)
+                        for node in row['internodes']:
+                            vertexSequence = vertexSequence + 1
+                            node['id'] = vertexSequence
+                            nodeEl = writeNode(node, extraction_date)
+                            xf.write(nodeEl, pretty_print=True)
+                        wayEl = writeWayNds(wayEl, row, row['internodes'])
+                        wayEl = writeWayTags(wayEl, row)
+                        xf.write(wayEl, pretty_print=True)
+                    nb_edges += len(rows)
+                    if i_batch % log_every == 0:
+                        logger.info("%s ways written (id %s / %s), %s seconds elapsed"
+                                    % (nb_edges, rows[-1]['id'], edgeSequence, time.time() - st_edges))
                 et_edges = time.time()
-                logger.info("Writing ways ended. Elapsed time : %s seconds." % (et_edges - st_edges))
+                logger.info("Writing ways ended (%s ways). Elapsed time : %s seconds." % (nb_edges, et_edges - st_edges))
 
                 # Ecriture des restrictions
                 sql_query_non_comm = f"select * from {input_schema}.non_comm"
