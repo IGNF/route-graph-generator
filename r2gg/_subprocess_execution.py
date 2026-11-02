@@ -29,7 +29,7 @@ def _log_subprocess_output(output, logger):
             logger.info(line)
 
 
-def subprocess_execution(args, logger, outfile = None):
+def subprocess_execution(args, logger, outfile = None, stream_output=False):
     """
     Exécute un sous-processus (commande système)
 
@@ -40,6 +40,9 @@ def subprocess_execution(args, logger, outfile = None):
         le nom de la commande
 
     logger: logging.Logger
+
+    stream_output: bool
+        journaliser la sortie au fil de l'execution, sans fichier de sortie
     """
     try:
         str_args = [str(arg) for arg in args]
@@ -66,8 +69,15 @@ def subprocess_execution(args, logger, outfile = None):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-            process_output, _ =  process.communicate()
-            _log_subprocess_output(process_output.decode("utf-8"), logger)
+            if stream_output:
+                for line in process.stdout:
+                    message = line.decode("utf-8", errors="replace").rstrip()
+                    if message:
+                        logger.info(message)
+                process.wait()
+            else:
+                process_output, _ = process.communicate()
+                _log_subprocess_output(process_output.decode("utf-8"), logger)
 
         # Wait for process stop
         while process.returncode is None:

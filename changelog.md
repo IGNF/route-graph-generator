@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+ADDED:
+- pivot2osrm : logs in osrm processes
+
 ## 4.2.11
 FIXED:
 - pivot2osm: nodes and ways are read with keyset pagination (`id > last_id LIMIT n`) and per-batch retry instead of a single long-lived server-side cursor, so a connection loss no longer fails the whole export
