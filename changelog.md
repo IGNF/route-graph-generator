@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 4.2.12
 ADDED:
 - pivot2osrm : logs in osrm processes
 
