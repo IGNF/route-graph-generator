@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.13
+FIXED:
+- osm2osrm: osrm-extract stuck for days on "Generating edge-expanded edges": the OSRM profile no longer uses the long, per-section unique way_names JSON as the way name, but the first non-empty value among nom_1_droite, nom_1_gauche, cpx_toponyme_route_nommee and cpx_numero (way_names is unchanged for Valhalla)
+
 ## 4.2.12
 ADDED:
 - pivot2osrm : logs in osrm processes

@@ -155,13 +155,15 @@ def _build_process_way(costs_config, output_cost):
     for string in get_variables_strings:
         process_way_string += string
 
-    # pour le nom
-    process_way_string += "    local way_names = way:get_value_by_key(\"way_names\")\n"
-
+    # Nom court : un way_names long et unique par tronçon rend osrm-extract extrêmement lent
     process_way_string += (
-        "    -- noms du troncon\n"
-        "    if way_names and way_names ~= '' then\n"
-        "        result.name = way_names\n"
+        "    -- nom du troncon\n"
+        "    for _, key in ipairs({\"nom_1_droite\", \"nom_1_gauche\", \"cpx_toponyme_route_nommee\", \"cpx_numero\"}) do\n"
+        "        local value = way:get_value_by_key(key)\n"
+        "        if value and value ~= '' and value ~= 'None' then\n"
+        "            result.name = value\n"
+        "            break\n"
+        "        end\n"
         "    end\n"
     )
 
