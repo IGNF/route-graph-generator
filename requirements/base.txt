@@ -1,6 +1,6 @@
-lxml==4.9.3
+lxml==6.1.0
 psycopg2==2.9.12
-sqlparse==0.4.2
+sqlparse==0.6.0
 osmium==4.3.1
 pyvalhalla==3.7.0
 pandas==3.0.3
