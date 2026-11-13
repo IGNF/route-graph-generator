@@ -3,6 +3,6 @@
 
 furo==2022.*
 myst-parser[linkify]>=0.14,<0.19
-sphinx-autobuild==2021.3.14
+sphinx-autobuild==2025.8.25
 sphinx-copybutton<1
 sphinxext-opengraph>=0.4,<1
