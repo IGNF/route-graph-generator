@@ -35,6 +35,8 @@ Champs supportés dans `gtfs`:
 - `transitDir` (string): dossier des tuiles transit Valhalla
 
 Quand activé, le rapport `processing_report.json` produit par le nettoyage GTFS est copié dans `generation.workingSpace.directory`.
+Les passages de `stop_times.txt` qui référencent un arrêt absent ou un lieu autre qu'un arrêt/quai (`location_type` égal à `0` ou vide) sont supprimés pour éviter les erreurs de conversion Valhalla. Cette suppression peut modifier les trajets ; un réseau sans passage restant est exclu et signalé dans le rapport.
+Les exceptions de `calendar_dates.txt` sont conservées. Pour les services définis uniquement par des dates, un calendrier sans jours hebdomadaires est créé afin que Valhalla puisse lire leurs exceptions. Si une date ajoutée dépasse la fin d'un calendrier existant, ce calendrier est prolongé et les jours de service hebdomadaire supplémentaires sont annulés par des exceptions. Valhalla encode les dates de service dans une fenêtre de 60 jours à partir de la date des tuiles.
 
 ### `road2config()`
 Permet de générer la configuration utile à Road2 pour lire les données.

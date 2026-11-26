@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 import pandas as pd
@@ -156,69 +156,87 @@ def hms_to_seconds(t):
     except:
         return None
 
-def calendar_dates_to_calendar(calendar_dates_path, output_path):
-    """
-    Convert calendar_dates.txt to calendar.txt format.
-    Analyzes which days of the week have service for each service_id.
-    """
+_WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
-    service_data = {}
 
-    # Parse calendar_dates.txt and build day-of-week usage
-    with open(calendar_dates_path, newline='', encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
+def _prepare_calendar(calendar, calendar_dates_path, output_dates_path):
+    """Provide calendar rows for exception-only services without inventing weekly service."""
+    columns = ["service_id", *_WEEKDAYS, "start_date", "end_date"]
+    if calendar is None:
+        calendar = pd.DataFrame(columns=columns)
+    else:
+        calendar = calendar.copy()
+
+    original_rows = {
+        row[0]: (row[1], row[2:])
+        for row in calendar[["service_id", "end_date", *_WEEKDAYS]].itertuples(index=False, name=None)
+    }
+    additions = {}
+    outside_exceptions = {}
+    with open(calendar_dates_path, newline="", encoding="utf-8-sig") as stream:
+        reader = csv.DictReader(stream)
+        fieldnames = reader.fieldnames
+        if not fieldnames or not {"service_id", "date", "exception_type"}.issubset(fieldnames):
+            raise ValueError("calendar_dates.txt is missing required columns")
         for row in reader:
-            service_id = row['service_id']
-            date_str = row['date']
-            exception_type = int(row.get('exception_type', '1'))
+            service_id = row["service_id"].strip()
+            date = row["date"].strip()
+            exception_type = row["exception_type"].strip()
+            if datetime.strptime(date, "%Y%m%d").strftime("%Y%m%d") != date:
+                raise ValueError(f"Invalid calendar exception date: {date}")
+            if exception_type not in ("1", "2"):
+                raise ValueError(f"Invalid calendar exception type: {exception_type}")
+            original = original_rows.get(service_id)
+            if original is not None and date > original[0]:
+                outside_exceptions.setdefault(service_id, set()).add(date)
+            if exception_type == "1":
+                first, last = additions.get(service_id, (date, date))
+                additions[service_id] = (min(first, date), max(last, date))
 
-            # Only count services with exception_type=1 (service added)
-            if exception_type != 1:
+    with open(output_dates_path, "rb") as stream:
+        stream.seek(0, os.SEEK_END)
+        if stream.tell():
+            stream.seek(-1, os.SEEK_END)
+            needs_newline = stream.read(1) not in (b"\n", b"\r")
+        else:
+            needs_newline = False
+
+    new_rows = []
+    extensions = {}
+    with open(output_dates_path, "a", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fieldnames)
+        if needs_newline:
+            stream.write("\n")
+        for service_id, (first, last) in additions.items():
+            original = original_rows.get(service_id)
+            if original is None:
+                new_rows.append({
+                    "service_id": service_id,
+                    **{day: "0" for day in _WEEKDAYS},
+                    "start_date": first,
+                    "end_date": last,
+                })
+                continue
+            if last <= original[0]:
                 continue
 
-            if service_id not in service_data:
-                service_data[service_id] = {
-                    'start': None,
-                    'end': None,
-                    'days': {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False}  # Mon-Sun
-                }
+            # Valhalla ignores additions after end_date. Extend it while cancelling
+            # the weekly service that the extension would otherwise introduce.
+            date = datetime.strptime(original[0], "%Y%m%d") + timedelta(days=1)
+            end = datetime.strptime(last, "%Y%m%d")
+            exceptions = outside_exceptions.get(service_id, set())
+            while date <= end:
+                date_str = date.strftime("%Y%m%d")
+                if original[1][date.weekday()] == "1" and date_str not in exceptions:
+                    writer.writerow({"service_id": service_id, "date": date_str, "exception_type": "2"})
+                date += timedelta(days=1)
+            extensions[service_id] = last
 
-            # Parse date (YYYYMMDD format)
-            date_obj = datetime.strptime(date_str, '%Y%m%d')
-            # If date is in the past, skip it
-            if date_obj.date() < datetime.now().date():
-                continue
-            day_of_week = date_obj.weekday()  # 0=Monday, 6=Sunday
-
-            # Update day of week as having service
-            service_data[service_id]['days'][day_of_week] = True
-
-            # Track date range
-            if service_data[service_id]['start'] is None or date_str < service_data[service_id]['start']:
-                service_data[service_id]['start'] = date_str
-            if service_data[service_id]['end'] is None or date_str > service_data[service_id]['end']:
-                service_data[service_id]['end'] = date_str
-
-    # Write calendar.txt
-    with open(output_path, 'w', newline='', encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            'service_id', 'monday', 'tuesday', 'wednesday', 'thursday',
-            'friday', 'saturday', 'sunday', 'start_date', 'end_date'
-        ])
-        writer.writeheader()
-        for service_id, data in service_data.items():
-            writer.writerow({
-                'service_id': service_id,
-                'monday': '1' if data['days'][0] else '0',
-                'tuesday': '1' if data['days'][1] else '0',
-                'wednesday': '1' if data['days'][2] else '0',
-                'thursday': '1' if data['days'][3] else '0',
-                'friday': '1' if data['days'][4] else '0',
-                'saturday': '1' if data['days'][5] else '0',
-                'sunday': '1' if data['days'][6] else '0',
-                'start_date': data['start'],
-                'end_date': data['end']
-            })
+    if extensions:
+        calendar["end_date"] = calendar["service_id"].map(extensions).fillna(calendar["end_date"])
+    if new_rows:
+        calendar = pd.concat([calendar, pd.DataFrame(new_rows)], ignore_index=True)
+    return calendar, additions
 
 
 def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
@@ -250,7 +268,10 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
     trips = read_if_exists(input_dir / "trips.txt")
     stop_times = read_if_exists(input_dir / "stop_times.txt")
     stops = read_if_exists(input_dir / "stops.txt")
-    calendar = read_if_exists(input_dir / "calendar.txt")
+    calendar = read_if_exists(input_dir / "calendars.txt")
+    if calendar is None:
+        calendar = read_if_exists(input_dir / "calendar.txt")
+    calendar_dates_path = input_dir / "calendar_dates.txt"
     routes = read_if_exists(input_dir / "routes.txt")
     transfers = read_if_exists(input_dir / "transfers.txt")
     shapes_input = read_if_exists(input_dir / "shapes.txt")
@@ -275,6 +296,10 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
         shutil.rmtree(output_dir, ignore_errors=True)
         return None, None, None, None, None, None, filter_result
 
+    additions = {}
+    if calendar_dates_path.is_file():
+        calendar, additions = _prepare_calendar(calendar, calendar_dates_path, output_dir / "calendar_dates.txt")
+
     if calendar is None:
         filter_result["eliminated"] = True
         filter_result["elimination_reason"] = "missing_calendar"
@@ -298,21 +323,13 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
         )
         routes.to_csv(output_dir / "routes.txt", index=False)
 
-    # filter out of calendar lines that have 0 for each day of week
-    calendar = calendar[(calendar["monday"] == "1") | (calendar["tuesday"] == "1") |
-                        (calendar["wednesday"] == "1") | (calendar["thursday"] == "1") |
-                        (calendar["friday"] == "1") | (calendar["saturday"] == "1") |
-                        (calendar["sunday"] == "1")]
-
-    # Convert end_date to datetime
-    calendar["enddate"] = calendar["end_date"].astype(str)
-    calendar["enddate"] = calendar["enddate"].apply(
-        lambda x: datetime.strptime(x, "%Y%m%d")
-    )
-    today = datetime.today()
-    # Keep only services that haven't expired
-    calendar = calendar[calendar["enddate"] >= today]
-    calendar.drop(columns=["enddate"], inplace=True)
+    today = datetime.today().date()
+    active_additions = {service_id for service_id, (_, last) in additions.items()
+                        if datetime.strptime(last, "%Y%m%d").date() >= today}
+    weekly_service = calendar[list(_WEEKDAYS)].eq("1").any(axis=1)
+    has_additions = calendar["service_id"].isin(active_additions)
+    end_dates = calendar["end_date"].apply(lambda value: datetime.strptime(value, "%Y%m%d").date())
+    calendar = calendar[(weekly_service | has_additions) & (end_dates >= today)].copy()
 
     valid_service_ids = set()
     if calendar is not None:
@@ -340,10 +357,11 @@ def filter_gtfs(input_dir, output_dir, geojson_file=None, zip_output=False):
     valid_trip_ids = filtered_trips["trip_id"].unique()
     filtered_stop_times = stop_times[stop_times["trip_id"].isin(valid_trip_ids)].copy()
 
-    # Drop stop_times referencing a stop_id absent from stops.txt (invalid GTFS, e.g. TAM Montpellier).
-    # valhalla_ingest_transit leaves such stop pairs without a graph id and valhalla_convert_transit
-    # then aborts trying to load transit_tiles/0/000/000.pbf.
-    filtered_stop_times = filtered_stop_times[filtered_stop_times["stop_id"].isin(stops["stop_id"])].copy()
+    # Valhalla cannot resolve stop_times that reference missing or non-platform stops.
+    valid_stops = stops
+    if "location_type" in stops.columns:
+        valid_stops = stops[stops["location_type"].isin(["", "0"])]
+    filtered_stop_times = filtered_stop_times[filtered_stop_times["stop_id"].isin(valid_stops["stop_id"])].copy()
 
     # cap departure time to 36:24:00 (Valhalla)
     filtered_stop_times["departure_seconds"] = filtered_stop_times["departure_time"].apply(hms_to_seconds)
@@ -522,28 +540,6 @@ def process_job(job):
         calendar = read_if_exists(input_dir / "calendar.txt")
         shapes = read_if_exists(input_dir / "shapes.txt")
         default_result["input_counts"] = _build_counts(stops, trips, stop_times, calendar, shapes)
-
-        calendar_dates_path = Path(input_dir) / "calendar_dates.txt"
-        calendar_path = Path(input_dir) / "calendar.txt"
-        calendars_path = Path(input_dir) / "calendars.txt"
-        if calendars_path.exists():
-            calendars_path.rename(calendar_path)
-
-        if calendar_path.exists():
-            is_empty_calendar = False
-            with open(calendar_path, newline='', encoding="utf-8-sig") as f:
-                reader = csv.DictReader(f)
-                # if calendar has no rows, remove it
-                if len(list(reader)) == 0:
-                    is_empty_calendar = True
-            if is_empty_calendar:
-                calendar_path.unlink()
-
-        if calendar_dates_path.is_file() and not calendar_path.is_file():
-            calendar_dates_to_calendar(calendar_dates_path, calendar_path)
-
-        if calendar_dates_path.exists():
-            calendar_dates_path.unlink()
 
         filter_output = output_dir
         if geojson_file is not None:

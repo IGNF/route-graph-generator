@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+FIXED:
+- GTFS cleaning removes stop-times referencing stations or other non-platform locations that can crash Valhalla transit conversion.
+- GTFS cleaning preserves calendar exceptions and creates calendars for services defined only by dates, instead of approximating their schedules as weekly patterns.
+
 ## 4.2.13
 FIXED:
 - osm2osrm: osrm-extract stuck for days on "Generating edge-expanded edges": the OSRM profile no longer uses the long, per-section unique way_names JSON as the way name, but the first non-empty value among nom_1_droite, nom_1_gauche, cpx_toponyme_route_nommee and cpx_numero (way_names is unchanged for Valhalla)
