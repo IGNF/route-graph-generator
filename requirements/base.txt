@@ -6,4 +6,4 @@ pyvalhalla==3.9.1
 pandas==3.0.3
 geopandas==1.2.0
 requests==2.34.2
-tqdm==4.68.4
+tqdm==4.70.1
